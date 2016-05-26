@@ -1,0 +1,30 @@
+SELECT 
+sacatalog.areaname AS Soil_Survey_Area_Name, 
+sacatalog.areasymbol AS Soil_Survey_Area_Symbol, 
+legend.lkey AS legend_key,
+mapunit.mukey AS Map_Unit_key, 
+mapunit.muname AS Map_Unit_Name,
+slope_r AS slope_representative, 
+tfact AS T_factor,
+drainagecl AS drainage_class,
+hydgrp AS Hydrologic_group,
+hzname AS horizon_name, 
+hzdept_r AS horizon_depth_top,
+hzdepb_r AS horizon_depth_bottom,
+om_r,
+dbovendry_r AS over_dry_bd,
+ph1to1h2o_r AS ph_h2o_rv,
+texture,
+texdesc AS  Tex_Mod_Class,
+component.cokey AS component_key
+FROM sacatalog 
+INNER JOIN legend  ON legend.areasymbol = sacatalog.areasymbol AND LEFT (sacatalog.areasymbol,2) = 'WI'
+INNER JOIN mapunit  ON mapunit.lkey = legend.lkey 
+INNER JOIN component ON component.mukey=mapunit.mukey AND majcompflag = 'Yes'
+AND component.cokey =
+(SELECT TOP 1 c1.cokey FROM component AS c1 
+INNER JOIN mapunit AS c ON c1.mukey=c.mukey AND c.mukey=mapunit.mukey ORDER BY c1.comppct_r DESC, c1.cokey) 
+LEFT OUTER JOIN(chorizon LEFT JOIN chtexturegrp ON chorizon.chkey = chtexturegrp.chkey) ON component.cokey = chorizon.cokey
+WHERE (((chorizon.hzdept_r)=(SELECT Min(chorizon.hzdept_r) AS MinOfhzdept_r
+FROM chorizon LEFT JOIN chtexturegrp ON chorizon.chkey = chtexturegrp.chkey
+Where chtexturegrp.texture Not In ('SPM','HPM', 'MPM') AND chtexturegrp.rvindicator='Yes' AND component.cokey = chorizon.cokey ))AND ((chtexturegrp.rvindicator)='Yes'))

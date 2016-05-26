@@ -1,0 +1,27 @@
+SELECT 
+sacatalog.areasymbol AS AREASYMBOL, 
+mapunit.mukey AS mukey, 
+mapunit.musym AS MUSYM,
+mapunit.muname AS MUNAME,
+(SELECT TOP 1  reskind 
+FROM mapunit AS m_sl 
+INNER JOIN component AS c_sl ON m_sl.mukey = c_sl.mukey  
+AND majcompflag = 'Yes' 
+AND m_sl.mukey=mapunit.mukey  
+ INNER JOIN corestrictions ON corestrictions.cokey=c_sl.cokey  AND reskind LIKE '%bedrock%' GROUP BY m_sl.mukey, reskind, resdept_r ORDER BY resdept_r ) 
+AS BEDROCK_KIND,
+
+(SELECT TOP 1  MIN (resdept_r) 
+FROM mapunit AS m_sl 
+INNER JOIN component AS c_sl ON m_sl.mukey = c_sl.mukey  
+AND majcompflag = 'Yes' 
+AND m_sl.mukey=mapunit.mukey  
+ INNER JOIN corestrictions ON corestrictions.cokey=c_sl.cokey AND reskind LIKE '%bedrock%' GROUP BY m_sl.mukey, resdept_r) 
+AS BEDROCK_RATING
+ 
+
+
+
+FROM sacatalog 
+INNER JOIN legend  ON legend.areasymbol = sacatalog.areasymbol AND sacatalog.areasymbol = 'WI007'
+INNER JOIN mapunit  ON mapunit.lkey = legend.lkey

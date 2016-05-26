@@ -1,0 +1,421 @@
+PARAMETER asymbol 	ELEMENT area.areasymbol PROMPT "Area Symbol Like? TN%".
+PARAMETER rule_name OBJECT ELEMENT rule.rulename MULTIPLE.
+
+#JASON NEMECEK
+BASE TABLE component.
+
+#The following syntax, CROSSTAB and all, must be followed for the report to work.
+INTERPRET rule_name MAX REASONS 1 MAX RULEDEPTH 0 
+    AGGREGATE CROSSTAB BY PrimaryRuleInterpRuleName
+    CELLS RatingValueHighRV,
+		 PrimaryRuleInterpRuleID ,
+		  RatingClassNameHighRV,
+		  InterpRuleDepth,
+          NullPropertyData,
+		  DefaultPropertyData,
+		  InterpRuleID,
+          InconsistentPropertyData.
+
+
+#QUOTENAME (muname, '"') 
+EXEC SQL select areaname, liid, coiid, lmapunit.seqnum, 1 AS id,  component.seqnum, musym, muname AS q_muname, areasymbol, ISNULL (comppct_r, 0) AS comppct_r, muiid, compname, compkind, dmuiid,
+lmapunitiid, lmapunitiid AS l_count
+FROM REAL area
+INNER JOIN REAL legend BY default AND legendsuituse = 'current wherever mapped'  AND area.areasymbol LIKE asymbol #'WV%'
+INNER JOIN REAL lmapunit ON lmapunit.liidref=legend.liid AND mustatus != 'additional' #AND musym LIKE 'AaC3'
+INNER JOIN REAL mapunit ON mapunit.muiid=lmapunit.muiidref #AND muiid = '2511323'
+INNER JOIN REAL correlation ON correlation.muiidref=mapunit.muiid AND repdmu= 1
+INNER JOIN REAL datamapunit ON datamapunit.dmuiid=correlation.dmuiidref #AND dmuiid ='375635'
+INNER JOIN REAL component ON component.dmuiidref=datamapunit.dmuiid
+ORDER BY lmapunitiid, CASE WHEN CODENAME (compkind) = 'miscellaneous area'  THEN 2 ELSE 1 END DESC, coiid;
+AGGREGATE ROWS BY coiid.
+
+
+#Defuzzify RatingValueHighRV
+ASSIGN RatingValueHighRV		IF ISNULL(RatingValueHighRV) THEN RatingValueHighRV else if
+		  	RatingValueHighRV <= 0 then 0 else if
+			RatingValueHighRV > 0.001 and RatingValueHighRV <=0.333 then 1 else if
+			RatingValueHighRV > 0.334 and RatingValueHighRV <=0.666 then 2 else if
+			RatingValueHighRV > 0.667 and RatingValueHighRV <=0.999 then 3 else if
+			RatingValueHighRV == 1.00 then 4 else RatingValueHighRV.
+
+#Massage some nulls to a consistent value.    			
+ASSIGN RatingValueHighRV	(isnull(RatingValueHighRV) and compname imatches "*water*" and codename(compkind) == "miscellaneous area") then 50 else if
+			(isnull(RatingValueHighRV) and compname imatches "bedrock *" and codename(compkind) == "miscellaneous area") then 99 else if
+			(isnull(RatingValueHighRV) and compname imatches "gulf of mexico" and codename(compkind) == "miscellaneous area") then 50 else if
+			(isnull(RatingValueHighRV) and compname imatches "oil brine damaged land" and codename(compkind) == "miscellaneous area") then 99 else if
+			(isnull(RatingValueHighRV) and compname imatches "animal waste lagoon" and codename(compkind) == "miscellaneous area") then 99 else if
+			(isnull(RatingValueHighRV) and compname imatches "ponds*" and codename(compkind) == "miscellaneous area") then 50 else if
+			(isnull(RatingValueHighRV) and codename(compkind) == "series") then 99 else if
+			(isnull(RatingValueHighRV) and codename(compkind) == "taxon above family") then 99 else if
+			(isnull(RatingValueHighRV) and codename(compkind) == "family") then 99 else if
+			(compname imatches "rubble land" and codename(compkind) == "miscellaneous area") then 99 else if
+			(isnull(RatingValueHighRV) and codename(compkind) == "miscellaneous area") then 99 else RatingValueHighRV.
+
+#Massage component percentages for non-soil components.
+ASSIGN comppct_r	isnull(comppct_r) then comppct_r else if
+			(compname imatches "*rock outcrop*" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 else
+			if (compname imatches "urban*land*" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 else
+			if (compname imatches "lava flows" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 else
+			if (compname imatches "glaciers" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 else
+			if (compname imatches "rough *land" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 else
+			if (compname imatches "rubble*" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 else 
+			if (compname imatches "stony* land" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 else 
+			if (compname imatches "bad*land*" and codename(compkind) == "miscellaneous area" and comppct_r <75) then 3 
+						else comppct_r.
+
+DEFINE sumpct			ARRAYSUM(comppct_r).
+
+define seq_a			arraysum(id).
+define seq_b			IF new (id) THEN seq_a ELSE 
+						if new(lmapunitiid) then seq_a + seq_b else seq_b .
+
+
+
+
+
+################################################################
+#                                                              #
+#             DOMINANT CONDITION RATING PERCENT                #
+#                                                              #
+################################################################
+
+DEFINE sum_pct_three	IF NEW(muiid) AND (RatingValueHighRV) == 3 THEN sumpct ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 3  THEN sum_pct_three + sumpct  ELSE sum_pct_three.
+
+DEFINE sum_pct_one	    IF NEW(muiid) AND (RatingValueHighRV) == 1  THEN sumpct ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 1  THEN sum_pct_one + sumpct ELSE sum_pct_one.
+
+DEFINE sum_pct_two	    IF NEW(muiid) AND (RatingValueHighRV) == 2  THEN sumpct ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 2  THEN sum_pct_two + sumpct ELSE sum_pct_two.
+
+DEFINE sum_pct_four	    IF NEW(muiid) AND (RatingValueHighRV) == 4  THEN sumpct ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 4  THEN sum_pct_four + sumpct ELSE sum_pct_four.
+
+
+DEFINE sum_pct_zero	    IF NEW(muiid) AND (RatingValueHighRV) == 0  THEN sumpct ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 0  THEN sum_pct_zero + sumpct ELSE sum_pct_zero.
+
+DEFINE sum_pct_null    IF NEW(muiid) AND (RatingValueHighRV) == 99  THEN sumpct ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 99  THEN sum_pct_null + sumpct ELSE sum_pct_null.
+
+DEFINE sum_pct_water    IF NEW(muiid) AND (RatingValueHighRV) == 50  THEN sumpct ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 99  THEN sum_pct_water + sumpct ELSE sum_pct_water.
+
+DEFINE final_pct        IF  (sum_pct_water > sum_pct_two)  AND  (sum_pct_water > sum_pct_three)  AND (sum_pct_water >  sum_pct_four) 	AND (sum_pct_water >  sum_pct_zero) 	AND (sum_pct_water >  sum_pct_one) 	THEN sum_pct_water   		ELSE
+						IF  (sum_pct_null > sum_pct_two)  AND  (sum_pct_null > sum_pct_three)  AND (sum_pct_null >  sum_pct_four) 	AND (sum_pct_null >  sum_pct_zero) 	AND (sum_pct_null >  sum_pct_one) 	THEN sum_pct_null 		ELSE
+						IF  (sum_pct_two > sum_pct_three)  AND (sum_pct_two >  sum_pct_four) 	AND (sum_pct_two >  sum_pct_zero) 	AND (sum_pct_two >  sum_pct_one) 	THEN sum_pct_two  	ELSE
+						IF  (sum_pct_three >  sum_pct_two) AND (sum_pct_three >  sum_pct_four) 	AND (sum_pct_three >  sum_pct_zero) AND (sum_pct_three >  sum_pct_one) 	THEN sum_pct_three 	ELSE
+ 						IF  (sum_pct_one > sum_pct_three)  AND (sum_pct_one >  sum_pct_four) 	AND (sum_pct_one >  sum_pct_zero) 	AND (sum_pct_one >  sum_pct_two) 	THEN sum_pct_one 	ELSE
+						IF  (sum_pct_four > sum_pct_three) AND (sum_pct_four >  sum_pct_two) 	AND (sum_pct_four >  sum_pct_zero) 	AND (sum_pct_four >  sum_pct_one) 	THEN sum_pct_four 	ELSE
+						IF  (sum_pct_zero > sum_pct_three) AND (sum_pct_zero >  sum_pct_two) 	AND (sum_pct_zero >  sum_pct_four) 	AND (sum_pct_zero >  sum_pct_one) 	THEN sum_pct_zero 	ELSE
+						final_pct.
+
+
+################################################################
+#                                                              #
+#             DOMINANT CONDITION RATING VALUE                  #
+#                                                              #
+################################################################
+
+DEFINE sum_value_three	IF NEW(muiid) AND (RatingValueHighRV) == 3 THEN RatingValueHighRV  ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 3  THEN RatingValueHighRV  ELSE sum_value_three.
+
+DEFINE sum_value_one	IF NEW(muiid) AND (RatingValueHighRV) == 1  THEN RatingValueHighRV  ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 1  THEN RatingValueHighRV  ELSE sum_value_one.
+
+DEFINE sum_value_two    IF NEW(muiid) AND (RatingValueHighRV) == 2  THEN RatingValueHighRV  ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 2  THEN RatingValueHighRV  ELSE sum_value_two.
+
+DEFINE sum_value_four	    IF NEW(muiid) AND (RatingValueHighRV) == 4  THEN RatingValueHighRV  ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 4  THEN RatingValueHighRV  ELSE sum_value_four.
+
+
+DEFINE sum_value_zero	IF NEW(muiid) AND (RatingValueHighRV) == 0  THEN RatingValueHighRV  ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 0  THEN RatingValueHighRV  ELSE sum_value_zero.
+
+DEFINE sum_value_null	IF NEW(muiid) AND (RatingValueHighRV) == 99  THEN RatingValueHighRV  ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 99  THEN RatingValueHighRV  ELSE sum_value_null.
+
+DEFINE sum_value_water	IF NEW(muiid) AND (RatingValueHighRV) == 50  THEN RatingValueHighRV  ELSE
+						IF NEW(muiid) THEN 0 ELSE 
+						IF (RatingValueHighRV) == 50  THEN RatingValueHighRV  ELSE sum_value_water.
+
+DEFINE final_value      IF  (sum_pct_water > sum_pct_two)  AND  (sum_pct_water > sum_pct_three)  AND (sum_pct_water >  sum_pct_four) 	AND (sum_pct_water >  sum_pct_zero) 	AND (sum_pct_water >  sum_pct_one) 	THEN sum_value_water    		ELSE
+						
+IF  (sum_pct_null > sum_pct_two)  AND  (sum_pct_null > sum_pct_three)  AND (sum_pct_null >  sum_pct_four) 	AND (sum_pct_null >  sum_pct_zero) 	AND (sum_pct_null >  sum_pct_one) 	THEN sum_value_null 		ELSE
+						IF  (sum_pct_two > sum_pct_three)  AND (sum_pct_two >  sum_pct_four) 	AND (sum_pct_two >  sum_pct_zero) 	AND (sum_pct_two >  sum_pct_one) 	THEN sum_value_two  	ELSE
+						IF  (sum_pct_three >  sum_pct_two) AND (sum_pct_three >  sum_pct_four) 	AND (sum_pct_three >  sum_pct_zero) AND (sum_pct_three >  sum_pct_one) 	THEN sum_value_three 	ELSE
+ 						IF  (sum_pct_one > sum_pct_three)  AND (sum_pct_one >  sum_pct_four) 	AND (sum_pct_one >  sum_pct_zero) 	AND (sum_pct_one >  sum_pct_two) 	THEN sum_value_one 	    ELSE
+						IF  (sum_pct_four > sum_pct_three) AND (sum_pct_four >  sum_pct_two) 	AND (sum_pct_four >  sum_pct_zero) 	AND (sum_pct_four >  sum_pct_one) 	THEN sum_value_four 	ELSE
+						IF  (sum_pct_zero > sum_pct_three) AND (sum_pct_zero >  sum_pct_two) 	AND (sum_pct_zero >  sum_pct_four) 	AND (sum_pct_zero >  sum_pct_one) 	THEN sum_value_zero 	ELSE
+						final_value.
+
+################################################################
+#                                                              #
+#                SUITABILITY OR LIMITAION CLASS                #
+#                                                              #
+################################################################
+# 
+DERIVE design_one  	FROM design 		USING "MLRA06_Morgantown":"RULE-RULE DESIGN" (PrimaryRuleInterpRuleID).
+
+EXEC SQL SELECT CODENAME (ruledesign) AS design, ruledesign  
+FROM REAL rule  WHERE
+ruleiid IN ($PrimaryRuleInterpRuleID) AND ruledesign IS NOT NULL;
+AGGREGATE COLUMN design NONE.
+
+#DEFINE design_one	IF NOT ISNULL(PrimaryRuleInterpRuleName) THEN LOOKUP(PrimaryRuleInterpRuleName == rule_name, design) ELSE design_one.
+
+ASSIGN design_one IF design_one ==  '' OR ISNULL (design_one) THEN ARRAYSHIFT (design_one, -1) ELSE design_one.
+
+DEFINE class IF final_value == 99 THEN 'Null' ELSE
+			 IF final_value == 50 THEN 'Water' ELSE
+
+			 IF final_value  == 0 AND  ruledesign   == 1 THEN 'Not Limited' ELSE 
+			 IF final_value  == 1 AND  ruledesign   == 1 THEN 'Slightly Limited' ELSE 
+			 IF final_value  == 2 AND  ruledesign   == 1 THEN 'Somewhat Limited' ELSE 
+			 IF final_value  == 3 AND  ruledesign   == 1 THEN 'Moderately Limited' ELSE 
+			 IF final_value  == 4 AND  ruledesign   == 1 THEN 'Very Limited' ELSE 
+
+			 IF final_value  == 0 AND  ruledesign   == 2 THEN 'Not Suited' ELSE 
+			 IF final_value  == 1 AND  ruledesign   == 2 THEN 'Poorly Suited' ELSE 
+			 IF final_value  == 2 AND  ruledesign   == 2 THEN 'Moderately Suited' ELSE 
+			 IF final_value  == 3 AND  ruledesign   == 2 THEN 'Moderately Well Suited' ELSE 
+	 		 IF final_value  == 4 AND  ruledesign   == 2 THEN 'Well Suited'   ELSE 			
+
+
+			 IF final_value  == 0 AND design_one == 'limitation' THEN 'Not Limited' ELSE 
+			 IF final_value  == 1 AND design_one == 'limitation' THEN 'Slightly Limited' ELSE 
+			 IF final_value  == 2 AND design_one == 'limitation' THEN 'Somewhat Limited' ELSE 
+			 IF final_value  == 3 AND design_one == 'limitation' THEN 'Moderately Limited' ELSE 
+			 IF final_value  == 4 AND design_one == 'limitation' THEN 'Very Limited' ELSE 
+
+			 IF final_value  == 0 AND design_one == 'suitability' THEN 'Not Suited' ELSE 
+			 IF final_value  == 1 AND design_one == 'suitability' THEN 'Poorly Suited' ELSE 
+			 IF final_value  == 2 AND design_one == 'suitability' THEN 'Moderately Suited' ELSE 
+			 IF final_value  == 3 AND design_one == 'suitability' THEN 'Moderately Well Suited' ELSE 
+	 		 IF final_value  == 4 AND design_one == 'suitability' THEN 'Well Suited'   ELSE 
+			
+			 IF final_value  == 0 AND RatingClassNameHighRV  IMATCHES '*limi*' THEN 'Not Limited' ELSE 
+			 IF final_value  == 1 AND RatingClassNameHighRV  IMATCHES '*limi*' THEN 'Slightly Limited' ELSE 
+			 IF final_value  == 2 AND RatingClassNameHighRV  IMATCHES '*limi*' THEN 'Somewhat Limited' ELSE 
+			 IF final_value  == 3 AND RatingClassNameHighRV  IMATCHES '*limi*' THEN 'Moderately Limited' ELSE 
+			 IF final_value  == 4 AND RatingClassNameHighRV  IMATCHES '*limi*' THEN 'Very Limited' ELSE 
+
+			 IF final_value  == 0 AND RatingClassNameHighRV IMATCHES '*suit*' THEN 'Not Suited' ELSE 
+			 IF final_value  == 1 AND RatingClassNameHighRV IMATCHES '*suit*' THEN 'Poorly suited' ELSE 
+			 IF final_value  == 2 AND RatingClassNameHighRV IMATCHES '*suit*' THEN 'Moderately suited' ELSE 
+			 IF final_value  == 3 AND RatingClassNameHighRV IMATCHES '*suit*' THEN 'Moderately Well Suited' ELSE 
+	 		 IF final_value  == 4 AND RatingClassNameHighRV IMATCHES '*suit*' THEN 'Well Suited'   ELSE 
+
+
+			 IF final_value  == 0 AND RatingClassNameHighRV IMATCHES '*productivity*' THEN 'Not Suited' ELSE 
+			 IF final_value  == 1 AND RatingClassNameHighRV IMATCHES '*productivity*' THEN 'Poorly suited' ELSE 
+			 IF final_value  == 2 AND RatingClassNameHighRV IMATCHES '*productivity*' THEN 'Moderately suited' ELSE 
+			 IF final_value  == 3 AND RatingClassNameHighRV IMATCHES '*productivity*' THEN 'Moderately Well Suited' ELSE 
+	 		 IF final_value  == 4 AND RatingClassNameHighRV IMATCHES '*productivity*' THEN 'Well Suited'   ELSE 
+			 'Error'. 
+
+
+
+
+#There are five interpretive classes (numerical values assigned to them) and ranges of fuzzy number classes:
+#For limitations:
+#1. Not limited (0)--Fuzzy Value <= 0 
+#2. Slightly limited (1)--Fuzzy Value Between  > 0.001 and  <=0.333 
+#3. Somewhat limited (2)--Fuzzy Value Between > 0.334 and  <=0.666 
+#4. Moderately limited (3)--Fuzzy Value Between > 0.667 and <=0.999 
+#5. Very limited (4)--Fuzzy Value = 1.00.
+
+#For Suitabilities:
+#There are five interpretive classes (numerical values assigned to them) and ranges of fuzzy number classes:
+#1. Not suited (0)--Fuzzy Value <= 0 
+#2. Poorly suited (1)--Fuzzy Value Between  > 0.001 and  <=0.333 
+#3. Moderately suited (2)--Fuzzy Value Between > 0.334 and  <=0.666 
+#4. Moderately well suited (3)--Fuzzy Value Between > 0.667 and <=0.999 
+#5. Well suited (4)--Fuzzy Value = 1.00.
+
+
+################################################################
+#                                                              #
+#             		 HTML TABLE SHADING                        #
+#                                                              #
+################################################################
+
+DEFINE counter 		 ISNULL(counter)? 0: counter.
+ASSIGN counter 		 counter + 1.
+
+DEFINE toggle_a			arraysum(id).
+DEFINE toggle_b			IF NEW (id) THEN toggle_a ELSE 
+						IF NEW (lmapunitiid) THEN toggle_a - toggle_b ELSE toggle_b .
+
+DEFINE shading	  	 IF toggle_b == 1  THEN 'odd' ELSE 'even'.
+
+PAGE WIDTH UNLIMITED LENGTH UNLIMITED .
+
+TEMPLATE head
+    ELEMENT 'tr'
+		FIELD TAG 'td' ATTRIB("width", "50px") ATTRIB ('rowspan', '2')ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9'),	
+		FIELD TAG 'td' ATTRIB ('rowspan', '2')ATTRIB("width", "50px") ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9'),		
+		FIELD TAG 'td' ATTRIB ('rowspan', '2')ATTRIB("width", "50px") ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9'),				
+		FIELD TAG 'td' ATTRIB("width", "300px") ATTRIB ('rowspan', '2')ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9'),
+		#FIELD TAG 'td' ATTRIB ('rowspan', '2')ATTRIB("width", "50px")  ATTRIB ('style', 'text-align:center;background-color:#D9D9D9'),
+		FIELD TAG 'td' ATTRIB ('rowspan', '2')ATTRIB("width", "50px")  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9'),		
+		ARRAY (FIELD TAG "td" ATTRIB ("colspan", "3")ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9')
+			   ATTRIB ("class", "begindatagroup enddatagroup")).
+
+TEMPLATE head2  
+    ELEMENT "tr" 
+		ARRAY (FIELD TAG "td" ATTRIB("class", "begindatagroup")  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9'),
+			   FIELD TAG "td"  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9'),
+		       FIELD TAG "td" ATTRIB("class", "enddatagroup") ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;background-color:#D9D9D9')).
+
+	
+
+ TEMPLATE cbody
+   		ELEMENT 'tr'    ATTRIB ('class', shading) 
+		FIELD TAG 'td'  ATTRIB("width", "50px")   ATTRIB ('type', 'number')  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;'), #2
+		FIELD TAG 'td'  ATTRIB("width", "50px")   ATTRIB ('type', 'number')  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;'), #2
+		FIELD TAG 'td'  ATTRIB("width", "50px")  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;'), #3
+		FIELD TAG 'td'  ATTRIB("width", "300px") ATTRIB ('type', 'number')  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;'), #5
+		#FIELD TAG 'td'  ATTRIB("width", "50px")  ATTRIB ('type', 'number'), #4
+		FIELD TAG 'td'  ATTRIB("width", "50px")  ATTRIB ('type', 'number')  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;'), #5
+		ARRAY (FIELD TAG 'td' ATTRIB("class", "begindatagroup") ATTRIB("width", "50px")  ATTRIB ('type', 'number')   ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;'),
+		FIELD TAG 'td'  ATTRIB("width", "50px")  ATTRIB ('type', 'number')  ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;'), #5
+		FIELD TAG 'td'  ATTRIB("class", "enddatagroup") ATTRIB("width", "50px")  ATTRIB ('type', 'number') ATTRIB ('style', 'text-align:center;font-family: Arial;font-size: 12; border : 1px solid black;')). #4.
+
+
+SECTION WHEN AT START
+ DATA
+ELEMENT OPEN 'html'. 
+ELEMENT 'style' ATTRIB ('type','text/css') 'table.tftable {font-size:12px;color:#333333;width:600px;border-width: 1px;border-color: #729ea5;border-collapse: collapse;} table.tftable th {font-size:12px;background-color:#acc8cc;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;text-align:left;} table.tftable tr {background-color:#d4e3e5;} table.tftable td {font-size:12px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}'.
+ELEMENT 'style' ATTRIB ('type','text/css') 'table.tftableb {font-size:12px;color:#333333;width:100%;border-width: 1px;border-color: #729ea5;border-collapse: collapse;} table.tftableb th {font-size:12px;background-color:#acc8cc;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;text-align:left;} table.tftableb tr {background-color:#d4e3e5;} table.tftableb td {font-size:12px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}'.
+#ATTRIB ('style', 'line-height:0px')
+ELEMENT OPEN 'b'.
+ELEMENT 'font' ATTRIB ('color', 'blue' )VALUETAG 'a' ATTRIB ('name', 'top') 'Dominant Condition By Map Unit'.
+ELEMENT CLOSE 'b'.
+ELEMENT 'br'.
+ELEMENT 'php'   'This report produces a dominant condition classification of the interpretation for each mapunit in the using the real tables in local or National database.'. 
+ELEMENT 'php' ' For more information go to the  '.
+ELEMENT 'php' VALUETAG 'a' ATTRIB ('href','#reportref') '"report Reference" '. 
+ELEMENT 'php' ' at the bottom of the page. '.
+ELEMENT 'php' 'This report automatically assigns a default rating class depending on a suitability or limitation. The assigned class is not the same class as the selected interpretation. Do not mix suitability and limitation interpretations together when running this report. It will assign all the classes a limitation or suitability.'.
+
+ 
+
+
+ELEMENT 'br'.
+ELEMENT OPEN "table" . 
+  ELEMENT OPEN "thead".
+ USING head "id","areasym", "musym", "muname",  "lmukey", PrimaryRuleInterpRuleName.
+USING head2 "Value" , "Class", "comppct_sum".
+ELEMENT CLOSE "thead". 
+ELEMENT OPEN "tbody".  
+END SECTION. 
+
+
+# THE SECTION NEEDS TO BE SET TO LAST OF LEGEND MAP UNIT ID IN ORDER TO WORK. THE REPORT IS DESIGNED SET OF FOR A RUNNING TOTAL 
+SECTION  WHEN LAST OF lmapunitiid 
+ DATA
+ 
+USING cbody 
+seq_b, areasymbol, musym,  q_muname, lmapunitiid NO COMMA, final_value, class VALUETAG 'div' ATTRIB ('style','width: 150px'), final_pct.
+END SECTION.
+
+
+SECTION WHEN AT END
+DATA
+ ELEMENT CLOSE "tbody".
+ ELEMENT CLOSE "table".
+
+
+ELEMENT 'br'.
+ELEMENT OPEN 'b'.
+ELEMENT 'font' ATTRIB ('color', 'red' )VALUETAG 'a' ATTRIB ('name', 'reportref') 'Criteria Used for this report'.
+ELEMENT CLOSE 'b'.
+ELEMENT 'php' 'Back to top' VALUETAG 'a' ATTRIB ('href','#top'). 
+ELEMENT 'p' 'Depending on the interpretation use either Limitation or Suitability Class. If the component percent is less than 75 percent, component kind is miscellaneous and component name contains Rock Outcrop, Urban land, Lava flows, Glaciers, Rough Land, Rubble, Stony land, or Badland the compoent percent is reduced to 3 percent.'. 
+		ELEMENT OPEN "table"  ATTRIB ('id','tfhover') ATTRIB ('class','tftable').	
+		ELEMENT OPEN "thead".		
+			ELEMENT OPEN "tr".	
+				ELEMENT "th" ATTRIB("width", "150px")ATTRIB ('style', 'text-align:center')"Fuzzy Value"  .
+				ELEMENT "th" ATTRIB("width", "125px")ATTRIB ('style', 'text-align:center')"Assigned Value" .
+				ELEMENT "th" ATTRIB("width", "150px")ATTRIB ('style', 'text-align:center')"Limitation Rating Class" .
+				ELEMENT "th" ATTRIB("width", "150px")ATTRIB ('style', 'text-align:center')"Suitability Rating Class" .
+			ELEMENT CLOSE "tr".	
+		ELEMENT CLOSE "thead".		
+		
+			ELEMENT OPEN "tbody".		
+			ELEMENT OPEN "tr".	
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "0".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "0".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Not Limited".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Not Suited".
+			ELEMENT CLOSE "tr".	
+
+			ELEMENT OPEN "tr".	
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "> 0.001 and <=0.333".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "1".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Slightly Limited".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Poorly Suited".
+			ELEMENT CLOSE "tr".	
+
+			ELEMENT OPEN "tr".	
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "> 0.334 and <=0.666".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "2".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Somewhat Limited".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Moderately Suited".
+			ELEMENT CLOSE "tr".	
+
+			ELEMENT OPEN "tr".	
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "> 0.667 and <=0.999".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "3".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Moderately Limited ".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Moderately Well Suited".
+			ELEMENT CLOSE "tr".	
+
+
+		ELEMENT OPEN "tr".	
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "1.00".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "4".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Very Limited".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Well Suited".
+			ELEMENT CLOSE "tr".	
+
+		ELEMENT OPEN "tr".	
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "---".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "99".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Null".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Null".
+			ELEMENT CLOSE "tr".	
+
+		ELEMENT OPEN "tr".	
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "---".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "50".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Water".
+				ELEMENT "td" ATTRIB ('style', 'text-align:center') "Water".
+			ELEMENT CLOSE "tr".	
+
+
+ELEMENT CLOSE "tbody".		
+ELEMENT CLOSE "table".
+ELEMENT OPEN 'p' 'Questions, suggestions, or errors with the report'.
+ELEMENT OPEN 'a' ATTRIB ('href','mailto:Bob.dobos@lin.usda.gov;Wayne.Gabriel@tx.usda.gov;jason.l.nemecek@tn.usda.gov?Subject=INTERP-Data%20Export%20Dominant%20Cond%205%20Class%201.1&amp;body=To:%20Jason,%20Bob,%20and%20Wayne,%0D%0DComments:%0D%0DName:%0D%0DNote:%20Any%20suggestion%20is%20a%20good%20suggestion;%20please%20feel%20free%20to%20send%20comments%20on%20any%20parts%20of%20the%20reports.%20%20If%20a%20report%20contains%20an%20error%20please%20include%20some%20kind%20of%20reference%20what%20the%20error%20is%20and%20where%20it%20occurred%20such%20as%20project%20name,%20component%20id%20so%20we%20can%20address%20the%20problem.%20Thanks') 'Send E-Mail'.
+ELEMENT CLOSE 'a'.
+ELEMENT 'php' ' to: Jason Nemecek, Bob Dobos, & Wayne Gabriel '.
+ELEMENT CLOSE 'p'.
+ELEMENT CLOSE 'html'. 
+END SECTION.

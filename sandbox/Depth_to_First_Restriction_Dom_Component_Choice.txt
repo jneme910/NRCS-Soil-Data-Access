@@ -1,0 +1,42 @@
+SELECT sacatalog.areasymbol AS AREASYMBOL, 
+mapunit.mukey AS mukey, 
+mapunit.musym AS MUSYM,
+mapunit.muname AS MUNAME,
+CONCAT(mapunit.mukey, ' - ', cokey) AS MUCOMPKEY,
+compname AS COMPNAME, 
+comppct_r AS COMPPCT_R,
+component.cokey,
+
+
+ISNULL((SELECT TOP 1 reskind
+FROM component AS c
+
+INNER JOIN corestrictions ON corestrictions.cokey=c.cokey
+AND c.cokey=component.cokey  and reskind LIKE 'Lithic bedrock' GROUP BY c.cokey, reskind, resdept_r, corestrictkey ORDER BY resdept_r, corestrictkey ), 'No Data') AS FIRST_RESTRICTION_KIND,
+
+ISNULL((SELECT TOP 1 MIN (resdept_l) 
+FROM component AS c
+
+INNER JOIN corestrictions ON corestrictions.cokey=c.cokey
+ AND c.cokey=component.cokey  and reskind LIKE 'Lithic bedrock' GROUP BY c.cokey, resdept_l), 9999) AS L_FIRST_RESTRICTION,
+
+ISNULL((SELECT TOP 1 MIN (resdept_r) 
+FROM component AS c
+
+INNER JOIN corestrictions ON corestrictions.cokey=c.cokey
+ AND c.cokey=component.cokey and reskind LIKE 'Lithic bedrock' GROUP BY c.cokey, resdept_r), 9999) AS RV_FIRST_RESTRICTION,
+
+ISNULL((SELECT TOP 1 MIN (resdept_h) 
+FROM component AS c
+
+INNER JOIN corestrictions ON corestrictions.cokey=c.cokey
+AND c.cokey=component.cokey and reskind LIKE 'Lithic bedrock'  GROUP BY c.cokey, resdept_h), 9999) AS H_FIRST_RESTRICTION
+
+
+FROM sacatalog 
+INNER JOIN legend  ON legend.areasymbol = sacatalog.areasymbol AND sacatalog.areasymbol = 'WI007'
+INNER JOIN mapunit  ON mapunit.lkey = legend.lkey
+INNER JOIN component ON component.mukey=mapunit.mukey AND majcompflag = 'Yes'
+AND component.cokey =
+(SELECT TOP 1 c1.cokey FROM component AS c1 
+INNER JOIN mapunit AS c ON c.mukey=c.mukey AND c1.mukey=mapunit.mukey ORDER BY c1.comppct_r DESC, c1.cokey) 

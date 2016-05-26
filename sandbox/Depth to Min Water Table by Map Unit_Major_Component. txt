@@ -1,0 +1,22 @@
+SELECT 
+sacatalog.areasymbol AS AREASYMBOL, 
+mapunit.mukey AS mukey, 
+mapunit.musym AS MUSYM,
+mapunit.muname AS MUNAME,
+
+
+ (SELECT TOP 1  MIN (soimoistdept_r) 
+FROM mapunit AS m_sl 
+INNER JOIN component AS c_sl ON m_sl.mukey = c_sl.mukey  
+AND majcompflag = 'Yes'   
+AND m_sl.mukey=mapunit.mukey  
+INNER JOIN comonth ON comonth.cokey=c_sl.cokey 
+INNER JOIN cosoilmoist ON cosoilmoist.comonthkey=comonth.comonthkey 
+AND (soimoiststat = 'Wet') 
+GROUP BY m_sl.mukey, soimoistdept_r) 
+AS WATER_TABLE_RATING_WET
+
+
+FROM sacatalog 
+INNER JOIN legend  ON legend.areasymbol = sacatalog.areasymbol AND sacatalog.areasymbol = 'WI007'
+INNER JOIN mapunit  ON mapunit.lkey = legend.lkey

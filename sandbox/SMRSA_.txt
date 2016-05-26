@@ -1,0 +1,176 @@
+--Modified from the Allowable depletion script.  Some notation may have not been updated.
+
+SELECT m.mukey, c.comppct_r, ch.hzdept_r, ch.hzdepb_r, ch.awc_r, ch.awc_h, ch.awc_l, c.cokey, ch.chkey 
+INTO #TempAWCAll
+FROM sacatalog sac
+	INNER JOIN legend l ON l.areasymbol = sac.areasymbol and l.areasymbol LIKE 'WI%'
+	INNER JOIN mapunit m ON m.lkey = l.lkey
+	INNER JOIN component c ON c.mukey = m.mukey
+	INNER JOIN chorizon ch ON c.cokey = ch.cokey
+	--LEFT JOIN corestrictions cr on c.cokey = cr.cokey
+WHERE 	c.majcompflag = 'yes'--AND
+	--cr.reshard <> 'noncemented' AND
+	--cr.reskind <> 'abrupt textural change'
+
+--Select the restrictions that would be root limiting
+
+SELECT	cr.reskind, cr.reshard, cr.resdept_r, cr.cokey
+INTO 	#TempRes1
+FROM corestrictions cr
+WHERE 	cr.reshard <> 'noncemented' AND
+	cr.reskind <> 'abrupt textural change'
+
+--Determine the top of the first restriction
+SELECT	MIN(resdept_r) as TopRestr, awc.cokey
+INTO #TempRes
+FROM #TempRes1
+	RIGHT JOIN #TempAWCAll awc ON awc.cokey = #TempRes1.cokey
+GROUP BY awc.cokey
+
+
+--Determine if the restriction is above the bottom of what we want to calc awc to
+
+SELECT CASE WHEN TopRestr < 152 THEN TopRestr ELSE 152
+	END as Bot36, cokey
+
+	
+INTO #TempBot
+FROM #TempRes
+
+--Determine in the horizon is within 152cm
+
+SELECT CASE  WHEN TA.hzdepb_r <= Bot.Bot36 THEN TA.hzdepb_r
+	     WHEN TA.hzdepb_r > Bot.Bot36 AND TA.hzdept_r < Bot.Bot36 THEN Bot.Bot36
+	     ELSE 9999
+	End AS InRange36, TA.mukey, TA.cokey, TA.chkey
+INTO #TempAWC36
+FROM #TempAWCAll TA
+	INNER JOIN #TempBot Bot ON TA.cokey = Bot.cokey
+
+--Calculate the AWC to the specified depth. Step 1 Determines if the horizon is InRange36 then multiplies the thickness * the awc_r.  If awc_r is null and still in range, then the horizon is given a value of 10000(to be used in the future steps)  If the horizon is out of range, then the awc is 0
+
+SELECT 	CASE   WHEN AWC36.InRange36 IS NOT NULL AND AWC36.InRange36 <> 9999 THEN (AWC36.InRange36 - TA.hzdept_r) * TA.awc_r
+	      WHEN AWC36.InRange36 <> 9999 and awc_r IS NULL THEN 100000
+		ELSE 0
+	End AS awcperhz36,
+	CASE   WHEN AWC36.InRange36 IS NOT NULL AND AWC36.InRange36 <> 9999 THEN (AWC36.InRange36 - TA.hzdept_r) * TA.awc_l
+	      WHEN AWC36.InRange36 <> 9999 and awc_l IS NULL THEN 100000
+		ELSE 0
+	End AS awcperhz36l,
+	CASE   WHEN AWC36.InRange36 IS NOT NULL AND AWC36.InRange36 <> 9999 THEN (AWC36.InRange36 - TA.hzdept_r) * TA.awc_h
+	      WHEN AWC36.InRange36 <> 9999 and awc_h IS NULL THEN 100000
+		ELSE 0
+	End AS awcperhz36h, TA.cokey, TA.mukey
+
+	
+INTO #TempAWC362
+FROM #TempAWCAll TA
+	Inner JOIN #TempAWC36 AWC36  ON TA.chkey = AWC36.chkey
+
+
+-- Step 2. Here will will sum the AWC and give the MAX of the awcperhz array.  This MAX (nullck) will be used in step 3 to determin if there is a null awc within the InRange36 (since sql will still sum if there is a null in the array)
+
+SELECT MAX(awcperhz36) AS nullck36, SUM(awcperhz36) AS AWC36, MAX(awcperhz36l) AS nullck36l, SUM(awcperhz36l) AS AWC36l,MAX(awcperhz36h) AS nullck36h, SUM(awcperhz36h) AS AWC36h,cokey, mukey
+INTO #TempAWC363
+FROM #TempAWC362
+GROUP BY cokey, mukey
+
+--Step 3. This is essentially the check for nulls within the range.  If nullck = 10000, then there was a null in the range and we cant intrepret this component.  Note we don't divide the 0 AWC soils by 0.  That doesn't work so well.  I
+
+SELECT 		Case	WHEN nullck36 = 100000 THEN NULL
+		WHEN AWC36 = 0 THEN 0
+		ELSE AWC36
+	END AS AWC36,
+		Case	WHEN nullck36l = 100000 THEN NULL
+		WHEN AWC36l = 0 THEN 0
+		ELSE AWC36l
+	END AS AWC36l,
+Case	WHEN nullck36h = 100000 THEN NULL
+		WHEN AWC36h = 0 THEN 0
+		ELSE AWC36h
+	END AS AWC36h, mukey, cokey
+INTO #TempAWC364
+FROM #TempAWC363
+
+--Creates awc to 152
+
+SELECT l.areaname, m.musym, m.muname,  ROUND(((AWC36)),1) AS AWC152r, ROUND(((AWC36l)),1) AS AWC152l, ROUND(((AWC36h)),1) AS AWC152h, ROUND(((AWC36h + AWC36l)/2),1) AS AWC152lh, m.mukey, AWC.cokey  
+INTO #AWC152
+FROM #TempAWC364 AWC
+INNER JOIN mapunit m ON AWC.mukey = m.mukey
+INNER JOIN legend l on l.lkey = m.lkey
+--GROUP BY m.mukey,  m.musym, l.areaname, m.muname, m.museq
+ORDER BY l.areaname, m.museq
+
+
+SELECT c.comppct_r, l.areaname, c.taxorder, c.taxsuborder, c.compname, m.mukey, c.cokey, m.musym, m.muname
+INTO #tax
+FROM sacatalog sac
+	INNER JOIN legend l ON l.areasymbol = sac.areasymbol and l.areasymbol LIKE 'WI%'
+	INNER JOIN mapunit m ON m.lkey = l.lkey
+	INNER JOIN component c ON c.mukey = m.mukey
+WHERE c.majcompflag = 'yes'
+	
+SELECT c.cokey, MIN (csm.soimoistdept_h) AS highwater
+INTO #water
+FROM sacatalog sac
+	INNER JOIN legend l ON l.areasymbol = sac.areasymbol and l.areasymbol LIKE 'WI%'
+	INNER JOIN mapunit m ON m.lkey = l.lkey
+	INNER JOIN component c ON c.mukey = m.mukey
+	LEFT JOIN comonth cm on c.cokey = cm.cokey
+	LEFT JOIN cosoilmoist csm ON cm.comonthkey = csm.comonthkey
+WHERE c.majcompflag = 'yes'AND
+	csm.soimoiststat = 'wet'
+GROUP BY c.cokey
+
+SELECT CASE WHEN cm.flodfreqcl = 'Frequent' or cm.flodfreqcl = 'Very frequent' THEN 1 
+	    ELSE 0
+	END AS freq,
+	CASE WHEN cm.floddurcl = 'very long' or cm.floddurcl = 'long' THEN 1
+	     ELSE 0
+	END AS dur, c.cokey
+INTO #flood1
+FROM sacatalog sac
+	INNER JOIN legend l ON l.areasymbol = sac.areasymbol and l.areasymbol LIKE 'WI%'
+	INNER JOIN mapunit m ON m.lkey = l.lkey
+	INNER JOIN component c ON c.mukey = m.mukey
+	LEFT JOIN comonth cm on c.cokey = cm.cokey
+WHERE c.majcompflag = 'yes'
+
+SELECT max(dur + freq) AS flood, cokey
+INTO #Flood2
+From #flood1
+GROUP by cokey
+
+SELECT tax.areaname, tax.musym, tax.muname,  compname, tax.comppct_r,
+	CASE 	
+		WHEN tax.taxorder = 'histosol' THEN 'Wet'
+		WHEN water.highwater <= 30 THEN 'Wet'
+		WHEN fl.flood = 2 THEN 'Wet'
+		WHEN tax.taxsuborder like 'aqu%' AND awc.awc152r >= 15.24 THEN 'wet-mesic'
+		WHEN tax.taxsuborder like 'aqu%' AND awc.awc152lh >= 15.24 THEN 'wet-mesic'
+		WHEN water.highwater > 30 and water.highwater <=91 and awc.awc152r >= 15.24 THEN 'wet-mesic'
+		WHEN water.highwater > 30 and water.highwater <=91 and awc.awc152lh >= 15.24 THEN 'wet-mesic'
+		WHEN awc152r >= 15.24 THEN 'mesic'
+		WHEN awc152lh >= 15.24 THEN 'mesic'
+		WHEN tax.taxsuborder like 'aqu%' AND awc.awc152r < 15.24 THEN 'mesic'
+		WHEN tax.taxsuborder like 'aqu%' AND awc.awc152lh < 15.24 THEN 'mesic'
+		WHEN water.highwater > 30 and water.highwater <=91 and awc.awc152r < 15.24 THEN 'mesic'
+		WHEN water.highwater > 30 and water.highwater <=91 and awc.awc152lh < 15.24 THEN 'mesic'
+		WHEN awc.awc152r >= 7.62 AND awc.awc152r < 15.24 THEN 'dry-mesic'
+		WHEN awc.awc152lh >= 7.62 AND awc.awc152lh < 15.24 THEN 'dry-mesic'
+		WHEN awc.awc152r < 7.62 THEN 'dry'
+		WHEN awc.awc152lh < 7.62 THEN 'dry'
+		ELSE 'wtf'
+	END as MoistStatus,
+	water.highwater, awc.awc152r, awc.awc152lh, tax.taxsuborder, fl.flood, tax.mukey, tax.cokey
+INTO #almostdone		
+
+FROM #tax tax
+	INNER join #awc152 awc on tax.cokey = awc.cokey
+	Left join #water water on tax.cokey = water.cokey
+	inner join #flood2 fl on tax.cokey =fl.cokey
+
+SELECT areaname, musym, muname,  compname,  comppct_r, MoistStatus, highwater, awc152r, awc152lh, taxsuborder, flood, mukey, cokey
+FROM #almostdone	
+GROUP by areaname, musym, muname,  compname, comppct_r, MoistStatus, highwater, awc152r, awc152lh, taxsuborder, flood, mukey, cokey

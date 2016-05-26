@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section>
+<title>Tennessee Commodity Crop Productivity Index for Corn and Soybeans</title>
+
+<para> <emphasis role="italic"> Why the TNCCPI:</emphasis>  Productivity indices have the advantage of being less vulnerable to changes in technology than are expressions of productivity based on yield. A mechanism that determines soil productivity in Tennessee that is consistent across political boundaries and over time is needed for many uses. Crop varieties, management scenarios, and yields vary from place to place and over time, reflecting choices made by farmers. These factors partially mask inherent soil quality. Except for extreme circumstances, inherent soil quality or inherent soil productivity varies little over time or from place to place for a specific soil (map unit component) identified by NRCS Soil Surveys.</para> 
+
+<para> Depths for data entry for many of these properties are based on typical rooting depths for corn and soybeans. For example, over 90 percent of corn roots are found in the upper meter of the soil. Over the growing season about 70 percent of water used by corn will come from the first 60 cm. Extraction is most rapid in the zone of greatest root concentration and where the most favorable conditions of aeration, biological activity and nutrient availability occur. Therefore, properties are weighted heavily for conditions found in the upper meter of the soil. </para> 
+
+<para> These properties quantify the effects of pH, CEC, and organic matter in the root zone, which is considered to be from the soil surface to a depth of 100 cm or more, or to a root-limiting layer. The effects of pH are considered for depths of 20 to 100 cm. Organic matter also is considered for the depth ranges of 0 to 20 cm and 20 to 100 cm. The average condition is used in the calculation. Properties also quantify the effects of KSAT and soil depth on soil productivity. The Bedrock property examines the thickness of soil material over bedrock. Layers with KSAT greater than 1.39 and less than 42.0 micro m/sec correlate well in the database with some characteristic that impedes roots such as bulk density, linear extensibility, etc. Saturated hydraulic conductivity (KSAT) is a measure of the ease of water movement in soil. It can reasonably be assumed that it also is an indicator of the ease of air movement. Although the arrangement and size distribution of pores can greatly affect KSAT, it correlates well with ease of root movement. </para>
+
+<para>Properties also quantify the capability of the soil, climate, and landscape to supply water for crop growth. Soil moisture availability is determined by the interaction of four factors; (1) amount of moisture present in the soil, (2) characteristics of the soil profile, (3) moisture capacity of the crop and (4) demand for water by the atmosphere.</para>
+
+<para>Root Zone Available Water Capacity (AWC) is the amount of plant-available water a soil can store between the surface and a root-limiting layer or between the surface and a depth of 150 cm, whichever is less. In this interpretation four layers are evaluated for AWC, 0 to 20 cm, 20 to 60 cm, 60 to 100 cm and greater than 100 cm. </para>
+
+<para>The TNCCPI uses the properties of slope gradient, depth to a water table during the growing season, and the occurrence, timing and duration of ponding and flooding during part of the growing season in calculating crop productivity index.</para>
+
+<para>The Wetness/May property quantifies the effects of a saturated zone deep within the zone where roots can exploit water during parts of the growing season. It also quantifies the detrimental effects of a water table at or near the surface that can delay planting or stress crops early in the growing season.</para>
+
+<para>Climate conditions in June, July and August are good indicators of a soils' productivity for corn and soybeans. Rainfall and temperature during this time-frame greatly affect crop productivity. The impact of rainfall for a given area is decreased because of the effects of temperature, day length and latitude, and crop use. For example, consider two soils, both receiving the same amount of rainfall. One soil is hot, thermic while the other is cool, mesic. A larger amount of rainfall on the cooler site is more readily available for crop growth due to lower evapotranspiration, and so the cool, mesic site receives a higher water balance value.</para>
+<para>The ratings are both verbal and numerical. Rating class terms indicate the estimated productivity which is determined by all of the soil, site, and climatic features that affect crop productivity. "High inherent productivity" indicates that the soil, site, and climate have features that are very favorable for crop production. High yields and low risk of crop failure can be expected if a high level of management is employed. "Moderately high inherent productivity" indicates that the soil has features that are generally quite favorable crop production.  Good yields and moderately low risk of crop failure can be expected. "Moderate inherent productivity" indicates that the soil has features that are generally favorable crop production.  Good yields and moderate risk of crop failure can be expected.  "Moderately low inherent productivity" indicates that the soil has features that are generally not favorable crop production.  Low yields and moderately high risk of crop failure can be expected.   "Low inherent productivity" indicates that the soil has one or more features that are unfavorable for crop production.  Low yields and high risk of crop failure can be expected. </para><para>Numerical ratings indicate the overall productivity of the soil. The ratings are shown in decimal fractions ranging from 1.00 to 0.01. They indicate gradations between the point at which the combination of soil, site, and climate features has the greatest positive impact on inherent productivity (1.00) and the point at which the soil features are very unfavorable (0.01).</para><para>The map unit components listed for each map unit in the accompanying Summary by Map Unit table in Web Soil Survey or the Aggregation Report in Soil Data Viewer are determined by the aggregation method chosen. An aggregated rating class is shown for each map unit. The components listed for each map unit are only those that have the same rating class as listed for the map unit. The percent composition of each component in a particular map unit is presented to help the user better understand the percentage of each map unit that has the rating presented. </para><para>Other components with different ratings may be present in each map unit. The ratings for all components, regardless of the map unit aggregated rating, can be viewed by generating the equivalent report from the Soil Reports tab in Web Soil Survey. Onsite investigation may be needed to validate these interpretations and to confirm the identity of the soil on a given site.</para>
+
+
+<title>References</title>
+
+<orderedlist>
+<listitem>
+<para>Thornthwaite, C.W. 1948. An approach toward a rational classification of climate.Geographic Review 38: 55-94.</para>
+</listitem>
+<listitem>
+<para>United States Department of Agriculture, Natural Resources Conservation Service. 1993. Soil survey manual. Soil Surv. Staff, U.S. Dep. Agric. Handb. 18.</para>
+</listitem>
+<listitem>
+<para>United States Department of Agriculture, Natural Resources Conservation Service. 1999. Soil taxonomy: A basic system of soil classification for making and interpreting soil surveys. Soil Surv. Staff, U.S. Dep. Agric. Handb. 496.</para>
+</listitem>
+<listitem>
+<para>Wayne C. Palmer and A. Vaughn Havens, “A Graphical Technique for Determining Evapotranspiration by the Thornthwaite Method”, Monthly Weather Review, pp.123-128, April 1958</para>
+</listitem>
+<listitem>
+<para>
+www.wcc.nrcs.usda.gov/ftpref/support/climate/wetlands/tn/
+</para>
+</listitem>
+<listitem>
+<para>
+Dobos, R.R., Sinclair, Jr., H.R. and Hipple, K.W. 2008. User guide national commodity crop productivity index (NCCPI) Version 1.0. United States Department of Agriculture, Natural Resources Conservation Service. National Soil Survey Center
+</para>
+</listitem>
+<listitem>
+<para>
+Soil Survey Division Staff. 1993. Soil survey manual. Soil Conservation Service. U.S. Department of Agriculture Handbook 18.
+</para>
+</listitem>
+</orderedlist>
+</section>
