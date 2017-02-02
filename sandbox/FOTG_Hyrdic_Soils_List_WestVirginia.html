@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Wisconsin Hydric Soils List</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	
+	<p>FOTG - Hydric Soils List for Wisconsin. This report never has to be manually updated for it is hitting Web Soil Survey Services Live (SDA)
+	</p>
+	
+	<!-- The following "div" tag will be updated with the retrieved data -->
+	<div id="id1"></div>
+	
+	
+	<script>
+		// Wait for everything to be loaded before starting the SDA request
+		$(document).ready(function(){
+			var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+			var data = {
+				// This query has only a single "select" command, its results will be in "Table"// 
+				query: "SELECT TOP 10 LEFT((areasymbol), 2) as Sate,  l.areasymbol as Area_Symbol,  l.areaname as Area_Name,  mu.mukey,  mu.musym as Mapunit_Symbol,  mu.muname as Mapunit_Name,  case when localphase is null then compname else compname + ', ' + localphase end as Component_Name_and_phase,  comppct_r/1 as Component_Representative_Percentage,  majcompflag,  ((muacres*comppct_r)/100) as Component_Acres,  (SELECT TOP 1 cogeomordesc.geomfname FROM cogeomordesc WHERE c.cokey = cogeomordesc.cokey AND cogeomordesc.rvindicator='yes' and cogeomordesc.geomftname = 'Landform')  as Component_Landform,  hydricrating as Hydric_Rating, SUBSTRING(  (  SELECT ( ', ' + hydriccriterion) FROM cohydriccriteria WHERE c.cokey = cohydriccriteria.cokey ORDER BY hydriccriterion ASC FOR XML PATH('') ), 3, 1000) as restrictions 						FROM legend l 						INNER JOIN mapunit mu ON mu.lkey = l.lkey 						AND  LEFT((areasymbol), 2)  = 'WI' 						INNER JOIN  muaggatt mg on mu.mukey=mg.mukey 						INNER JOIN component c ON mu.mukey=c.mukey  AND (hydricrating like 'yes') 						ORDER BY l.areasymbol, mu.musym, comppct_r DESC",
+
+				//"SELECT DISTINCT Compname FROM (legend INNER JOIN (mapunit LEFT JOIN component ON mapunit.mukey = component.mukey AND hydricrating = 'yes' ) ON legend.lkey = mapunit.lkey AND LEFT(legend.areasymbol,2) LIKE 'WI') WHERE  Compname IS NOT NULL GROUP BY Compname  ORDER BY Compname",
+				//"select top 2 * from mapunit",
+					  //+	"SELECT top 2 from component ",
+				
+				// We'll request the column names which will be returned as the first row
+				format: "json+columnname"
+			}
+			
+			// "Post" the request to SDA and when the data are returned invoke the
+			// "success" function (see https://api.jquery.com/jquery.post/)
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+		});
+	</script>
+</body>
+</html>

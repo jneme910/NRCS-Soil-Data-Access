@@ -1,0 +1,20 @@
+SELECT 
+LEFT((areasymbol), 2) as State_Sym,
+ l.areasymbol as Area_Symbol,
+ l.areaname as Area_Name,
+ mu.mukey,
+ mu.musym as Mapunit_Symbol,
+ mu.muname as Mapunit_Name,
+ case when localphase is null then compname else compname + ', ' + localphase end as Component_Name_and_phase,
+ comppct_r/1 as Component_Representative_Percentage,
+ majcompflag, 
+ ((muacres*comppct_r)/100) as Component_Acres,
+ SUBSTRING( (SELECT DISTINCT ( ', ' +  cogeomordesc.geomfname) FROM cogeomordesc WHERE c.cokey = cogeomordesc.cokey AND cogeomordesc.rvindicator='yes' and cogeomordesc.geomftname = 'Landform' GROUP BY cogeomordesc.geomfname FOR XML PATH('') ), 3, 1000)  as Component_Landform,
+ SUBSTRING( (SELECT ( ', ' +  cogeomordesc.geomfname) FROM cogeomordesc WHERE c.cokey = cogeomordesc.cokey AND cogeomordesc.rvindicator='yes' and cogeomordesc.geomftname = 'Microfeature' ORDER BY existsonfeat ASC FOR XML PATH('') ), 3, 1000)  as microfeature,
+ hydricrating as Hydric_Rating,
+SUBSTRING(  (  SELECT ( ', ' + hydriccriterion) FROM cohydriccriteria WHERE c.cokey = cohydriccriteria.cokey ORDER BY hydriccriterion ASC FOR XML PATH('') ), 3, 1000) as restrictions 
+FROM legend AS l 
+INNER JOIN mapunit AS mu ON mu.lkey = l.lkey  AND l.areasymbol NOT LIKE 'US'  AND l.areasymbol LIKE 'NE167'
+INNER JOIN component AS c ON mu.mukey=c.mukey  AND (hydricrating like 'yes')
+ORDER by l.areasymbol, mu.musym, comppct_r DESC
+

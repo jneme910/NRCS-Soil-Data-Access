@@ -1,0 +1,3 @@
+SELECT DISTINCT Compname 
+FROM (legend INNER JOIN (mapunit LEFT JOIN component ON mapunit.mukey = component.mukey AND hydricrating = 'yes') ON legend.lkey = mapunit.lkey AND LEFT(legend.areasymbol,2) LIKE 'WI')
+GROUP BY Compname  ORDER BY Compname

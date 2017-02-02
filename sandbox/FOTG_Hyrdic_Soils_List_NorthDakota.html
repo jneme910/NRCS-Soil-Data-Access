@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>West Virginia Hydric Soils List</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	
+	<p>FOTG - Hydric Soils List for West Virginia. This report never has to be manually updated for it is hitting Web Soil Survey Services Live (SDA)
+	</p>
+	
+	<!-- The following "div" tag will be updated with the retrieved data -->
+	<div id="id1"></div>
+	
+	
+	<script>
+		// Wait for everything to be loaded before starting the SDA request
+		$(document).ready(function(){
+			var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+			var data = {
+				// This query has only a single "select" command, its results will be in "Table"// Note: Jason Nemecek - The sql below groups the unique hydric soils list by state.  
+				query: "SELECT DISTINCT Compname FROM (legend INNER JOIN (mapunit LEFT JOIN component ON mapunit.mukey = component.mukey AND hydricrating = 'yes' ) ON legend.lkey = mapunit.lkey AND LEFT(legend.areasymbol,2) LIKE 'WV') WHERE  Compname IS NOT NULL GROUP BY Compname  ORDER BY Compname",
+				//"select top 2 * from mapunit",
+					  //+	"SELECT top 2 from component ",
+				
+				// We'll request the column names which will be returned as the first row
+				format: "json+columnname"
+			}
+			
+			// "Post" the request to SDA and when the data are returned invoke the
+			// "success" function (see https://api.jquery.com/jquery.post/)
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+		});
+	</script>
+</body>
+</html>
