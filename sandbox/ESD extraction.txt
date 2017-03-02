@@ -1,0 +1,220 @@
+select LEFT((l.areasymbol), 2) as state,  lo.areasymbol, l.areaname, mu.mukey, mu.musym, mu.muname, mukind, mu.muacres, mo.areaovacres, c.majcompflag, c.comppct_r, 
+c.compname, compkind, (mu.muacres*c.comppct_r/100) AS compacres, localphase, slope_l, slope_r, slope_h, case when nirrcapscl is null then 
+nirrcapcl else nirrcapcl + nirrcapscl end as capclass, drainagecl, hydgrp, hydricrating, (SELECT TOP 1 hydriccriterion FROM cohydriccriteria 
+WHERE c.cokey = cohydriccriteria.cokey) as criteria, corsteel, corcon, flecolcomnum, (SELECT TOP 1 coecoclass.ecoclassid FROM component LEFT OUTER JOIN coecoclass on component.cokey = coecoclass.cokey WHERE ecoclasstypename not in ('NRCS Rangeland Site', 'NRCS Forestland Site') and coecoclass.cokey = c.cokey) as ecosite
+, taxclname
+, taxorder
+, taxsuborder
+, taxgrtgroup
+, taxsubgrp
+, taxtempregime
+, taxpartsize
+, (SELECT  TOP 1 copmgrp.pmgroupname FROM copmgrp WHERE c.cokey = copmgrp.cokey AND copmgrp.rvindicator='yes') as pm
+, (SELECT TOP 1 cogeomordesc.geomfname FROM cogeomordesc WHERE c.cokey = cogeomordesc.cokey AND cogeomordesc.rvindicator='yes' and cogeomordesc.geomftname = 'Landform')  as landform
+, (select CASE when min(soimoistdept_r) is null then '200' else (min(soimoistdept_r) ) END
+          from component left outer join comonth left outer join cosoilmoist 
+            on comonth.comonthkey = cosoilmoist.comonthkey
+            on comonth.cokey = component.cokey
+        where component.cokey = c.cokey
+          and soimoiststat = 'Wet'
+and ((taxtempregime in ('Cryic', 'Pergelic') and comonth.month in ('July', 'August'))
+or (taxtempregime in ('Frigid', 'Mesic', 'Isofrigid') and comonth.month in ('May', 'June',  'July', 'August', 'September'))
+or (taxtempregime in ('Thermic', 'Hyperthermic') and comonth.month in ('April', 'May', 'June',  'July', 'August', 'September', 'October'))
+or (taxtempregime in ('Isothermic', 'Isohyperthermic', 'Isomesic') and comonth.month in ('March', 'April', 'May', 'June',  'July', 'August', 
+'September', 'October', 'November')))
+            ) as mingswatertable_r, (select CASE when max(soimoistdept_r) is null then '200' else (max(soimoistdept_r)) END
+          from component left outer join comonth left outer join cosoilmoist 
+            on comonth.comonthkey = cosoilmoist.comonthkey
+            on comonth.cokey = component.cokey
+        where component.cokey = c.cokey
+          and soimoiststat = 'Wet'
+and ((taxtempregime in ('Cryic', 'Pergelic') and comonth.month in ('July', 'August'))
+or (taxtempregime in ('Frigid', 'Mesic', 'Isofrigid') and comonth.month in ('May', 'June',  'July', 'August', 'September'))
+or (taxtempregime in ('Thermic', 'Hyperthermic') and comonth.month in ('April', 'May', 'June',  'July', 'August', 'September', 'October'))
+or (taxtempregime in ('Isothermic', 'Isohyperthermic', 'Isomesic') and comonth.month in ('March', 'April', 'May', 'June',  'July', 'August', 
+'September', 'October', 'November')))
+            ) as maxgswatertable_r, (select top 1 flodfreqcl from comonth, MetadataDomainMaster dm, MetadataDomainDetail dd where comonth.cokey
+= c.cokey and flodfreqcl = ChoiceLabel and DomainName = 'flooding_frequency_class' and dm.DomainID = dd.DomainID order by choicesequence desc) 
+as flodfreq, (select top 1 floddurcl from comonth, MetadataDomainMaster dm, MetadataDomainDetail dd where comonth.cokey = c.cokey and floddurcl
+= ChoiceLabel and DomainName = 'flooding_duration_class' and dm.DomainID = dd.DomainID order by choicesequence desc) as floddur, (select top 1 
+pondfreqcl from comonth, MetadataDomainMaster dm, MetadataDomainDetail dd where comonth.cokey = c.cokey and pondfreqcl = ChoiceLabel and 
+DomainName = 'ponding_frequency_class' and dm.DomainID = dd.DomainID order by choicesequence desc) as pondfreq, (select top 1 ponddurcl from
+comonth, MetadataDomainMaster dm, MetadataDomainDetail dd where comonth.cokey = c.cokey and ponddurcl = ChoiceLabel and DomainName = 
+'ponding_duration_class' and dm.DomainID = dd.DomainID order by choicesequence desc) as ponddur, (SELECT CASE when min(resdept_r) is null then
+'200' else cast(min(resdept_r) as varchar) END from component left outer join corestrictions on component.cokey = corestrictions.cokey where 
+component.cokey = c.cokey and reskind is not null) as restrictiondept, (SELECT TOP 1  reskind  from component left outer join corestrictions on 
+component.cokey = corestrictions.cokey where component.cokey = c.cokey and reskind is not null) as restriction, c.cokey, hzname, hzdept_r, 
+hzdepb_r, (hzdepb_r-hzdept_r) as thickness, (select CASE when sum(cf.fragvol_r) is null then '0' else cast(sum(cf.fragvol_r) as varchar) END 
+FROM chfrags cf WHERE cf.chkey = ch.chkey)  as fragvol
+, texture
+, sandtotal_r
+, sandvc_r
+, sandco_r
+, sandmed_r
+, sandfine_r
+, sandvf_r
+, silttotal_r
+, claytotal_r
+, om_r
+, awc_r
+, ksat_r
+, ph1to1h2o_r
+, ph01mcacl2_r
+, caco3_r
+,cec7_r
+,ecec_r
+,ec_r
+,sar_r
+,ch.chkey
+INTO #temp
+FROM legend l
+INNER JOIN laoverlap lo on l.lkey=lo.lkey AND l.areasymbol <> 'US'
+INNER JOIN muaoverlap mo ON mo.lareaovkey = lo.lareaovkey AND lo.areatypename='mlra' and lo.areasymbol like '74'
+INNER JOIN mapunit mu ON mu.mukey = mo.mukey 
+LEFT OUTER JOIN component c ON c.mukey = mu.mukey AND compkind = 'series' 
+LEFT OUTER JOIN chorizon ch ON ch.cokey = c.cokey 
+LEFT OUTER JOIN chtexturegrp ct ON ch.chkey=ct.chkey and ct.rvindicator = 'yes' 
+ORDER by l.areasymbol, mu.musym 
+
+SELECT state, #temp.areasymbol, areaname, mukey, musym, muname, mukind, muacres, majcompflag, comppct_r, compname, compkind, compacres, localphase, 
+slope_l, slope_r, slope_h, capclass, drainagecl, hydgrp, hydricrating, criteria, corsteel, corcon, ecosite, taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp, taxtempregime, taxpartsize, pm, landform, mingswatertable_r, maxgswatertable_r, flodfreq, floddur, pondfreq, ponddur, CASE when (restrictiondept) = '0' then '1' else restrictiondept END as restrictiondepth, restriction, cokey, hzname, hzdept_r, hzdepb_r, thickness, fragvol
+, texture
+, sandtotal_r
+, sandvc_r
+, sandco_r
+, sandmed_r
+, sandfine_r
+, sandvf_r
+, silttotal_r
+, claytotal_r
+, om_r
+, awc_r
+, ksat_r
+, ph1to1h2o_r
+, ph01mcacl2_r
+, caco3_r
+, cec7_r
+, ecec_r
+, ec_r
+, sar_r
+, chkey
+INTO #temp2
+FROM #temp
+where hzdept_r = 0
+
+SELECT mukey, cokey, chkey, thickness, restrictiondept, corcon, corsteel,
+CASE when sandtotal_r is null then '0' else (sandtotal_r*thickness) END as sand_r, 
+CASE when sandvc_r is null then '0' else (sandvc_r*thickness) END as vcos_r, 
+CASE when sandco_r is null then '0' else (sandco_r*thickness) END as cos_r, 
+CASE when sandmed_r is null then '0' else (sandmed_r*thickness) END as meds_r, 
+CASE when sandfine_r is null then '0' else (sandfine_r*thickness) END as fines_r, 
+CASE when sandvf_r is null then '0' else (sandvf_r*thickness) END as vfines_r, 
+CASE when silttotal_r is null then '0' else (silttotal_r*thickness) END as silt_r, 
+CASE when claytotal_r is null then '0' else (claytotal_r*thickness) END as clay_r, 
+CASE when om_r is null then '0' else (om_r*thickness) END as th_om_r, 
+CASE when awc_r is null then '0' else (awc_r*thickness) END as th_awc_r, 
+CASE when ksat_r is null then '0' else (ksat_r*thickness) END as th_ksat_r, 
+CASE when ph1to1h2o_r is null then '0' else (ph1to1h2o_r*thickness) END as th_ph1to1h2o_r, 
+CASE when ph01mcacl2_r is null then '0' else (ph01mcacl2_r*thickness) END as th_ph01mcacl2_r, 
+CASE when caco3_r is null then '0' else (caco3_r*thickness) END as th_caco3_r, 
+CASE when cec7_r is null then '0' else (cec7_r*thickness) END as th_cec7_r, 
+CASE when ecec_r is null then '0' else (ecec_r*thickness) END as th_ecec_r, 
+CASE when ec_r is null then '0' else (ec_r*thickness) END as th_ec_r, 
+CASE when sar_r is null then '0' else (sar_r*thickness) END as th_sar_r
+INTO #sand
+from #temp
+ORDER BY mukey, cokey, chkey
+
+select mukey, cokey, 
+cast(sum(sand_r) as float(2)) as sum_sand_r,
+cast(sum(vcos_r) as float(2)) as sum_vcos_r,
+cast(sum(cos_r) as float(2)) as sum_cos_r,
+cast(sum(meds_r) as float(2)) as sum_meds_r,
+cast(sum(fines_r) as float(2)) as sum_fines_r,
+cast(sum(vfines_r) as float(2)) as sum_vfines_r,
+cast(sum(silt_r) as float(2)) as sum_silt_r,
+cast(sum(clay_r) as float(2)) as sum_clay_r,
+cast(sum(th_om_r) as float(2)) as sum_om_r,
+cast(sum(th_awc_r) as float(2)) as sum_awc_r,
+cast(sum(th_ksat_r) as float(2)) as sum_ksat_r,
+cast(sum(th_ph1to1h2o_r) as float(2)) as sum_ph1to1h2o_r,
+cast(sum(th_ph01mcacl2_r) as float(2)) as sum_ph01mcacl2_r,
+cast(sum(th_caco3_r) as float(2)) as sum_caco3_r,
+cast(sum(th_cec7_r) as float(2)) as sum_cec7_r,
+cast(sum(th_ecec_r) as float(2)) as sum_ecec_r,
+cast(sum(th_ec_r) as float(2)) as sum_ec_r,
+cast(sum(th_sar_r) as float(2)) as sum_sar_r
+into #vcsand
+FROM #sand
+GROUP BY mukey, cokey
+ORDER BY mukey
+
+select #temp2.mukey, #temp2.cokey,
+(sum_sand_r/#temp2.restrictiondepth) as wtavg_sand,
+(sum_vcos_r/#temp2.restrictiondepth) as wtavg_vcos,
+(sum_cos_r/#temp2.restrictiondepth) as wtavg_cos,
+(sum_meds_r/#temp2.restrictiondepth) as wtavg_meds,
+(sum_fines_r/#temp2.restrictiondepth) as wtavg_fines,
+(sum_vfines_r/#temp2.restrictiondepth) as wtavg_vfines,
+(sum_silt_r/#temp2.restrictiondepth) as wtavg_silt,
+(sum_clay_r/#temp2.restrictiondepth) as wtavg_clay,
+(sum_om_r/#temp2.restrictiondepth) as wtavg_om,
+(sum_awc_r/#temp2.restrictiondepth) as wtavg_awc,
+(sum_ksat_r/#temp2.restrictiondepth) as wtavg_ksat,
+(sum_ph1to1h2o_r/#temp2.restrictiondepth) as wtavg_phH2O,
+(sum_ph01mcacl2_r/#temp2.restrictiondepth) as wtavg_phCACL,
+(sum_caco3_r/#temp2.restrictiondepth) as wtavg_caco3,
+(sum_cec7_r/#temp2.restrictiondepth) as wtavg_cec7,
+(sum_ecec_r/#temp2.restrictiondepth) as wtavg_ecec,
+(sum_ec_r/#temp2.restrictiondepth) as wtavg_ec,
+(sum_sar_r/#temp2.restrictiondepth) as wtavg_sar
+INTO #FLwtavg
+FROM #vcsand
+INNER JOIN #temp2 on #vcsand.cokey = #temp2.cokey
+order by mukey, cokey
+
+Select state, #temp2.areasymbol, areaname, #temp2.mukey, musym, muname, mukind, muacres, majcompflag, comppct_r, compname, compkind, compacres, localphase, slope_l, slope_r, 
+slope_h, capclass, drainagecl, hydgrp, hydricrating, criteria, corsteel, corcon, ecosite, taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp, taxtempregime, taxpartsize, pm, landform, mingswatertable_r, maxgswatertable_r, flodfreq, floddur, pondfreq, ponddur, restrictiondepth, restriction, #temp2.cokey, 
+hzname, hzdept_r, hzdepb_r, thickness, 
+fragvol, 
+texture, 
+sandtotal_r
+, CAST(wtavg_sand AS INT) as sand_wtavg
+, sandvc_r
+, CAST(wtavg_vcos AS Decimal(4,1)) as vcos_wtavg
+, sandco_r
+, CAST(wtavg_cos AS Decimal(4,1)) as cos_wtavg
+, sandmed_r
+, CAST(wtavg_meds AS Decimal(4,1)) as msand_wtavg
+, sandfine_r
+, CAST(wtavg_fines AS Decimal(4,1)) as fsand_wtavg
+, sandvf_r
+, CAST(wtavg_vfines AS Decimal(4,1)) as vfsand_wtavg
+, silttotal_r
+, CAST(wtavg_silt AS INT) as silt_wtavg
+, claytotal_r
+, CAST(wtavg_clay AS INT) as clay_wtavg
+, om_r
+, CAST(wtavg_om AS Decimal(4, 1)) as om_wtavg
+, awc_r
+, CAST(wtavg_awc as Decimal(3,2)) as awc_wtavg
+, ksat_r
+, CAST(wtavg_ksat as Decimal(7,3)) as ksat_wtavg
+, ph1to1h2o_r
+, CAST(wtavg_phH2O as decimal(3,1)) as ph_wtavg
+, ph01mcacl2_r
+, CAST(wtavg_phCACL as decimal(3,1)) as phcacl_wtavg
+, caco3_r
+, CAST(wtavg_caco3 as decimal(4,1)) as caco3_wtavg
+, cec7_r
+, CAST(wtavg_cec7 as decimal(4,1)) as cec7_wtavg
+, ecec_r
+, CAST(wtavg_ecec as decimal(3,1)) as ecec_wtavg
+, ec_r
+, CAST(wtavg_ec as decimal(3,1)) as ec_wtavg
+, sar_r
+, CAST(wtavg_sar as decimal(3,1)) as sar_wtavg
+, chkey
+FROM #temp2
+LEFT OUTER JOIN #FLwtavg on #temp2.cokey = #FLwtavg.cokey
+ORDER BY #temp2.areasymbol, #temp2.mukey, #temp2.cokey, #temp2.chkey

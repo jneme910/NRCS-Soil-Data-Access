@@ -45,6 +45,8 @@ FROM component AS c
 
 INNER JOIN corestrictions ON corestrictions.cokey=c.cokey
 and reskind LIKE 'Lithic bedrock' AND c.cokey=component.cokey  GROUP BY c.cokey, resdept_h), 9999)  AS H_LITHIC,
+
+
 --,
 
 --(SELECT TOP 1 MIN (resdept_r) 
@@ -75,7 +77,12 @@ ISNULL((SELECT TOP 1 MIN (resdept_h)
 FROM component AS c
 
 INNER JOIN corestrictions ON corestrictions.cokey=c.cokey
-AND c.cokey=component.cokey  GROUP BY c.cokey, resdept_h), 9999) AS H_FIRST_RESTRICTION
+AND c.cokey=component.cokey  GROUP BY c.cokey, resdept_h), 9999) AS H_FIRST_RESTRICTION,
+ISNULL((SELECT TOP 1 MIN (resdept_r) 
+FROM component AS c,
+
+INNER JOIN corestrictions ON corestrictions.cokey=c.cokey
+and reskind LIKE '%bedrock%' AND c.cokey=component.cokey  GROUP BY c.cokey, resdept_r), 9999)  AS Min_Any_Bedrock_RV
 
 ---INTO #main
 FROM sacatalog 
