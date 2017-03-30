@@ -1,6 +1,4 @@
-SELECT areasymbol, areaname
+SELECT lap.areasymbol, lap.areaname
 FROM laoverlap AS lap
-INNER JOIN muaoverlap AS mop ON mop.lareaovkey=lap.lareaovkey AND lap.areatypename = 'County or Parish' 
-INNER JOIN mapunit AS mu ON mu.mukey=mop.mukey 
-INNER JOIN legend AS l ON l.lkey=mu.lkey AND LEFT ()l.areasymbol = 'TX620'
-AND LEFT (l.areasymbol,2) = 'WI'
+INNER JOIN legend AS l ON l.lkey=lap.lkey  AND lap.areatypename = 'County or Parish' 
+AND LEFT (l.areasymbol,2) = 'WI' ORDER BY lap.areaname ASC
