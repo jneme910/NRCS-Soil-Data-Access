@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="emphasis">
+		<xs:complexType mixed="true">
+			<xs:attribute name="role" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="graphic">
+		<xs:complexType mixed="true">
+			<xs:attribute name="srccredit" type="xs:string"/>
+			<xs:attribute name="fileref" type="xs:string"/>
+			<xs:attribute name="width" type="xs:string"/>
+			<xs:attribute name="depth" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="figure">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="title"/>
+				<xs:element ref="graphic" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="label" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="title">
+		<xs:complexType mixed="true">
+			<xs:attribute name="role" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ulink">
+		<xs:complexType mixed="true">
+			<xs:attribute name="url" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="glossary">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="title"/>
+				<xs:element ref="para"/>
+				<xs:element ref="glossentry" maxOccurs="unbounded"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="glossdef">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="para" maxOccurs="unbounded"/>
+				<xs:element ref="glosslist" maxOccurs="unbounded"/>
+				<xs:element ref="orderedlist" maxOccurs="unbounded"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="glosslist">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="glossentry"/>
+			</xs:choice>
+			<xs:attribute name="role" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="glossentry">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="glossterm"/>
+				<xs:element ref="glossdef"/>
+				<xs:element ref="glosssee"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="glossterm" type="xs:string"/>
+	<xs:element name="glosssee" type="xs:string"/>
+	<xs:element name="para">
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="emphasis"/>
+				<xs:element ref="subscript"/>
+				<xs:element ref="superscript"/>
+				<xs:element ref="orderedlist"/>
+				<xs:element ref="itemizedlist"/>
+				<xs:element ref="variablelist"/>
+				<xs:element ref="figure"/>
+				<xs:element ref="ulink"/>
+				<xs:element ref="table"/>
+				<xs:element ref="citation"/>
+			</xs:choice>
+			<xs:attribute name="role" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="section">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="title"/>
+				<xs:element ref="section" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="toc" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="glossary" minOccurs="0"/>
+				<xs:element ref="para" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="figure" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="orderedlist" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="itemizedlist" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="variablelist" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="table" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:choice>
+			<xs:attribute name="label" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="itemizedlist">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="listitem" maxOccurs="unbounded"/>
+				<xs:element ref="orderedlist" minOccurs="0"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="orderedlist">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="listitem" maxOccurs="unbounded"/>
+				<xs:element ref="orderedlist" minOccurs="0"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="variablelist">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="varlistentry" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="varlistentry">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="term" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="listitem" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="listitem">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="para"/>
+				<xs:element ref="orderedlist"/>
+				<xs:element ref="itemizedlist"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="table">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="title"/>
+				<xs:element ref="tgroup"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tbody">
+		<xs:complexType>
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element ref="tr"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="td">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="para" minOccurs="0"/>
+				<xs:element ref="ulink" minOccurs="0"/>
+				<xs:element ref="figure" minOccurs="0"/>
+			</xs:choice>
+			<xs:attribute name="title" type="xs:string"/>
+			<xs:attribute name="rowspan" type="xs:string"/>
+			<xs:attribute name="colspan" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tgroup">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="colspec"/>
+				<xs:element ref="thead"/>
+				<xs:element ref="tbody"/>
+			</xs:choice>
+			<xs:attribute name="cols" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="colspec">
+		<xs:complexType mixed="true">
+			<xs:attribute name="colwidth" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="thead">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="tr"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tr">
+		<xs:complexType>
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element ref="td"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="term" type="xs:string"/>
+	<xs:element name="subscript" type="xs:string"/>
+	<xs:element name="superscript" type="xs:string"/>
+	<xs:element name="toc">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="tocchap"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tocchap">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="tocentry"/>
+				<xs:element ref="toclevel1"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="toclevel1">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="tocentry"/>
+				<xs:element ref="toclevel2"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="toclevel2">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="tocentry"/>
+				<xs:element ref="toclevel3"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="toclevel3">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="tocentry"/>
+				<xs:element ref="toclevel4"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="toclevel4">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="tocentry"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tocentry" type="xs:string"/>
+	<xs:element name="citation">
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="ulink"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
