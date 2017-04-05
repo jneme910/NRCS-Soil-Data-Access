@@ -1,0 +1,13 @@
+select
+areasymbol
+, lkey
+,(select count(*) from mapunit where legend.lkey=mapunit.lkey) MU_count ,(select count(*) from component inner join mapunit on mapunit.mukey=component.mukey where legend.lkey=mapunit.lkey) COMP_count ,(select count(*) from cotext inner join component on cotext.cokey=component.cokey inner join mapunit on mapunit.mukey=component.mukey where legend.lkey=mapunit.lkey and comptextkind like '%nontech%') COMPTECH_count ,(select count(*) from cointerp inner join component on cointerp.cokey=component.cokey inner join mapunit on mapunit.mukey=component.mukey where legend.lkey=mapunit.lkey) Interp_count ,(select count(*) from sainterp where sainterp.areasymbol=legend.areasymbol) Survey_Interp_count from legend where areasymbol <> 'US'
+order by areasymbol
+
+select
+LEFT((sc.areasymbol), 2) as state
+, legend.lkey
+, sc.areasymbol
+, sc.areaname
+, case when (month(st.tabularverest) IN (8, 9) and year(st.tabularverest) = 2016) then 'X' else '' end as FY17_refresh , areaacres , st.tabularversion , CAST(DATEPART(month, tabularverest) as varchar(2)) + '/' + CAST(DATEPART(day, tabularverest) as varchar(2)) + '/' + CAST(DATEPART(year, tabularverest) as varchar(4)) AS Tabular_date , month(st.tabularverest) as TabMONTH , year(st.tabularverest) as TabYEAR , spatialversion , CAST(DATEPART(month, spatialverest) as varchar(2)) + '/' + CAST(DATEPART(day, spatialverest) as varchar(2)) + '/' + CAST(DATEPART(year, spatialverest) as varchar(4)) AS Spat_date , month(spatialverest) as SpatialMONTH , year(spatialverest) as SpatialYEAR , (select count(*) from mapunit where legend.lkey=mapunit.lkey) MU_count , (select count(*) from component inner join mapunit on mapunit.mukey=component.mukey where legend.lkey=mapunit.lkey) COMP_count , (select count(*) from cotext inner join component on cotext.cokey=component.cokey inner join mapunit on mapunit.mukey=component.mukey where legend.lkey=mapunit.lkey and comptextkind like '%nontech%') COMPTECH_count , (select count(*) from chorizon inner join component on chorizon.cokey=component.cokey inner join mapunit on mapunit.mukey=component.mukey where legend.lkey=mapunit.lkey) as hcount , (select count(*) from cointerp inner join component on cointerp.cokey=component.cokey inner join mapunit on mapunit.mukey=component.mukey where legend.lkey=mapunit.lkey and ruledepth=0) Interp_count , (select count(*) from sainterp where sainterp.areasymbol=legend.areasymbol) Survey_Interp_count from sacatalog sc inner  join saspatialver sp ON sc.areasymbol=sp.areasymbol inner join satabularver st on sc.areasymbol=st.areasymbol inner join legend  on sc.areasymbol=legend.areasymbol where sc.areasymbol not like 'US'
+Order by sc.areasymbol
