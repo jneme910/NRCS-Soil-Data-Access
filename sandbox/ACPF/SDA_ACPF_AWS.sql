@@ -12,7 +12,7 @@
 --Churchtown2809844	31.07		6			100				0.06			1.8642
 --Elbaville	2809844	17.88		25			100				0.25			4.47
 --Dorerton	2809844	14.36		60			100				0.6				8.616
---																		SUM	15.9
+--																		 SUM	15.9
 -------------------------------------------------------------------------------------
 
 
@@ -143,18 +143,31 @@ FROM #acpf
 
 --- depth ranges for AWS ----
 SELECT
-CASE    WHEN hzdepb_r <= 150 THEN hzdepb_r
-   WHEN hzdepb_r > 150 and hzdept_r < 150 THEN 150
-   ELSE 0
-   END AS InRangeBot,
-CASE    WHEN hzdept_r < 150 then hzdept_r
-   ELSE 0
-   END AS InRangeTop, awc_r, cokey, mukey
+CASE  WHEN hzdepb_r <= 150 THEN hzdepb_r WHEN hzdepb_r > 150 and hzdept_r < 150 THEN 150 ELSE 0 END AS InRangeBot,
+CASE  WHEN hzdept_r < 150 then hzdept_r ELSE 0 END AS InRangeTop, 
+
+CASE  WHEN hzdepb_r <= 20  THEN hzdepb_r WHEN hzdepb_r > 20  and hzdept_r < 20 THEN 20  ELSE 0 END AS InRangeBot_0_20,
+CASE  WHEN hzdept_r < 20 then hzdept_r ELSE 0 END AS InRangeTop_0_20, 
+
+
+CASE  WHEN hzdepb_r <= 50  THEN hzdepb_r WHEN hzdepb_r > 50  and hzdept_r < 50 THEN 50  ELSE 20 END AS InRangeBot_20_50,
+CASE  WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50, 
+
+CASE  WHEN hzdepb_r <= 100  THEN hzdepb_r WHEN hzdepb_r > 100  and hzdept_r < 100 THEN 100  ELSE 50 END AS InRangeBot_50_100,
+CASE  WHEN hzdept_r < 100 then hzdept_r ELSE 50 END AS InRangeTop_50_100, 
+awc_r, cokey, mukey
 INTO #aws
 FROM #acpf
 ORDER BY cokey
 
-SELECT mukey, cokey, SUM((InRangeBot - InRangeTop)*awc_r) AS aws150
+SELECT mukey, cokey, 
+SUM((InRangeBot - InRangeTop)*awc_r) AS aws150,
+
+SUM((InRangeBot_0_20 - InRangeTop_0_20)*awc_r) AS aws_0_20,
+
+SUM((InRangeBot_20_50 - InRangeTop_20_50)*awc_r) AS aws_20_50,
+
+SUM((InRangeBot_50_100 - InRangeTop_50_100)*awc_r) AS aws_50_100
 INTO #aws150
 FROM #aws 
 GROUP BY  mukey, cokey
@@ -219,6 +232,11 @@ SELECT DISTINCT
   slope_r,
   slope_h,
   CAST(aws150 AS Decimal(5,1)) AS aws150_dcp,
+	CAST(aws_0_20 AS Decimal(5,1)) AS aws_0_20_dcp,
+		CAST(aws_20_50 AS Decimal(5,1)) AS aws_20_50_dcp,
+			CAST(aws_50_100 AS Decimal(5,1)) AS aws_50_100_dcp,
+	
+	
   CAST(profile_Waterstorage AS Decimal(5,1)) AS AWS_profile_dcp,
   CAST(wtavg_awc_r_to_restrict AS Decimal(5,1)) AS AWS_restrict_dcp,
   sum_thickness,
@@ -237,13 +255,21 @@ LEFT OUTER JOIN #acpfwtavg on #acpf.cokey = #acpfwtavg.cokey
 ORDER BY #acpf.state, #acpf.areasymbol, #acpf.areaname, #acpf.musym
 
 ---Uses the above query and the query on line 89
-SELECT  #alldata.mukey,  #alldata.cokey, #alldata.aws150_dcp, WEIGHTED_COMP_PCT , CAST (CASE WHEN #alldata.aws150_dcp IS NULL THEN 0 ELSE #alldata.aws150_dcp END * CASE WHEN #alldata.aws150_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS AWC_COMP_SUM
+SELECT  #alldata.mukey,  #alldata.cokey, #alldata.aws150_dcp, WEIGHTED_COMP_PCT , 
+CAST (CASE WHEN #alldata.aws150_dcp IS NULL THEN 0 ELSE #alldata.aws150_dcp END * CASE WHEN #alldata.aws150_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS AWC_COMP_SUM,
+CAST (CASE WHEN #alldata.aws_0_20_dcp IS NULL THEN 0 ELSE #alldata.aws_0_20_dcp END * CASE WHEN #alldata.aws_0_20_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS AWC_COMP_SUM_0_20,
+CAST (CASE WHEN #alldata.aws_20_50_dcp IS NULL THEN 0 ELSE #alldata.aws_20_50_dcp END * CASE WHEN #alldata.aws_20_50_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS AWC_COMP_SUM_20_50,
+CAST (CASE WHEN #alldata.aws_50_100_dcp IS NULL THEN 0 ELSE #alldata.aws_50_100_dcp END * CASE WHEN #alldata.aws_50_100_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS AWC_COMP_SUM_50_100
+
 INTO #alldata2
 FROM #alldata
 INNER JOIN #muacpf3 ON #alldata.cokey=#muacpf3.cokey
 
 
-SELECT #alldata2.mukey , CAST (SUM (AWC_COMP_SUM) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_AWC_WEIGHTED_AVG0_150
+SELECT #alldata2.mukey , CAST (SUM (AWC_COMP_SUM) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_AWC_WEIGHTED_AVG0_150,
+CAST (SUM (AWC_COMP_SUM_0_20) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_AWC_WEIGHTED_AVG_0_20,
+CAST (SUM (AWC_COMP_SUM_20_50) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_AWC_WEIGHTED_AVG_20_50,
+CAST (SUM (AWC_COMP_SUM_50_100) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_AWC_WEIGHTED_AVG_50_100
 INTO #alldata3
 FROM #alldata2
 
@@ -256,9 +282,14 @@ SELECT state,
  muname,
  nationalmusym,
  mukind,
-MU_AWC_WEIGHTED_AVG0_150, aws0150wta AS MuAGG_aws0150wta
+MU_AWC_WEIGHTED_AVG0_150, 
+aws0150wta AS MuAGG_aws0150wta,
+MU_AWC_WEIGHTED_AVG_0_20 AS aws0_20,
+MU_AWC_WEIGHTED_AVG_20_50 AS aws20_50,
+MU_AWC_WEIGHTED_AVG_50_100 AS aws50_100
+
 FROM #main
 LEFT OUTER JOIN #alldata on #main.mukey=#alldata.mukey
 LEFT OUTER JOIN #alldata3 on #main.mukey=#alldata3.mukey
-GROUP BY  state, #main.areasymbol,  #main.areaname, #main.mukey,   muname, #main.musym,  nationalmusym,  mukind, MU_AWC_WEIGHTED_AVG0_150, aws0150wta  ORDER BY areasymbol, musym
+GROUP BY  state, #main.areasymbol,  #main.areaname, #main.mukey,   muname, #main.musym,  nationalmusym,  mukind, MU_AWC_WEIGHTED_AVG0_150, aws0150wta, MU_AWC_WEIGHTED_AVG_0_20, MU_AWC_WEIGHTED_AVG_20_50, MU_AWC_WEIGHTED_AVG_50_100  ORDER BY areasymbol, musym
 
