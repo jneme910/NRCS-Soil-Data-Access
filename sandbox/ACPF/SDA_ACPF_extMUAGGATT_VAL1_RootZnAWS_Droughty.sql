@@ -1,4 +1,4 @@
---The available water storage for the standard depth ranges is calculated using ALL
+---The available water storage for the standard depth ranges is calculated using ALL
 --components as long as they have horizon data and hzdept_r and hzdepb_r is not null and
 --horizon thickness > 0. Weighting for component-to-mapunit uses comppct_r / 100. 
 
