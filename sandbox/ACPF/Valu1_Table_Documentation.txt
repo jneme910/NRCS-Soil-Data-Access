@@ -1,0 +1,101 @@
+﻿=====================================================================================
+ROOTZNAWS
+Root zone (commodity crop) available water storage estimate (RZAWS) , expressed in mm, is the volume of plant available water that the soil can store within the root zone based on all map unit earthy major components (weighted average). Earthy components are those soil series or higher level taxa components that can support crop growth (Dobos et al., 2012). Major components are those soil components where the majorcompflag = 'Yes' (SSURGO component table). NULL values are presented where data are incomplete or not available. Map unit weighted average for earthy components using the sum of those component percentages.
+
+Only use components where compkind is not null and != 'Miscellaneous area'
+
+Skip top level organic horizons where desnmaster in ('O', 'L')
+Skip components where taxorder = 'Histosol' or taxsubgrp like 'Histic%'
+
+Try to avoid surface organic horizons. Once a mineral horizon is encountered, use everything there below, even if it is a buried organic horizon.
+Skip upper contigouos horizons where lieutex in ('Slightly decomposed plant material', 'Moderately decomposed plant material', 'Highly decomposed plant material', 'Undecomposed plant material', 'Muck', 'Mucky peat', 'Peat', 'Coprogenous earth')
+Skip upper contigous horizons where texture in ("CE", "COP-MAT", "HPM", "MPM", "MPT", "MUCK", "PDOM", "PEAT", "SPM", "UDOM")
+
+=====================================================================================
+ROOTZNEMC
+Metadata:
+Root zone depth is the depth within the soil profile that commodity crop (cc) roots can effectively extract water and nutrients for growth. Root zone depth influences soil productivity significantly. Soil component horizon criteria for root-limiting depth include: presence of hard bedrock, soft bedrock, a fragipan, a duripan, sulfuric material, a dense layer, a layer having a pH of less than 3.5, or a layer having an electrical conductivity of more than 12 within the component soil profile. If no root-restricting zone is identified, a depth of 150 cm is used to approximate the root zone depth (Dobos et al., 2012). Root zone depth is computed for all map unit major earthy components (weighted average). Earthy components are those soil series or higher level taxa components that can support crop growth (Dobos et al., 2012). Major components are those soil components where the majorcompflag = 'Yes' (SSURGO component table). NULL values are presented where data are incomplete or not available.
+
+Python script notes for rootznemc:
+    # Look at soil horizon properties to adjust the root zone depth.
+    # This is in addition to the standard component restrictions
+    #
+    # Read the component restrictions into a dictionary, then read through the
+    # QueryTable_Hz table, calculating the final component rootzone depth
+    #
+	# Only major components are used.
+    # Components with COMPKIND = 'Miscellaneous area' or NULL are filtered out.
+    # Components with no horizon data are assigned a root zone depth of zero.
+    #
+    # Horizons with NULL hzdept_r or hzdepb_r are filtered out
+    # Horizons with hzdept_r => hzdepb_r are filtered out
+    # O horizons or organic horizons from the surface down to the first mineral horizon
+    # are filtered out.
+    #
+    # Horizon data below 150cm or select component restrictions are filtered out.
+	# Uses Lithic bedrock, Paralithic bedrock, Densic bedrock, Fragipan, Duripan, Sulfuric
+	# Other restrictions include pH < 3.5 and EC > 16
+	#
+	# A Dense layer calculation is also included as an additional component restriction. It
+	# looks at rv values for sandtotal, silttotal, claytotal and bulkdensity thirdbar
+	# a = dbthirdbar_r - ((( sand * 1.65 ) / 100.0 ) + (( silt * 1.30 ) / 100.0 ) + (( clay * 1.25 ) / 100.0))
+
+    # b = ( 0.002081 * sand ) + ( 0.003912 * silt ) + ( 0.0024351 * clay )
+
+    #  if a > b:
+    #     This is a Dense horizon. Consider top depth to be a restriction for this component
+    #  else:
+	#     This is NOT a Dense horizon
+
+=====================================================================================
+SOC
+Soil organic carbon stock estimate (SOC) in total soil profile (0 cm to the reported depth of the soil profile). The concentration of organic carbon present in the soil expressed in grams C per square meter for the total reported soil profile depth. NULL values are presented where data are incomplete or not available.
+
+Uses all components with horizon data.
+
+Does not calculate component SOC below the following component restrictions:
+   Lithic bedrock, Paralithic bedrock, Densic bedrock, Fragipan, Duripan, Sulfuric
+
+soc =  ( (hzT * ( ( om / 1.724 ) * db3 )) / 100.0 ) * ((100.0 - fragvol) / 100.0) * ( compPct * 100 )
+
+
+=====================================================================================
+NCCPI2SG
+National Commodity Crop Productivity Index for Small Grains (weighted average) for major earthy components. Values range from .01 (low productivity) to .99 (high productivity). Earthy components are those soil series or higher level taxa components that can support crop growth (Dobos et al., 2012). Major components are those soil components where the majorcompflag = 'Yes' (SSURGO component table). NULL values are presented where data are incomplete or not available.
+
+Component weighting uses the sum of comppct_r for major, earthy coponents.
+Uses component weighted average of the fuzzy value where ruleDepth <> 0 and rulename == "NCCPI - NCCPI Small Grains Submodel (II)"
+
+
+=====================================================================================
+NCCPI2CS
+National Commodity Crop Productivity Index for Corn and Soybeans (weighted average) for major earthy components. Values range from .01 (low productivity) to .99 (high productivity). Earthy components are those soil series or higher level taxa components that can support crop growth (Dobos et al., 2012). Major components are those soil components where the majorcompflag = 'Yes' (SSURGO component table). NULL values are presented where data are incomplete or not available.
+
+Component weighting uses the sum of comppct_r for major, earthy coponents.
+Uses component weighted average of the fuzzy values where ruleDepth <> 0 and rulename == "NCCPI - NCCPI Corn and Soybeans Submodel (II)"
+
+=====================================================================================
+DROUGHTY
+Drought vulnerable soil landscapes comprise those map units that have available water storage within the root zone for commodity crops that is less than or equal to 6 inches (152 mm) expressed as "1" for a drought vulnerable soil landscape map unit or "0" for a non-droughty soil landscape map unit or NULL for miscellaneous areas (includes water bodies) or where data were not available. It is computed as a weighted average for major earthy components. Earthy components are those soil series or higher level taxa components that can support crop growth (Dobos et al., 2012). Major components are those soil components where the majorcompflag = 'Yes' (SSURGO component table). NULL values are presented where data are incomplete or not available.
+
+
+=====================================================================================
+PWSL1POMU
+Potential Wetland Soil Landscapes (PWSL) is expressed as the percentage of the map unit that meets the PWSL criteria. The hydric rating (soil component variable “hydricrating”) is an indicator of wet soils. For version 1 (pwsl1), those soil components that meet the following criteria are tagged as PWSL and their comppct_r values are summed for each map unit. Soil components with hydricrating = 'YES' are considered PWSL. Soil components with hydricrating = “NO” are not PWSL. Soil components with hydricrating = 'UNRANKED' are tested using other attributes, and will be considered PWSL if any of the following conditions are met: drainagecl = 'Poorly drained' or 'Very poorly drained' or the localphase or the otherph data fields contain any of the phrases "drained" or "undrained" or "channeled" or "protected" or "ponded" or "flooded". If these criteria do not determine the PWSL for a component and hydricrating = 'UNRANKED', then the map unit will be classified as PWSL if the map unit name contains any of the phrases "drained" or "undrained" or "channeled" or "protected" or "ponded" or "flooded". For version 1 (pwsl1), waterbodies are identified as "999" when map unit names match a list of terms that identify water or intermittent water or map units have a sum of the comppct_r for "Water" that is 80% or greater. NULL values are presented where data are incomplete or not available.
+
+Script Notes for PWSL 
+
+if hydricrating = 'Yes', then use this component,
+
+else if:
+        # 1. compkind = 'Miscellaneous area' or is NULL and (
+        # 2. compname = 'Water' or
+        # 3. compname like '% water' or
+        # 4. compname like '% Ocean' or
+        # 5. compname like '% swamp'
+		# 6. muname = 'Water'
+		
+        For draincl look for ("Poorly drained", "Very poorly drained")
+        For localphase or otherphase look for ("drained", "undrained", "channeled", "protected", "ponded", "flooded")
+		
+		
