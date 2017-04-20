@@ -297,14 +297,14 @@ INTO #alldata3
 FROM #alldata2
 
 
-SELECT state,
- #main.areasymbol,
- #main.areaname,
+SELECT --state,
+-- #main.areasymbol,
+-- #main.areaname,
  #main.mukey,
- #main.musym,
- muname,
- nationalmusym,
- mukind,
+-- #main.musym,
+-- muname,
+---- nationalmusym,
+--- mukind,
 MU_AWC_WEIGHTED_AVG0_150 AS RootZnAWS,
 CASE WHEN MU_AWC_WEIGHTED_AVG0_150 IS NULL THEN NULL 
 WHEN MU_AWC_WEIGHTED_AVG0_150 >=15.24 THEN 0 ELSE 1 END AS Droughty
@@ -317,6 +317,11 @@ WHEN MU_AWC_WEIGHTED_AVG0_150 >=15.24 THEN 0 ELSE 1 END AS Droughty
 FROM #main
 LEFT OUTER JOIN #alldata on #main.mukey=#alldata.mukey
 LEFT OUTER JOIN #alldata3 on #main.mukey=#alldata3.mukey
-GROUP BY  state, #main.areasymbol,  #main.areaname, #main.mukey,   muname, #main.musym,  nationalmusym,  mukind, MU_AWC_WEIGHTED_AVG0_150 ---, aws0150wta, MU_AWC_WEIGHTED_AVG_0_20, MU_AWC_WEIGHTED_AVG_20_50, MU_AWC_WEIGHTED_AVG_50_100  
-ORDER BY areasymbol, musym
+GROUP BY  
+--state, #main.areasymbol,  #main.areaname, 
+#main.mukey,   muname, 
+--#main.musym,  nationalmusym,  mukind, 
+MU_AWC_WEIGHTED_AVG0_150 
+---, aws0150wta, MU_AWC_WEIGHTED_AVG_0_20, MU_AWC_WEIGHTED_AVG_20_50, MU_AWC_WEIGHTED_AVG_50_100  
+--ORDER BY areasymbol, musym
 
