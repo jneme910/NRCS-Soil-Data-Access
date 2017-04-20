@@ -33,7 +33,7 @@ SELECT
  FROM #main
  DROP TABLE #main
  
- 
+ --1 column left need PotWetandSoil
 	 --nccpi2cs as NCCPIcs,
 	-- nccpi2sg as NCCPIsg --,
 	--rootznemc as RootZnDepth,

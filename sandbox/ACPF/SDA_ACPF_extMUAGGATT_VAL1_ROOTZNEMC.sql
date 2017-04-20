@@ -187,10 +187,10 @@ SELECT
  
 --Extra Step  
 SELECT 
-#last_step.AREASYMBOL, 
+---#last_step.AREASYMBOL, 
 #last_step.mukey, 
-#last_step.MUSYM,
-#last_step.MUNAME,
+---#last_step.MUSYM,
+---#last_step.MUNAME,
 #last_step.RootZnDepth 
 FROM #last_step
  

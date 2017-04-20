@@ -276,16 +276,17 @@ INTO #alldata3
 FROM #alldata2
 
 
-SELECT state,
- #main.areasymbol,
- #main.areaname,
+SELECT 
+---state,
+--- #main.areasymbol,
+--- #main.areaname,
  #main.mukey,
- #main.musym,
- muname,
- nationalmusym,
- mukind,
-MU_AWC_WEIGHTED_AVG0_150, 
-aws0150wta AS MuAGG_aws0150wta,
+--- #main.musym,
+--- muname,
+--- nationalmusym,
+--- mukind,
+---MU_AWC_WEIGHTED_AVG0_150, 
+---aws0150wta AS MuAGG_aws0150wta,
 MU_AWC_WEIGHTED_AVG_0_20 AS aws0_20,
 MU_AWC_WEIGHTED_AVG_20_50 AS aws20_50,
 MU_AWC_WEIGHTED_AVG_50_100 AS aws50_100
@@ -293,5 +294,10 @@ MU_AWC_WEIGHTED_AVG_50_100 AS aws50_100
 FROM #main
 LEFT OUTER JOIN #alldata on #main.mukey=#alldata.mukey
 LEFT OUTER JOIN #alldata3 on #main.mukey=#alldata3.mukey
-GROUP BY  state, #main.areasymbol,  #main.areaname, #main.mukey,   muname, #main.musym,  nationalmusym,  mukind, MU_AWC_WEIGHTED_AVG0_150, aws0150wta, MU_AWC_WEIGHTED_AVG_0_20, MU_AWC_WEIGHTED_AVG_20_50, MU_AWC_WEIGHTED_AVG_50_100  ORDER BY areasymbol, musym
+GROUP BY  
+---state, #main.areasymbol,  #main.areaname, 
+#main.mukey,   
+---muname, #main.musym,  nationalmusym,  mukind, MU_AWC_WEIGHTED_AVG0_150, aws0150wta, 
+MU_AWC_WEIGHTED_AVG_0_20, MU_AWC_WEIGHTED_AVG_20_50, MU_AWC_WEIGHTED_AVG_50_100  
+---ORDER BY areasymbol, musym
 
