@@ -166,15 +166,40 @@ CASE  WHEN hzdepb_r <= 20  THEN hzdepb_r WHEN hzdepb_r > 20  and hzdept_r < 20 T
 -------CASE  WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50, 
 --------CASE  WHEN hzdepb_r <= 50  THEN hzdepb_r WHEN hzdepb_r > 50  and hzdept_r < 50 THEN 50  ELSE 20 END AS InRangeBot_20_50,
 
-CASE    WHEN hzdept_r < 20 THEN 20
-		WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50,
-CASE    WHEN hzdepb_r < 20 THEN 20
+--CASE    WHEN hzdept_r < 20 THEN 20
+--		WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50,
+		
+--CASE    WHEN hzdepb_r < 20 THEN 20
+--WHEN hzdepb_r <= 50 THEN hzdepb_r  WHEN hzdepb_r > 50 and hzdept_r < 50 THEN 50 ELSE 20 END AS InRangeBot_20_50,
+
+CASE    WHEN hzdepb_r < 20 THEN 0
+WHEN hzdept_r >50 THEN 0 
+WHEN hzdepb_r >= 20 AND hzdept_r < 20 THEN 20 
+WHEN hzdept_r < 20 THEN 0
+		WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50 ,
+		
+	
+CASE   WHEN hzdept_r > 50 THEN 0
+WHEN hzdepb_r < 20 THEN 0
 WHEN hzdepb_r <= 50 THEN hzdepb_r  WHEN hzdepb_r > 50 and hzdept_r < 50 THEN 50 ELSE 20 END AS InRangeBot_20_50,
 
-CASE    WHEN hzdept_r < 50 THEN 50
-		WHEN hzdept_r < 100 then hzdept_r ELSE 50 END AS InRangeTop_50_100,
-CASE    WHEN hzdepb_r < 50 THEN 50
+
+
+CASE    WHEN hzdepb_r < 50 THEN 0
+WHEN hzdept_r >100 THEN 0 
+WHEN hzdepb_r >= 50 AND hzdept_r < 50 THEN 50 
+WHEN hzdept_r < 50 THEN 0
+		WHEN hzdept_r < 100 then hzdept_r ELSE 50 END AS InRangeTop_50_100 ,
+		
+	
+CASE   WHEN hzdept_r > 100 THEN 0
+WHEN hzdepb_r < 50 THEN 0
 WHEN hzdepb_r <= 100 THEN hzdepb_r  WHEN hzdepb_r > 100 and hzdept_r < 100 THEN 100 ELSE 50 END AS InRangeBot_50_100,
+--CASE    WHEN hzdept_r < 50 THEN 50
+--		WHEN hzdept_r < 100 then hzdept_r ELSE 50 END AS InRangeTop_50_100,
+		
+--CASE    WHEN hzdepb_r < 50 THEN 50
+--WHEN hzdepb_r <= 100 THEN hzdepb_r  WHEN hzdepb_r > 100 and hzdept_r < 100 THEN 100 ELSE 50 END AS InRangeBot_50_100,
 
 om_r, fragvol, dbthirdbar_r, cokey, mukey, 100.0 - fragvol AS frag_main
 INTO #SOC
