@@ -26,10 +26,10 @@
 
 
 
-SELECT areASymbol, areaname, mapunit.mukey, mapunit.musym, nationalmusym, mapunit.muname, mukind, muacres
+SELECT areasymbol, areaname, mapunit.mukey, mapunit.mukey AS mulink, mapunit.musym, nationalmusym, mapunit.muname, mukind, muacres
 INTO #main
 FROM legend
-INNER JOIN mapunit on legend.lkey=mapunit.lkey 
+INNER JOIN mapunit on legend.lkey=mapunit.lkey --AND mapunit.mukey = 2809839
 INNER JOIN muaggatt AS mt1 on mapunit.mukey=mt1.mukey
 AND legend.areasymbol = 'WI025'
 
@@ -37,7 +37,7 @@ AND legend.areasymbol = 'WI025'
 SELECT
 -- grab survey area data
 LEFT((areasymbol), 2) AS state,
- l.areASymbol,
+ l.areasymbol,
  l.areaname,
 (SELECT SUM (DISTINCT comppct_r) FROM mapunit  AS mui3  INNER JOIN component AS cint3 ON cint3.mukey=mui3.mukey INNER JOIN chorizon AS chint3 ON chint3.cokey=cint3.cokey AND cint3.cokey = c.cokey GROUP BY chint3.cokey) AS sum_comp,
 --grab map unit level information
@@ -65,7 +65,7 @@ AND reskind IS NOT NULL ORDER BY resdept_r) AS TOPrestriction, c.cokey,
  hzdept_r,
  hzdepb_r,
  CASE WHEN (hzdepb_r-hzdept_r) IS NULL THEN 0 ELSE CAST((hzdepb_r-hzdept_r) AS INT) END AS thickness,  
---  thickness in inches
+
   om_r, dbthirdbar_r, 
   (SELECT CASE WHEN SUM (cf.fragvol_r) IS NULL THEN 0 ELSE CAST (SUM(cf.fragvol_r) AS INT) END FROM chfrags cf WHERE cf.chkey = ch.chkey) as fragvol,
 brockdepmin,
@@ -155,177 +155,60 @@ FROM #acpf
 
 
 --- depth ranges for SOC ----
-SELECT
-CASE  WHEN hzdepb_r <= 150 THEN hzdepb_r WHEN hzdepb_r > 150 and hzdept_r < 150 THEN 150 ELSE 0 END AS InRangeBot,
+SELECT hzname, chkey, comppct_r, hzdept_r, hzdepb_r, thickness,
 CASE  WHEN hzdept_r < 150 then hzdept_r ELSE 0 END AS InRangeTop, 
+CASE  WHEN hzdepb_r <= 150 THEN hzdepb_r WHEN hzdepb_r > 150 and hzdept_r < 150 THEN 150 ELSE 0 END AS InRangeBot,
 
-CASE  WHEN hzdepb_r <= 20  THEN hzdepb_r WHEN hzdepb_r > 20  and hzdept_r < 20 THEN 20  ELSE 0 END AS InRangeBot_0_20,
 CASE  WHEN hzdept_r < 20 then hzdept_r ELSE 0 END AS InRangeTop_0_20, 
+CASE  WHEN hzdepb_r <= 20  THEN hzdepb_r WHEN hzdepb_r > 20  and hzdept_r < 20 THEN 20  ELSE 0 END AS InRangeBot_0_20,
 
 
-CASE  WHEN hzdepb_r <= 50  THEN hzdepb_r WHEN hzdepb_r > 50  and hzdept_r < 50 THEN 50  ELSE 20 END AS InRangeBot_20_50,
-CASE  WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50, 
+-------CASE  WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50, 
+--------CASE  WHEN hzdepb_r <= 50  THEN hzdepb_r WHEN hzdepb_r > 50  and hzdept_r < 50 THEN 50  ELSE 20 END AS InRangeBot_20_50,
 
-CASE  WHEN hzdepb_r <= 100  THEN hzdepb_r WHEN hzdepb_r > 100  and hzdept_r < 100 THEN 100  ELSE 50 END AS InRangeBot_50_100,
-CASE  WHEN hzdept_r < 100 then hzdept_r ELSE 50 END AS InRangeTop_50_100, 
+CASE    WHEN hzdept_r < 20 THEN 20
+		WHEN hzdept_r < 50 then hzdept_r ELSE 20 END AS InRangeTop_20_50,
+CASE    WHEN hzdepb_r < 20 THEN 20
+WHEN hzdepb_r <= 50 THEN hzdepb_r  WHEN hzdepb_r > 50 and hzdept_r < 50 THEN 50 ELSE 20 END AS InRangeBot_20_50,
+
+CASE    WHEN hzdept_r < 50 THEN 50
+		WHEN hzdept_r < 100 then hzdept_r ELSE 50 END AS InRangeTop_50_100,
+CASE    WHEN hzdepb_r < 50 THEN 50
+WHEN hzdepb_r <= 100 THEN hzdepb_r  WHEN hzdepb_r > 100 and hzdept_r < 100 THEN 100 ELSE 50 END AS InRangeBot_50_100,
+
 om_r, fragvol, dbthirdbar_r, cokey, mukey, 100.0 - fragvol AS frag_main
 INTO #SOC
 FROM #acpf
-ORDER BY cokey
-
-SELECT mukey, cokey, 
-SUM((InRangeBot - InRangeTop)* ( ( om_r / 1.724 ) * dbthirdbar_r )) AS SOC150_Main,
-
-SUM((InRangeBot_0_20 - InRangeTop_0_20)* ( ( om_r / 1.724 ) * dbthirdbar_r )) AS SOC_0_20_Main,
-
-SUM((InRangeBot_20_50 - InRangeTop_20_50)* ( ( om_r / 1.724 ) * dbthirdbar_r )) AS SOC_20_50_Main,
-
-SUM((InRangeBot_50_100 - InRangeTop_50_100)* ( ( om_r / 1.724 ) * dbthirdbar_r )) AS SOC_50_100_Main,
+ORDER BY cokey, hzdept_r ASC, hzdepb_r ASC, chkey
 
 
+SELECT mukey, cokey, hzname, chkey, comppct_r, hzdept_r, hzdepb_r, thickness, 
+InRangeTop_0_20, 
+InRangeBot_0_20, 
 
-SUM((InRangeBot - InRangeTop)* om_r) AS SOC150,
+InRangeTop_20_50, 
+InRangeBot_20_50, 
 
-SUM((InRangeBot_0_20 - InRangeTop_0_20)* om_r) AS SOC_0_20,
+InRangeTop_50_100 ,
+InRangeBot_50_100,
+(( ((InRangeBot_0_20 - InRangeTop_0_20) * ( ( om_r / 1.724 ) * dbthirdbar_r )) / 100.0 ) * ((100.0 - fragvol) / 100.0)) * ( comppct_r * 100 ) AS HZ_SOC_0_20,
+((((InRangeBot_20_50 - InRangeTop_20_50) * ( ( om_r / 1.724 ) * dbthirdbar_r )) / 100.0 ) * ((100.0 - fragvol) / 100.0)) * ( comppct_r * 100 ) AS HZ_SOC_20_50,
+((((InRangeBot_50_100 - InRangeTop_50_100) * ( ( om_r / 1.724 ) * dbthirdbar_r )) / 100.0 ) * ((100.0 - fragvol) / 100.0)) * ( comppct_r * 100 ) AS HZ_SOC_50_100
+INTO #SOC2
+FROM #SOC
+ORDER BY  mukey ,cokey, comppct_r DESC, hzdept_r ASC, hzdepb_r ASC, chkey
 
-SUM((InRangeBot_20_50 - InRangeTop_20_50)* om_r) AS SOC_20_50,
+---Aggregates and sum it by component. 
+SELECT DISTINCT cokey, mukey,  
+ROUND (SUM (HZ_SOC_0_20) over(PARTITION BY cokey) ,3) AS CO_SOC_0_20, 
+ROUND (SUM (HZ_SOC_20_50) over(PARTITION BY cokey),3) AS CO_SOC_20_50, 
+ROUND (SUM (HZ_SOC_50_100) over(PARTITION BY cokey),3)  AS CO_SOC_50_100 
+INTO #SOC3
+FROM #SOC2
 
-SUM((InRangeBot_50_100 - InRangeTop_50_100)* om_r) AS SOC_50_100
-INTO #SOC150
-FROM #SOC 
-GROUP BY  mukey, cokey
+SELECT DISTINCT mukey, ROUND (SUM (CO_SOC_0_20) over(PARTITION BY mukey) ,3) AS MU_SOC_0_20, 
+ROUND (SUM (CO_SOC_20_50) over(PARTITION BY mukey),3) AS MU_SOC_20_50, 
+ROUND(SUM (CO_SOC_50_100) over(PARTITION BY mukey),3)  AS MU_SOC_50_100 
+FROM #SOC3
 
----return to weighted averages, using the thickness times the non-null horizon properties
-SELECT mukey, cokey, chkey,
- thickness,
- restrictiodepth,
-( (thickness * ( ( om_r / 1.724 ) * dbthirdbar_r )) / 100.0 ) * ((100.0 - fragvol) / 100.0)  AS soc, 
-(om_r * thickness) as th_om_r
-INTO #acpf3
-FROM #acpfhzn 
-ORDER BY mukey, cokey, chkey
-
-
----sum all horizon properties to gather the final product for the component
-
-SELECT mukey, cokey, restrictiodepth,
-CAST(sum(thickness) AS float(2)) AS sum_thickness,
-CAST(sum(th_om_r) AS float(2)) AS sum_om_r, 
-CAST(sum(soc) AS float(2)) AS sum_soc 
-
-INTO #acpf4
-FROM #acpf3
-GROUP BY mukey, cokey, restrictiodepth 
-ORDER BY mukey
-
----find the depth to use in the weighted average calculation 
-
-SELECT mukey, cokey, CASE WHEN sum_thickness < restrictiodepth then sum_thickness  else restrictiodepth end AS restrictiondepth
-INTO #depthtest
-FROM #acpf4
-
-
-
----sql to create weighted average by dividing by the restriction depth found in the above query
-
-SELECT #acpf4.mukey, #acpf4.cokey,
- sum_thickness,
- #depthtest.restrictiondepth,
-(sum_soc) AS profile_socstorage,
-(sum_soc/#depthtest.restrictiondepth)  AS wtavg_soc_to_restrict,
-(sum_om_r) AS profile_Waterstorage,
-(sum_om_r/#depthtest.restrictiondepth)  AS wtavg_om_r_to_restrict
-INTO #acpfwtavg 
-FROM #acpf4 
-INNER JOIN #depthtest on #acpf4.cokey=#depthtest.cokey
----WHERE sum_om_r != 0
-ORDER by #acpf4.mukey, #acpf4.cokey
-
-
---time to put it all together using a lot of CASTs to change the data to reflect the way I want it to appear
-
-SELECT DISTINCT 
-  #acpf.state,
-  #acpf.areasymbol,
-  #acpf.areaname,
-  #acpf.musym,
-  #acpf.mukey,
-  #acpf.cokey,
-  majcompflag,
-  comppct_r,
-  #acpf.compname,
-  compkind,
-  localphase,
-  slope_l,
-  slope_r,
-  slope_h,
-  CAST(SOC150_Main AS Decimal(5,1)) AS SOC150_dcp_Main,
-	CAST(SOC_0_20_Main AS Decimal(5,1)) AS SOC_0_20_dcp_Main,
-		CAST(SOC_20_50_Main AS Decimal(5,1)) AS SOC_20_50_dcp_Main,
-			CAST(SOC_50_100_Main AS Decimal(5,1)) AS SOC_50_100_dcp_Main,
-	
-	CAST(profile_socstorage AS Decimal(5,3)) AS SOC_profile_dcp_Main,
-  CAST(wtavg_soc_to_restrict AS Decimal(5,1)) AS SOC_restrict_dcp_Main,
-  
-  
-    CAST(SOC150 AS Decimal(5,1)) AS SOC150_dcp,
-	CAST(SOC_0_20 AS Decimal(5,1)) AS SOC_0_20_dcp,
-		CAST(SOC_20_50 AS Decimal(5,1)) AS SOC_20_50_dcp,
-			CAST(SOC_50_100 AS Decimal(5,1)) AS SOC_50_100_dcp,
-  CAST(profile_Waterstorage AS Decimal(5,1)) AS SOC_profile_dcp,
-  CAST(wtavg_om_r_to_restrict AS Decimal(5,1)) AS SOC_restrict_dcp,
-  
-  sum_thickness,
-  CAST(#acpfwtavg.restrictiondepth/2.54 AS int)  restrictiondepth_IN,
-  #acpfwtavg.restrictiondepth,
-  TOPrestriction,
-  #acpf2.chkey,
-  #acpf2.hzname,
-CAST(#acpf2.hzdept_r/2.54 AS int)  AS hzdept_r,
-CAST(#acpf2.hzdepb_r/2.54 AS int) AS hzdeb_r
-INTO #alldata
-FROM #acpf2
-INNER JOIN #acpf on #acpf.cokey = #acpf2.cokey 
-LEFT OUTER JOIN #SOC150 on #acpf.cokey = #SOC150.cokey
-LEFT OUTER JOIN #acpfwtavg on #acpf.cokey = #acpfwtavg.cokey
-ORDER BY #acpf.state, #acpf.areasymbol, #acpf.areaname, #acpf.musym
-
----Uses the above query and the query on line 89
-SELECT  #alldata.mukey,  #alldata.cokey, #alldata.SOC150_dcp, WEIGHTED_COMP_PCT , 
-CAST (CASE WHEN #alldata.SOC150_dcp IS NULL THEN 0 ELSE #alldata.SOC150_dcp END * CASE WHEN #alldata.SOC150_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS om_COMP_SUM,
-CAST (CASE WHEN #alldata.SOC_0_20_dcp IS NULL THEN 0 ELSE #alldata.SOC_0_20_dcp END * CASE WHEN #alldata.SOC_0_20_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS om_COMP_SUM_0_20,
-CAST (CASE WHEN #alldata.SOC_20_50_dcp IS NULL THEN 0 ELSE #alldata.SOC_20_50_dcp END * CASE WHEN #alldata.SOC_20_50_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS om_COMP_SUM_20_50,
-CAST (CASE WHEN #alldata.SOC_50_100_dcp IS NULL THEN 0 ELSE #alldata.SOC_50_100_dcp END * CASE WHEN #alldata.SOC_50_100_dcp IS NULL THEN 0 ELSE WEIGHTED_COMP_PCT   END AS Decimal(5,2)) AS om_COMP_SUM_50_100
-
-INTO #alldata2
-FROM #alldata
-INNER JOIN #muacpf3 ON #alldata.cokey=#muacpf3.cokey
-
-
-SELECT #alldata2.mukey , CAST (SUM (om_COMP_SUM) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_om_WEIGHTED_AVG0_150,
-CAST (SUM (om_COMP_SUM_0_20) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_om_WEIGHTED_AVG_0_20,
-CAST (SUM (om_COMP_SUM_20_50) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_om_WEIGHTED_AVG_20_50,
-CAST (SUM (om_COMP_SUM_50_100) over(partition by #alldata2.mukey )AS Decimal(5,2)) AS MU_om_WEIGHTED_AVG_50_100
-INTO #alldata3
-FROM #alldata2
-
-
-SELECT state,
- #main.areasymbol,
- #main.areaname,
- #main.mukey,
- #main.musym,
- muname,
- nationalmusym,
- mukind,
-MU_om_WEIGHTED_AVG0_150, 
-SOC0150wta AS MuAGG_SOC0150wta,
-MU_om_WEIGHTED_AVG_0_20 AS SOC0_20,
-MU_om_WEIGHTED_AVG_20_50 AS SOC20_50,
-MU_om_WEIGHTED_AVG_50_100 AS SOC50_100
-
-FROM #main
-LEFT OUTER JOIN #alldata on #main.mukey=#alldata.mukey
-LEFT OUTER JOIN #alldata3 on #main.mukey=#alldata3.mukey
-GROUP BY  state, #main.areasymbol,  #main.areaname, #main.mukey,   muname, #main.musym,  nationalmusym,  mukind, MU_om_WEIGHTED_AVG0_150, SOC0150wta, MU_om_WEIGHTED_AVG_0_20, MU_om_WEIGHTED_AVG_20_50, MU_om_WEIGHTED_AVG_50_100  ORDER BY areasymbol, musym
 
