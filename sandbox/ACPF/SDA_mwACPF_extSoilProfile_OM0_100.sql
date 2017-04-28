@@ -61,9 +61,12 @@ INNER JOIN mapunit AS mm1 ON c2.mukey=mm1.mukey AND c2.mukey=mu1.mukey ORDER BY 
  ORDER BY #kitchensink.areasymbol, #kitchensink.musym, #kitchensink.muname, #kitchensink.mukey
  
  
- SELECT #last_step2.areasymbol, #last_step2.musym, #last_step2.muname,
- #last_step2.mukey, #last_step2.om_r
+ SELECT 
+ ---#last_step2.areasymbol, #last_step2.musym, #last_step2.muname,
+ #last_step2.mukey, #last_step2.om_r AS OM0_100 
  FROM #last_step2
  LEFT OUTER JOIN #last_step ON #last_step.mukey=#last_step2.mukey
- GROUP BY #last_step2.areasymbol, #last_step2.musym, #last_step2.muname, #last_step2.mukey, #last_step2.om_r
- ORDER BY #last_step2.areasymbol, #last_step2.musym, #last_step2.muname, #last_step2.mukey, #last_step2.om_r
+ GROUP BY 
+ ---#last_step2.areasymbol, #last_step2.musym, #last_step2.muname, 
+ #last_step2.mukey, #last_step2.om_r
+ ---ORDER BY #last_step2.areasymbol, #last_step2.musym, #last_step2.muname, #last_step2.mukey, #last_step2.om_r

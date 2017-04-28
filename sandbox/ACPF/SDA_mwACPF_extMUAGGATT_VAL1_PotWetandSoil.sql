@@ -1,3 +1,5 @@
+ ---The report does not count for null component percents where the component was hydric. I was thinking of adding 3 percent 
+ 
  --pwsl1pomu  -Potential Wetland Soil Landscapes
 ---=====================================================================================
 ---PWSL1POMU
