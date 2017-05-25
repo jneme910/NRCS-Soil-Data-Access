@@ -94,7 +94,8 @@ AND hydricrating  = 'Yes' ) AS MU_comppct_SUM
  
  INTO #main_query
  FROM legend  AS l
- INNER JOIN  mapunit AS mu ON mu.lkey = l.lkey AND  l.areasymbol = 'WI025' ---LEFT(l.areasymbol,2) LIKE 'WI'
+ INNER JOIN  mapunit AS mu ON mu.lkey = l.lkey --AND mu.mukey IN ('168209') 
+AND  l.areasymbol = 'WI025' ---LEFT(l.areasymbol,2) LIKE 'WI'
  
  ---Getting the component data and criteria together for the Component Percent. 
  SELECT  #main_query.areasymbol, #main_query.muname, #main_query.mukey, cokey, compname, hydricrating, localphase, drainagecl, 
@@ -122,19 +123,25 @@ AND hydricrating  = 'Yes' ) AS MU_comppct_SUM
  FROM #main_query
  INNER JOIN component ON component.mukey=#main_query.mukey
  
- SELECT DISTINCT mukey, muname, areasymbol, CASE WHEN Water999 = 999 THEN 999 ELSE SUM (hydric_sum) over(PARTITION BY mukey) END AS mu_hydric_sum
+ SELECT  DISTINCT mukey, muname, areasymbol, 
+CASE WHEN Water999 = 999 THEN MAX (999) over(PARTITION BY mukey)  ELSE SUM (hydric_sum) over(PARTITION BY mukey) END AS mu_hydric_sum
  INTO #mu_agg2
- FROM #mu_agg
+ FROM #mu_agg 
+
+  SELECT  DISTINCT mukey, muname, areasymbol, 
+mu_hydric_sum
+ INTO #mu_agg3
+ FROM #mu_agg2 WHERE mu_hydric_sum IS NOT NULL
  
  
 SELECT  ---#main_query.areasymbol, 
 ---#main_query.musym, 
  ---#main_query.muname,
-#main_query.mukey, #mu_agg2.mu_hydric_sum AS PotWetandSoil,
+#main_query.mukey, #mu_agg3.mu_hydric_sum AS PotWetandSoil,
 CASE WHEN comp_count = all_not_hydric + hydric_null THEN  'Nonhydric' 
 WHEN comp_count = all_hydric  THEN 'Hydric' 
 WHEN comp_count != all_hydric AND count_maj_comp = maj_hydric THEN 'Predominantly Hydric' 
 WHEN hydric_inclusions >= 0.5 AND  maj_hydric < 0.5 THEN  'Predominantly Nonydric' 
 WHEN maj_not_hydric >= 0.5  AND  maj_hydric >= 0.5 THEN 'Partially Hydric' ELSE 'Error' END AS hydric_rating
 FROM #main_query
-LEFT OUTER JOIN #mu_agg2 ON #mu_agg2.mukey=#main_query.mukey
+LEFT OUTER JOIN #mu_agg3 ON #mu_agg3.mukey=#main_query.mukey
