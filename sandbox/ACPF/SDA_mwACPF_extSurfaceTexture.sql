@@ -2,6 +2,7 @@ SELECT
 mapunit.mukey, 
 component.cokey,
 component.comppct_r,
+
 chtexturegrp.texture as Texture,
 (SELECT TOP 1 chtexture.texcl FROM chtexturegrp AS cht INNER JOIN  chtexture ON cht.chtgkey=chtexture.chtgkey AND cht.rvindicator='yes' AND cht.chtgkey=chtexturegrp.chtgkey)  as TextCls,
 (SELECT TOP 1 cop1.pmgroupname 
