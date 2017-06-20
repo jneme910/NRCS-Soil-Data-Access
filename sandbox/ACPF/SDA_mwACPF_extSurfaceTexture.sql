@@ -7,7 +7,7 @@ chtexturegrp.texture as Texture,
 (SELECT TOP 1 cop1.pmgroupname 
 FROM component   AS c3 
 INNER JOIN copmgrp AS cop1 ON cop1.cokey=c3.cokey AND component.cokey=c3.cokey AND cop1.rvindicator ='Yes') as ParMatGrp ,
-(SELECT TOP 1  copm1.pmkind  FROM component AS c2 	  INNER JOIN copmgrp AS cop2 ON cop2.cokey=c2.cokey  INNER JOIN copm AS copm1 ON copm1.copmgrpkey=cop2.copmgrpkey AND component.cokey=c2.cokey AND cop2.rvindicator ='Yes') as ParMatKind
+(SELECT TOP 1  copm1.pmkind  FROM component AS c2 	  INNER JOIN copmgrp AS cop2 ON cop2.cokey=c2.cokey  INNER JOIN copm AS copm1 ON copm1.copmgrpkey=cop2.copmgrpkey AND component.cokey=c2.cokey AND cop2.rvindicator ='Yes' ORDER BY pmorder ASC, copm1.copmgrpkey ASC) as ParMatKind
 FROM sacatalog 
 INNER JOIN legend ON legend.areasymbol = sacatalog.areasymbol AND LEFT (sacatalog.areasymbol,2) = 'WI' 
 INNER JOIN mapunit ON mapunit.lkey = legend.lkey 
