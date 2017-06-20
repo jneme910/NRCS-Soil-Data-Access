@@ -1,4 +1,4 @@
-SELECT lap.areasymbol, lap.areaname
+SELECT l.areasymbol, l.areaname
 FROM laoverlap AS lap
 INNER JOIN legend AS l ON l.lkey=lap.lkey  AND lap.areatypename = 'County or Parish' 
-AND LEFT (l.areasymbol,2) = 'WI' ORDER BY lap.areaname ASC
+AND LEFT (l.areasymbol,2) = 'NE' ORDER BY l.areaname ASC
