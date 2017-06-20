@@ -1,4 +1,5 @@
-SELECT l.areasymbol, l.areaname
+SELECT l.areasymbol, l.areaname,
+"<option value='http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=" + l.areasymbol + "'>" + l.areaname +  "</option>""
 FROM laoverlap AS lap
 INNER JOIN legend AS l ON l.lkey=lap.lkey  AND lap.areatypename = 'County or Parish' 
-AND LEFT (l.areasymbol,2) = 'NE' ORDER BY l.areaname ASC
+AND LEFT (l.areasymbol,2) = 'IL' ORDER BY l.areaname ASC
