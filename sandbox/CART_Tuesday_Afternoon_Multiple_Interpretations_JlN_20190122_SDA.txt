@@ -1,0 +1,278 @@
+
+-- Query for 'Surface Salt Concentration' Soil Health
+-- url: https://sdmdataaccess.nrcs.usda.gov/Tabular/post.rest
+-- Two parameters are required. "format":"JSON+COLUMNNAME+METADATA"    "query": (uses the following string)
+
+CREATE TABLE #InterpTable
+    ( nasisRuleName2 CHAR(60), ruleKey2 int);      
+INSERT INTO #InterpTable (nasisRuleName2, ruleKey2) VALUES ('SOH - Concentration of Salts- Soil Surface', '62833' );
+INSERT INTO #InterpTable (nasisRuleName2, ruleKey2) VALUES ('Soil Susceptibility to Compaction', '57990' ) ;
+
+
+
+-- In the Beginning, create AOI table with geometry
+CREATE TABLE #AoiTable 
+    ( t_aoiid int IDENTITY (1,1),
+    landunit char(20),
+    aoigeom geometry );
+ 
+ INSERT INTO #AoiTable ( landunit, aoigeom ) VALUES ('T9981 Fld3', geometry::STGeomFromText('MULTIPOLYGON (((-102.12335160649138 45.959173206278479, -102.13402891000618 45.959218442177416, -102.13386921469248 45.944643788080384, -102.12327175658623 45.944703605586994, -102.12335160649138 45.959173206278479)))', 4326)); 
+ INSERT INTO #AoiTable ( landunit, aoigeom ) VALUES ('T9981 Fld4', geometry::STGeomFromText('MULTIPOLYGON (((-102.11303364418728 45.959162794827193, -102.12335160649138 45.959173206278479, -102.12327175658623 45.944703605586994, -102.11288922835519 45.944710506085016, -102.11303364418728 45.959162794827193)))', 4326));
+ 
+ -- Create summary acres for each landunit 
+CREATE TABLE #AoiAcres
+    ( t_aoiid int,
+    landunit CHAR(20),
+    landunit_acres FLOAT );
+ 
+INSERT INTO #AoiAcres (t_aoiid, landunit, landunit_acres )
+    SELECT  t_aoiid, landunit,
+    SUM( ROUND( ( ( GEOGRAPHY::STGeomFromWKB(aoigeom.MakeValid().STAsBinary(), 4326 ).STArea() ) / 4046.8564224 ), 3 ) ) AS landunit_acres
+    FROM #AoiTable
+    GROUP BY t_aoiid, landunit;
+ 
+-- Create intersected soil polygon table with geometry
+CREATE TABLE #AoiSoils 
+    ( polyid int IDENTITY (1,1),
+    t_aoiid int,
+    landunit char(20),
+    mukey int,
+    soilgeom geometry);
+    
+INSERT INTO #AoiSoils (t_aoiid, landunit, mukey, soilgeom)
+    SELECT A.t_aoiid, A.landunit, M.mukey, M.mupolygongeo.STIntersection(A.aoigeom ) AS soilgeom
+    FROM mupolygon M, #AoiTable A
+    WHERE mupolygongeo.STIntersects(A.aoigeom) = 1;
+ 
+-- Soil geometry with landunits
+CREATE TABLE #AoiSoils2 
+    ( t_aoiid int,
+    polyid int,
+    landunit char(20),
+    mukey int,
+    poly_acres FLOAT,
+    soilgeog GEOGRAPHY);
+ 
+INSERT INTO #AoiSoils2   
+SELECT t_aoiid, polyid, landunit,  mukey, ROUND((( GEOGRAPHY::STGeomFromWKB(soilgeom.STAsBinary(), 4326 ).STArea() ) / 4046.8564224 ), 3 ) AS poly_acres, GEOGRAPHY::STGeomFromWKB(soilgeom.STAsBinary(), 4326 ) AS soilgeog 
+FROM #AoiSoils;
+ 
+-- Soil map unit acres, aggregated by mukey (merges polygons together)
+CREATE TABLE #M2
+(   t_aoiid int,
+    landunit char(20),
+    mukey int,
+    mapunit_acres FLOAT,
+);
+ 
+INSERT INTO #M2
+SELECT DISTINCT M1.t_aoiid, M1.landunit, M1.mukey,
+ROUND (SUM (M1.poly_acres) OVER(PARTITION BY M1.landunit, M1.mukey), 3) AS mapunit_acres
+FROM #AoiSoils2 AS M1
+GROUP BY M1.t_aoiid, M1.landunit, M1.mukey, M1.poly_acres;
+ 
+-- Component level data with cokey, comppct_r and mapunit sum-of-comppct_r (major components only)
+CREATE TABLE #M4
+(   t_aoiid int, 
+    landunit char(20),
+    mukey int,
+    mapunit_acres FLOAT,
+    cokey int,
+    compname CHAR(60),
+    comppct_r INT,
+);
+ 
+INSERT INTO #M4
+SELECT M2.t_aoiid, M2.landunit, M2.mukey, mapunit_acres, CO.cokey, CO.compname, CO.comppct_r
+FROM #M2 AS M2
+INNER JOIN component AS CO ON CO.mukey = M2.mukey AND CO.majcompflag = 'Yes';
+ 
+-- Set variables for NASIS rulename, rulekey and resultcolumn name
+--~DeclareChar(@nasisRuleName,60)~
+--~DeclareChar(@resultColumnName,10)~
+--~DeclareInt(@ruleKey)~
+--~DeclareChar(@attributeName,60)~
+
+
+
+--declare @nasisRuleName CHAR(60);
+--declare @resultColumnName CHAR(10);
+--declare @ruleKey int;
+--declare @attributeName CHAR(60); 
+
+--SELECT @nasisRuleName = 'SOH - Concentration of Salts- Soil Surface'
+---SELECT @resultColumnName = (SELECT resultcolumnname FROM sdvattribute WHERE nasisrulename = @nasisRuleName)
+--SELECT @ruleKey = (SELECT TOP 1 rulekey FROM distinterpmd WHERE rulename = @nasisRuleName);
+--SELECT @attributeName = (SELECT attributename FROM sdvattribute WHERE nasisrulename = @nasisRuleName)
+
+
+
+
+--SELECT @nasisRuleName = 'Soil Susceptibility to Compaction'
+--SELECT @resultColumnName = (SELECT resultcolumnname FROM sdvattribute WHERE nasisrulename = @nasisRuleName)
+--SELECT @ruleKey = (SELECT TOP 1 rulekey FROM distinterpmd WHERE rulename = @nasisRuleName);
+--SELECT @attributeName = (SELECT attributename FROM sdvattribute WHERE nasisrulename = @nasisRuleName)
+
+
+
+ 
+-- Component level ratings the currently set soil interpretation
+CREATE TABLE #M5
+(   t_aoiid int, rulekey int, rulename CHAR(60),
+    landunit char(20),
+    mukey int,
+    mapunit_acres FLOAT,
+    cokey int,
+    compname CHAR(60),
+    comppct_r INT,
+    rating CHAR(60),
+    mu_pct_sum int
+);
+ 
+INSERT INTO #M5
+--OUTPUT inserted.rulekey, inserted.rulename
+SELECT M4.t_aoiid, rulekey, rulename, M4.landunit, M4.mukey, mapunit_acres, M4.cokey, M4.compname, M4.comppct_r, TP.interphrc AS rating, SUM (M4.comppct_r) OVER(PARTITION BY M4.landunit, M4.mukey, rulekey) AS mu_pct_sum
+FROM #M4 AS M4
+LEFT OUTER JOIN cointerp AS TP ON M4.cokey = TP.cokey
+LEFT OUTER JOIN #InterpTable ON  #InterpTable.rulekey2 = TP.rulekey
+WHERE #InterpTable.rulekey2 = TP.rulekey
+---GROUP BY M4.t_aoiid, rulekey, rulename, M4.landunit, M4.mukey, mapunit_acres, M4.cokey, M4.compname, M4.comppct_r, TP.interphrc
+;
+ 
+-- Component level ratings with adjusted component percent to account for missing minor components
+CREATE TABLE #M6
+(   t_aoiid int, rulekey int, rulename CHAR(60),
+    landunit char(20),
+    mukey int,
+    mapunit_acres FLOAT,
+    cokey int,
+    compname CHAR(60),
+    comppct_r INT,
+    rating CHAR(60),
+    mu_pct_sum INT,
+    adj_comp_pct FLOAT
+);
+ 
+INSERT INTO #M6
+SELECT t_aoiid,  rulekey, rulename, landunit, mukey, mapunit_acres, cokey, compname, comppct_r, rating, mu_pct_sum, (1.0 * comppct_r / mu_pct_sum) AS adj_comp_pct
+FROM #M5 --WHERE  rulekey = 62833
+;
+ 
+-- Gets the component acres by multiplying map unit acres with adjusted component percent
+CREATE TABLE #M8
+(   
+	t_aoiid int, rulekey int, rulename CHAR(60),
+    landunit char(20),
+    mukey int,
+    mapunit_acres FLOAT,
+    cokey int,
+    compname CHAR(60),
+    comppct_r INT,
+    rating CHAR(60),
+    MU_pct_sum INT,
+    adj_comp_pct FLOAT,
+    co_acres FLOAT
+);
+ 
+INSERT INTO #M8
+SELECT   t_aoiid, rulekey, rulename, landunit, mukey, mapunit_acres, cokey, compname, comppct_r, rating, MU_pct_sum, adj_comp_pct, ROUND ( (adj_comp_pct * mapunit_acres), 4) AS co_acres
+FROM #M6 --WHERE  rulekey = 62833;
+
+
+ 
+-- Aggregates the rating classes and sums up the component acres  by land type (Tract and Field number)
+CREATE TABLE #M10
+(    landunit char(20), rulekey int, rulename CHAR(60),
+    rating CHAR(60),
+    rating_acres FLOAT
+);
+ 
+INSERT INTO #M10
+SELECT  landunit, rulekey , rulename, rating, SUM (co_acres) AS rating_acres
+FROM #M8 --WHERE rulekey = 62833--@ruleKey
+GROUP BY landunit,  rulekey, rulename, rating
+ORDER BY landunit, rulekey, rulename,  rating_acres DESC;
+ 
+
+
+
+
+-- Group of SELECT statements to report results
+ 
+-- CART
+-- Soil Susceptibility to Compaction
+-- Landunit Ratings and statistics for the majority of the area within each landunit. Keep this query for future use.
+-- SELECT DISTINCT M.landunit, M.rating AS rating_DCD, ROUND((100.0 * M.rating_acres / AA.landunit_acres), 2) AS rating_pct, ROUND(M.rating_acres, 2) AS acres_DCD, ROUND(AA.landunit_acres, 2) AS landunit_acres
+-- FROM #M10 M
+-- INNER JOIN (SELECT landunit, MAX(rating_acres) AS max_acres FROM #M10 GROUP BY landunit) B ON M.landunit = B.landunit AND M.rating_acres = B.max_acres
+-- INNER JOIN #AoiAcres AA ON M.landunit = AA.landunit;
+ 
+-- CART
+-- Soil Susceptibility to Compaction
+-- Detailed Landunit Ratings: rating acres and rating percent by area for each soil-landunit polygon
+-- SELECT #M10.landunit, rating, ROUND (rating_acres,2) AS rating_acres,
+-- ROUND ((rating_acres/ landunit_acres) * 100.0, 2) AS rating_pct, 
+-- ROUND ( landunit_acres, 2) AS landunit_acres
+-- FROM #M10 
+-- LEFT OUTER JOIN #AoiAcres ON #AoiAcres.landunit = #M10.landunit 
+-- GROUP BY #M10.landunit, rating, rating_acres,  landunit_acres
+-- ORDER BY #M10.landunit, rating_acres DESC, rating;
+-- CART
+-- SOH - Concentration of Salts- Soil Surface
+-- Table
+-- Final landunit rating
+
+---Concentration of Salts
+SELECT DISTINCT rulekey, rulename, M.landunit, M.rating AS rating_final, ROUND((100.0 * M.rating_acres / AA.landunit_acres), 2) AS rating_pct, ROUND(M.rating_acres, 2) AS rating_acres, ROUND(AA.landunit_acres, 2) AS landunit_acres
+FROM #M10 M
+INNER JOIN #AoiAcres AA ON M.landunit = AA.landunit AND rulekey = 62833--@ruleKey
+WHERE M.rating_acres = (SELECT TOP 1 (B.rating_acres) AS max_acres FROM #M10 AS B 
+INNER JOIN #AoiAcres AB ON B.landunit = AB.landunit  AND rulekey = 62833--@ruleKey
+AND M.landunit = B.landunit GROUP BY B.landunit, B.rating_acres, AB.landunit_acres, B.rating 
+ORDER BY CASE 
+WHEN ROUND((100.0 * B.rating_acres / AB.landunit_acres), 2) >= 10 AND B.rating = 'High surface salinization risk or already saline' THEN 1 
+WHEN B.rating_acres >= 10 AND B.rating = 'High surface salinization risk or already saline' THEN 2
+WHEN ROUND((100.0 * B.rating_acres / AB.landunit_acres), 2) >= 10 AND B.rating = 'Surface salinization risk' THEN 3
+WHEN B.rating_acres >= 10 AND B.rating = 'Surface salinization risk' THEN 4
+ELSE 5 END ASC
+);
+
+--Compaction
+SELECT DISTINCT rulekey, rulename, M.landunit, M.rating AS rating_final, ROUND((100.0 * M.rating_acres / AA.landunit_acres), 2) AS rating_pct, ROUND(M.rating_acres, 2) AS rating_acres, ROUND(AA.landunit_acres, 2) AS landunit_acres
+FROM #M10 M
+INNER JOIN #AoiAcres AA ON M.landunit = AA.landunit AND rulekey = 57990--@ruleKey
+WHERE M.rating_acres = (SELECT TOP 1 (B.rating_acres) AS max_acres FROM #M10 AS B 
+INNER JOIN #AoiAcres AB ON B.landunit = AB.landunit  AND rulekey = 57990--@ruleKey
+AND M.landunit = B.landunit GROUP BY B.landunit, B.rating_acres, AB.landunit_acres, B.rating 
+ORDER BY CASE 
+WHEN ROUND((100.0 * B.rating_acres / AB.landunit_acres), 2) >= 2 AND B.rating = 'High' THEN 1 
+WHEN B.rating_acres >= 10 AND B.rating = 'High' THEN 2
+WHEN ROUND((100.0 * B.rating_acres / AB.landunit_acres), 2) >= 2 AND B.rating = 'Medium' THEN 3
+WHEN B.rating_acres >= 10 AND B.rating = 'Medium' THEN 4
+ELSE 5 END ASC
+);
+ 
+-- CART
+-- SOH - Concentration of Salts- Soil Surface
+-- Table1
+-- Detailed Landunit Ratings: rating acres and rating percent by area for each soil-landunit polygon
+SELECT rulekey, rulename, #M10.landunit, rating,
+ROUND ((rating_acres/ landunit_acres) * 100.0, 2) AS rating_pct, 
+ROUND (rating_acres,2) AS rating_acres,
+ROUND ( landunit_acres, 2) AS landunit_acres
+FROM #M10 
+LEFT OUTER JOIN #AoiAcres ON #AoiAcres.landunit = #M10.landunit 
+--WHERE rulekey = 62833
+GROUP BY #M10.landunit, rulekey,  rulename, rating, rating_acres,  landunit_acres
+ORDER BY #M10.landunit, rulekey, rulename, rating_acres DESC, rating;
+
+
+-- Cleanup all temporary tables 
+IF OBJECT_ID('temp_db..#M10', 'U') IS NOT NULL
+  DROP TABLE #M10;
+IF OBJECT_ID('temp_db..#M8', 'U') IS NOT NULL
+  DROP TABLE #M8;
+IF OBJECT_ID('temp_db..#M6', 'U') IS NOT NULL
+  DROP TABLE #M6;
+IF OBJECT_ID('temp_db..#M5', 'U') IS NOT NULL
+  DROP TABLE #M5;

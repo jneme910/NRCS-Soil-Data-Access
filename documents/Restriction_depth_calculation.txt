@@ -1,0 +1,220 @@
+BASE TABLE corestrictions.
+
+EXEC SQL SELECT corestrictiid AS MAIN_corestrictiid
+FROM corestrictions;.
+
+
+EXEC SQL select compname, coiid/1 AS coiid,  resdept_r, resdepb_r, resthk_r, resthk_l, resthk_h, CODENAME (reskind) AS reskind, coiidref AS MAIN_coiidref
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid;.
+
+#BEDROCK LITHIC
+EXEC SQL SELECT coiid AS lithic_coiid, 
+hzname AS lithic_hzname, 
+hzdept_r  AS lithic_hzdept_r, 
+hzdepb_r AS lithic_hzdepb_r, 
+
+hzdept_l  AS lithic_hzdept_l, 
+hzdepb_l AS lithic_hzdepb_l,
+
+hzdept_h AS lithic_hzdept_h, 
+hzdepb_h AS lithic_hzdepb_h, 
+ 
+CODENAME (reskind) AS lithic_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND coiid IN ($MAIN_coiidref) AND reskind IN ('bedrock, lithic')
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid AND desgnmaster = 'R';
+AGGREGATE ROWS BY lithic_coiid COLUMN lithic_hzdept_r MIN, lithic_hzdepb_r MAX, lithic_hzdept_l MIN, lithic_hzdepb_l MAX, lithic_hzdept_h MIN, lithic_hzdepb_h MAX.
+
+
+#BEDROCK PARALITHIC
+EXEC SQL SELECT coiid AS paralithic_coiid, hzname AS paralithic_hzname, 
+hzdept_r AS paralithic_hzdept_r, 
+hzdepb_r AS paralithic_hzdepb_r, 
+
+hzdept_l AS paralithic_hzdept_l, 
+hzdepb_l AS paralithic_hzdepb_l, 
+
+hzdept_h AS paralithic_hzdept_h, 
+hzdepb_h AS paralithic_hzdepb_h, 
+
+CODENAME (reskind) AS paralithic_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND coiid IN ($MAIN_coiidref) AND reskind IN ('bedrock, paralithic')
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid AND hzname LIKE '%Cr%';
+AGGREGATE ROWS BY paralithic_coiid COLUMN paralithic_hzdept_r MIN, paralithic_hzdepb_r MAX, paralithic_hzdept_l MIN, paralithic_hzdepb_l MAX, paralithic_hzdept_h MIN, paralithic_hzdepb_h MAX.
+
+
+#DENSIC MATERIAL 
+EXEC SQL SELECT coiid AS densic_coiid, hzname AS densic_hzname, 
+hzdept_r AS densic_hzdept_r, 
+hzdepb_r AS densic_hzdepb_r, 
+
+hzdept_l AS densic_hzdept_l, 
+hzdepb_l AS densic_hzdepb_l, 
+
+hzdept_h AS densic_hzdept_h, 
+hzdepb_h AS densic_hzdepb_h, 
+
+CODENAME (reskind) AS densic_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND coiid IN ($MAIN_coiidref) AND reskind IN ('densic material')
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid AND hzname LIKE '%d%';
+AGGREGATE ROWS BY densic_coiid COLUMN densic_hzdept_r MIN, densic_hzdepb_r MAX, densic_hzdept_l MIN, densic_hzdepb_l MAX, densic_hzdept_h MIN, densic_hzdepb_h MAX.
+
+
+#BEDROCK, DENSIC 
+EXEC SQL SELECT coiid AS bedrockdensic_coiid, hzname AS bedrockdensic_hzname, 
+hzdept_r AS bedrockdensic_hzdept_r, 
+hzdepb_r AS bedrockdensic_hzdepb_r, 
+hzdept_l AS bedrockdensic_hzdept_l, 
+hzdepb_l AS bedrockdensic_hzdepb_l,
+hzdept_h AS bedrockdensic_hzdept_h, 
+hzdepb_h AS bedrockdensic_hzdepb_h,  
+CODENAME (reskind) AS bedrockdensic_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND coiid IN ($MAIN_coiidref) AND reskind IN ('bedrock, densic')
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid AND hzname LIKE '%d%';
+AGGREGATE ROWS BY bedrockdensic_coiid COLUMN bedrockdensic_hzdept_r MIN, bedrockdensic_hzdepb_r MAX, bedrockdensic_hzdept_l MIN, bedrockdensic_hzdepb_l MAX, bedrockdensic_hzdept_h MIN, bedrockdensic_hzdepb_h MAX.
+
+#PETROCALCIC 
+EXEC SQL SELECT coiid AS petrocalcic_coiid, hzname AS petrocalcic_hzname, 
+hzdept_r AS petrocalcic_hzdept_r, 
+hzdepb_r AS petrocalcic_hzdepb_r, 
+hzdept_l AS petrocalcic_hzdept_l, 
+hzdepb_l AS petrocalcic_hzdepb_l, 
+hzdept_h AS petrocalcic_hzdept_h, 
+hzdepb_h AS petrocalcic_hzdepb_h, 
+CODENAME (reskind) AS petrocalcic_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND coiid IN ($MAIN_coiidref) AND reskind IN ('petrocalcic')
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid AND (hzname LIKE '%Bkkm%' OR hzname LIKE '%Bkm%') ;
+AGGREGATE ROWS BY petrocalcic_coiid COLUMN petrocalcic_hzdept_r MIN, petrocalcic_hzdepb_r MAX, petrocalcic_hzdept_l MIN, petrocalcic_hzdepb_l MAX, petrocalcic_hzdept_h MIN, petrocalcic_hzdepb_h MAX.
+
+#PETROGYPSIC
+EXEC SQL SELECT coiid AS petrogypsic_coiid, hzname AS petrogypsic_hzname, 
+hzdept_r AS petrogypsic_hzdept_r, 
+hzdepb_r AS petrogypsic_hzdepb_r, 
+hzdept_l AS petrogypsic_hzdept_l, 
+hzdepb_l AS petrogypsic_hzdepb_l, 
+hzdept_h AS petrogypsic_hzdept_h, 
+hzdepb_h AS petrogypsic_hzdepb_h, 
+
+CODENAME (reskind) AS petrogypsic_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND coiid IN ($MAIN_coiidref) AND reskind IN ('petrogypsic')
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid AND (hzname LIKE '%Byym%' OR hzname LIKE '%Bym%') ;
+AGGREGATE ROWS BY petrogypsic_coiid COLUMN petrogypsic_hzdept_r MIN, petrogypsic_hzdepb_r MAX, petrogypsic_hzdept_l MIN, petrogypsic_hzdepb_l MAX, petrogypsic_hzdept_h MIN, petrogypsic_hzdepb_h MAX.
+
+
+#FRAGIPAN
+EXEC SQL SELECT coiid AS fragipan_coiid, hzname AS fragipan_hzname, 
+hzdept_r AS fragipan_hzdept_r, 
+hzdepb_r AS fragipan_hzdepb_r,
+hzdept_l AS fragipan_hzdept_l, 
+hzdepb_l AS fragipan_hzdepb_l,
+hzdept_h AS fragipan_hzdept_h, 
+hzdepb_h AS fragipan_hzdepb_h,
+ CODENAME (reskind) AS fragipan_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND coiid IN ($MAIN_coiidref) AND reskind IN ('fragipan')
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid AND hzname LIKE '%x%' ;
+AGGREGATE ROWS BY fragipan_coiid COLUMN fragipan_hzdept_r MIN, fragipan_hzdepb_r MAX, fragipan_hzdept_l MIN, fragipan_hzdepb_l MAX, fragipan_hzdept_h MIN, fragipan_hzdepb_h MAX.
+
+
+#OTHER RESTRICTIONS 
+EXEC SQL SELECT coiid AS other_coiid, hzname AS other_hzname, 
+hzdept_r AS other_hzdept_r, 
+hzdepb_r AS other_hzdepb_r, 
+
+hzdept_l AS other_hzdept_l, 
+hzdepb_l AS other_hzdepb_l, 
+
+hzdept_h AS other_hzdept_h, 
+hzdepb_h AS other_hzdepb_h, 
+
+CODENAME (reskind) AS other_reskind 
+FROM component
+INNER JOIN corestrictions ON corestrictions.coiidref=component.coiid AND corestrictiid IN ($MAIN_corestrictiid) 
+INNER JOIN chorizon ON chorizon.coiidref=component.coiid;
+AGGREGATE ROWS BY other_coiid COLUMN other_hzdept_r MIN, other_hzdepb_r MAX, other_hzdept_l MIN, other_hzdepb_l MAX, other_hzdept_h MIN, other_hzdepb_h MAX.
+
+
+DEFINE testresdept_r 	IF reskind == 'bedrock, lithic' THEN lithic_hzdept_r ELSE 
+				 		IF reskind == 'bedrock, paralithic' THEN paralithic_hzdept_r ELSE 
+			     		IF reskind == 'densic material' THEN densic_hzdept_r  ELSE
+				 		IF reskind == 'bedrock, densic' THEN bedrockdensic_hzdept_r  ELSE
+						IF reskind == 'petrocalcic' THEN petrocalcic_hzdept_r ELSE
+						IF reskind == 'petrogypsic' THEN petrogypsic_hzdept_r ELSE 	
+						IF reskind == 'fragipan' THEN fragipan_hzdept_r 	 			
+						ELSE resdept_r.
+
+
+DEFINE testresdept_l 	IF reskind == 'bedrock, lithic' THEN lithic_hzdept_l ELSE 
+				 		IF reskind == 'bedrock, paralithic' THEN paralithic_hzdept_l ELSE 
+			     		IF reskind == 'densic material' THEN densic_hzdept_l  ELSE
+				 		IF reskind == 'bedrock, densic' THEN bedrockdensic_hzdept_l  ELSE
+						IF reskind == 'petrocalcic' THEN petrocalcic_hzdept_l ELSE
+						IF reskind == 'petrogypsic' THEN petrogypsic_hzdept_l ELSE	
+						IF reskind == 'fragipan' THEN fragipan_hzdept_l 	 			
+						ELSE resdept_l.
+
+
+
+DEFINE testresdept_h 	IF reskind == 'bedrock, lithic' THEN lithic_hzdept_h ELSE 
+				 		IF reskind == 'bedrock, paralithic' THEN paralithic_hzdept_h ELSE 
+			     		IF reskind == 'densic material' THEN densic_hzdept_h  ELSE
+				 		IF reskind == 'bedrock, densic' THEN bedrockdensic_hzdept_h  ELSE
+						IF reskind == 'petrocalcic' THEN petrocalcic_hzdept_h ELSE
+						IF reskind == 'petrogypsic' THEN petrogypsic_hzdept_h ELSE	
+						IF reskind == 'fragipan' THEN fragipan_hzdept_h 	 			
+						ELSE resdept_h.
+#ASSIGN testresdept_r IF ISNULL (testresdept_r)
+
+
+DEFINE  testresdepb_r 	IF reskind == 'bedrock, lithic' THEN lithic_hzdepb_r ELSE 
+				 		IF reskind == 'bedrock, paralithic' THEN paralithic_hzdepb_r ELSE 
+			     		IF reskind == 'densic material' THEN densic_hzdepb_r  ELSE
+ 						IF reskind == 'bedrock, densic' THEN bedrockdensic_hzdepb_r  ELSE 	
+						IF reskind == 'petrocalcic' THEN petrocalcic_hzdepb_r  ELSE 
+						IF reskind == 'fragipan' THEN fragipan_hzdepb_r  
+						ELSE resdepb_r.
+
+
+DEFINE  testresdepb_l	IF reskind == 'bedrock, lithic' THEN lithic_hzdepb_l ELSE 
+				 		IF reskind == 'bedrock, paralithic' THEN paralithic_hzdepb_l ELSE 
+			     		IF reskind == 'densic material' THEN densic_hzdepb_l  ELSE
+ 						IF reskind == 'bedrock, densic' THEN bedrockdensic_hzdepb_l  ELSE 	
+						IF reskind == 'petrocalcic' THEN petrocalcic_hzdepb_l  ELSE 
+						IF reskind == 'fragipan' THEN fragipan_hzdepb_l  
+						ELSE resdepb_l.
+
+
+DEFINE  testresdepb_h 	IF reskind == 'bedrock, lithic' THEN lithic_hzdepb_h ELSE 
+				 		IF reskind == 'bedrock, paralithic' THEN paralithic_hzdepb_h ELSE 
+			     		IF reskind == 'densic material' THEN densic_hzdepb_h  ELSE
+ 						IF reskind == 'bedrock, densic' THEN bedrockdensic_hzdepb_h  ELSE 	
+						IF reskind == 'petrocalcic' THEN petrocalcic_hzdepb_h  ELSE 
+						IF reskind == 'fragipan' THEN fragipan_hzdepb_h  
+						ELSE resdepb_h.
+
+
+DEFINE resthick2	IF testresdepb_r - testresdept_r < 0 THEN null ELSE testresdepb_r - testresdept_r.
+
+DEFINE testthickness_r   IF (resthk_l > resthick2 and not isnull(resthk_l)) OR 
+						 (resthk_h < resthick2 and not isnull(resthk_h)) THEN NULL
+						 ELSE resthick2.	
+
+
+
+SET 
+resdept_r FROM testresdept_r, 
+resdepb_r FROM testresdepb_r,
+
+resdept_l FROM testresdept_l, 
+resdepb_l FROM testresdepb_l,
+
+resdept_h FROM testresdept_h, 
+resdepb_h FROM testresdepb_h, 
+
+resthk_r FROM  testthickness_r.

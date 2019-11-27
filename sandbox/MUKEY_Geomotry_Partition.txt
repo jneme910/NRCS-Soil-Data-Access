@@ -1,0 +1,57 @@
+
+--  Query for Soil Data Access. Uses SDA macros. Output table is #MuNoAdolfo.
+-- Creates a set number of partitions to limit the number of records returned by each query
+--
+DROP TABLE IF EXISTS #MuNoAdolfo;
+
+-- Set number of partitions
+--declare @numberOfPartitions INT ; -- use for managment studio
+ ~DeclareInt(@numberOfPartitions)~;  --use for python and SDA
+SELECT @numberOfPartitions = 5
+
+-- Create variable for current partition number
+
+--declare @partitionNumber INT ; -- use for managment studio
+~DeclareInt(@partitionNumber)~;  --use for python and SDA
+
+CREATE TABLE #MuNoAdolfo
+(mukey CHAR(30), soilgeom geometry
+);
+
+SELECT @partitionNumber = 0;
+INSERT INTO #MuNoAdolfo (mukey, soilgeom)
+SELECT mukey, mupolygongeo.STAsText() AS soilgeom
+FROM mupolygon
+WHERE mukey IN (2798206)
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 1;
+INSERT INTO #MuNoAdolfo (mukey, soilgeom)
+SELECT mukey, mupolygongeo.STAsText() AS soilgeom
+FROM mupolygon
+WHERE mukey IN (2798206)
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 2;
+INSERT INTO #MuNoAdolfo (mukey, soilgeom)
+SELECT mukey, mupolygongeo.STAsText() AS soilgeom
+FROM mupolygon
+WHERE mukey IN (2798206)
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 3;
+INSERT INTO #MuNoAdolfo (mukey, soilgeom)
+SELECT mukey, mupolygongeo.STAsText() AS soilgeom
+FROM mupolygon
+WHERE mukey IN (2798206)
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 4;
+INSERT INTO #MuNoAdolfo (mukey, soilgeom)
+SELECT mukey, mupolygongeo.STAsText() AS soilgeom
+FROM mupolygon
+WHERE mukey IN (2798206)
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT  mukey, soilgeom FROM #MuNoAdolfo
+ORDER BY mukey

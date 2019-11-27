@@ -1,0 +1,5 @@
+SELECT l.areasymbol, l.areaname,
+'&lt;option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=' + l.areasymbol + '"&gt;' + l.areaname +  '&lt;/option&gt;' AS SSAConnect
+FROM legend AS l 
+WHERE LEFT (l.areasymbol,2) = 'WY' 
+GROUP BY l.areaname, l.areasymbol ORDER BY l.areaname ASC

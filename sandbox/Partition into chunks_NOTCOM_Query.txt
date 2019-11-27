@@ -1,0 +1,62 @@
+
+-- NOTCOM Query for Soil Data Access. Uses SDA macros. Output table is #MuNotcom.
+-- Creates a set number of partitions to limit the number of records returned by each query
+--
+DROP TABLE IF EXISTS #MuNotcom;
+
+-- Set number of partitions
+~DeclareInt(@numberOfPartitions)~;
+SELECT @numberOfPartitions = 5
+
+-- Create variable for current partition number
+~DeclareInt(@partitionNumber)~;
+
+CREATE TABLE #MuNotcom
+( areasymbol CHAR(8),
+mukey CHAR(30),
+musym CHAR(8),
+muname CHAR(120)
+);
+
+SELECT @partitionNumber = 0;
+INSERT INTO #MuNotcom
+SELECT L.areasymbol, M.mukey, musym, muname
+FROM mapunit M
+INNER JOIN legend L on M.lkey = L.lkey
+WHERE (musym IN ('NOTCOM', 'NOTPUB') OR (muname LIKE '%DENIED%' AND muname LIKE '%ACCESS%'))
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 1;
+INSERT INTO #MuNotcom
+SELECT L.areasymbol, M.mukey, musym, muname
+FROM mapunit M
+INNER JOIN legend L on M.lkey = L.lkey
+WHERE (musym IN ('NOTCOM', 'NOTPUB') OR (muname LIKE '%DENIED%' AND muname LIKE '%ACCESS%'))
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 2;
+INSERT INTO #MuNotcom
+SELECT L.areasymbol, M.mukey, musym, muname
+FROM mapunit M
+INNER JOIN legend L on M.lkey = L.lkey
+WHERE (musym IN ('NOTCOM', 'NOTPUB') OR (muname LIKE '%DENIED%' AND muname LIKE '%ACCESS%'))
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 3;
+INSERT INTO #MuNotcom
+SELECT L.areasymbol, M.mukey, musym, muname
+FROM mapunit M
+INNER JOIN legend L on M.lkey = L.lkey
+WHERE (musym IN ('NOTCOM', 'NOTPUB') OR (muname LIKE '%DENIED%' AND muname LIKE '%ACCESS%'))
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT @partitionNumber = 4;
+INSERT INTO #MuNotcom
+SELECT L.areasymbol, M.mukey, musym, muname
+FROM mapunit M
+INNER JOIN legend L on M.lkey = L.lkey
+WHERE (musym IN ('NOTCOM', 'NOTPUB') OR (muname LIKE '%DENIED%' AND muname LIKE '%ACCESS%'))
+and (mukey % @numberOfPartitions) = @partitionNumber;
+
+SELECT DISTINCT areasymbol, mukey, musym, muname FROM #MuNotcom
+ORDER BY areasymbol, mukey

@@ -1,0 +1,56 @@
+-- TOP SECTION WHICH IS STATIC
+--
+-- Declare all variables here
+--
+~DeclareChar(@attributeName,60)~
+~DeclareChar(@nasisRuleName,60)~
+~DeclareChar(@resultColumnName,10)~
+~DeclareInt(@ruleKey)~
+~DeclareChar(@ratingHigh,60)~
+~DeclareChar(@ratingMedium,60)~
+
+-- Create a temporary table (#SDV), containing all values needed to build the dynamic interp queries.
+-- This table will contain metadata for multiple interps, based upon sdvattribute.attributename.
+-- Please note that if we instead get ruledesign from sdvattribute, those values change to integer as in 1:limitation, 2:suitability
+--
+CREATE TABLE #SDV
+(rulekey VARCHAR(60),
+attributename CHAR(60),
+nasisrulename CHAR(60),
+resultcolumnname CHAR(10),
+ruledesign VARCHAR(254),
+maplegendxml XML
+);
+
+INSERT INTO #SDV
+  SELECT md.rulekey, sdv.attributename, sdv.nasisrulename,  sdv.resultcolumnname, md.ruledesign, CAST(sdv.maplegendxml AS XML) AS maplegendxml
+  FROM sdvattribute sdv
+  INNER JOIN distinterpmd md ON sdv.nasisrulename = md.rulename
+  WHERE sdv.attributename IN ('Agricultural Organic Soil Subsidence', 'Soil Susceptibility to Compaction', 'Organic Matter Depletion', 'Surface Salt Concentration', 'Sand Source')
+  GROUP BY md.rulekey, sdv.attributename, sdv.nasisrulename, sdv.resultcolumnname, md.ruledesign, maplegendxml;
+
+-- END OF STATIC SECTION
+
+-- BEGIN REPEATING SECTION OF QUERY (ONCE FOR EACH INTERP)
+--
+-- Set the name of attribute to be queried
+SELECT @attributeName = 'Surface Salt Concentration';
+
+-- Get first interphrc value from sdvattribute.maplegendxml. This will be the 'worst' rating.
+SELECT @ratingHigh = (SELECT maplegendxml FROM #SDV WHERE attributename = @attributename).value('(/Map_Legend/Legend_Elements/Labels/@value)[1]', 'VARCHAR(100)');
+
+-- Get second interphrc value from sdvattribute.maplegendxml
+SELECT @ratingMedium = (SELECT maplegendxml FROM #SDV WHERE attributename = @attributename).value('(/Map_Legend/Legend_Elements/Labels/@value)[2]', 'VARCHAR(100)');
+
+-- Set variables that might be used in the rest of the 
+SELECT @nasisRuleName = (SELECT nasisrulename FROM #SDV WHERE attributename = @attributeName);
+SELECT @resultColumnName = (SELECT resultcolumnname FROM #SDV WHERE attributename = @attributeName);
+SELECT @ruleKey = (SELECT rulekey FROM #SDV WHERE attributename = @attributeName);
+--
+-- END OF REPEATING SECTION
+
+-- TEST. RETURN THESE AS OUTPUT DATA.
+--
+SELECT @ruleKey AS rulekey, @nasisRuleName AS nasisrulename, @resultColumnName AS resultcolumnname
+
+SELECT @ratingHigh as rating_high, @ratingMedium as rating_medium

@@ -1,0 +1,35 @@
+<h2>  Shape Command </h2>
+</hr>
+<p>Below is a simple sample Shape command that returns map unit symbol, map unit name, component name and corresponding representative percent composition for all components for all map units for the Hall County Nebraska SSURGO survey area.</p>
+<div width=200px>
+<blockquote style=background-color:F0F8FF>
+SHAPE {</br>
+SELECT musym, muname, mukey</br>
+FROM legend l</br>
+INNER JOIN mapunit mu ON l.lkey = mu.lkey</br>
+WHERE areasymbol = <mark>'NE079'</mark></br>
+ORDER BY museq}</br>
+APPEND ({</br>
+SELECT mu.mukey, comppct_r, compname</br>
+FROM legend l</br>
+INNER JOIN mapunit mu ON l.lkey = mu.lkey</br>
+LEFT OUTER JOIN component c ON mu.mukey = c.mukey</br>
+WHERE areasymbol = <mark>'NE079'</mark></br>
+ORDER BY comppct_r DESC, compname}</br>
+AS component RELATE mukey TO mukey)</br>
+</blockquote>
+</div>
+<h3>Example Table format</h3></br>
+<div>
+<img src="https://github.com/ncss-tech/sda-lib/trunk/TableImages/ShapeCommandT1.png"></img></br>
+</div><div>
+<img src="https://github.com/ncss-tech/sda-lib/trunk/TableImages/ShapeCommandT2.png"></img></br>
+</div>
+
+<p>For additional information on constructing and using Shape commands, please see a current text on Active X Data Objects (ADO), or search the web using the key phrase "ADO shape command". At the time this was written, an introduction to Shape command syntax was available as an article in the Microsoft Knowledge Base at the following </p></br>
+
+<a href="http://support.microsoft.com/kb/189657/en-us">Link to Microsoft</a></br>
+
+<p>A couple sample Shape commands are also included in the sample query document titled "Using an ADO Shape Command", available at the following </p></br>
+
+<a href="https://sdmdataaccess.sc.egov.usda.gov/queryhelp.aspx">Link to Soil Data Access page</a></br>

@@ -1,0 +1,971 @@
+SELECT
+-- This instance of the query is the best working model.
+-- FSA uses counties as their primary spatial entity.  Money flows through counties. But since the overlaps are not always reliably populated, we use GIS to get the geographic -- occurrence of map units.
+legend.areasymbol AS 'State_County_ID'
+, legend.areasymbol AS 'Soil_Survey_Area_ID'
+--, laoverlap.areaname
+, mapunit.mukey as mapkey
+, mapunit.musym
+, mapunit.muname
+, c.compname
+, c.cokey
+, case
+-- Find out if a county is within the region where long leaf pine exists, revised 2/20/18. 
+WHEN legend.areasymbol = 'AL001' THEN 'Y'
+WHEN legend.areasymbol = 'AL003' THEN 'Y'
+WHEN legend.areasymbol = 'AL005' THEN 'Y'
+WHEN legend.areasymbol = 'AL007' THEN 'Y'
+WHEN legend.areasymbol = 'AL009' THEN 'Y'
+WHEN legend.areasymbol = 'AL011' THEN 'Y'
+WHEN legend.areasymbol = 'AL013' THEN 'Y'
+WHEN legend.areasymbol = 'AL015' THEN 'Y'
+WHEN legend.areasymbol = 'AL017' THEN 'Y'
+WHEN legend.areasymbol = 'AL019' THEN 'Y'
+WHEN legend.areasymbol = 'AL021' THEN 'Y'
+WHEN legend.areasymbol = 'AL023' THEN 'Y'
+WHEN legend.areasymbol = 'AL025' THEN 'Y'
+WHEN legend.areasymbol = 'AL027' THEN 'Y'
+WHEN legend.areasymbol = 'AL029' THEN 'Y'
+WHEN legend.areasymbol = 'AL031' THEN 'Y'
+WHEN legend.areasymbol = 'AL035' THEN 'Y'
+WHEN legend.areasymbol = 'AL037' THEN 'Y'
+WHEN legend.areasymbol = 'AL039' THEN 'Y'
+WHEN legend.areasymbol = 'AL041' THEN 'Y'
+WHEN legend.areasymbol = 'AL043' THEN 'Y'
+WHEN legend.areasymbol = 'AL045' THEN 'Y'
+WHEN legend.areasymbol = 'AL047' THEN 'Y'
+WHEN legend.areasymbol = 'AL051' THEN 'Y'
+WHEN legend.areasymbol = 'AL053' THEN 'Y'
+WHEN legend.areasymbol = 'AL055' THEN 'Y'
+WHEN legend.areasymbol = 'AL057' THEN 'Y'
+WHEN legend.areasymbol = 'AL061' THEN 'Y'
+WHEN legend.areasymbol = 'AL067' THEN 'Y'
+WHEN legend.areasymbol = 'AL069' THEN 'Y'
+WHEN legend.areasymbol = 'AL073' THEN 'Y'
+WHEN legend.areasymbol = 'AL081' THEN 'Y'
+WHEN legend.areasymbol = 'AL085' THEN 'Y'
+WHEN legend.areasymbol = 'AL087' THEN 'Y'
+WHEN legend.areasymbol = 'AL091' THEN 'Y'
+WHEN legend.areasymbol = 'AL097' THEN 'Y'
+WHEN legend.areasymbol = 'AL099' THEN 'Y'
+WHEN legend.areasymbol = 'AL101' THEN 'Y'
+WHEN legend.areasymbol = 'AL105' THEN 'Y'
+WHEN legend.areasymbol = 'AL109' THEN 'Y'
+WHEN legend.areasymbol = 'AL111' THEN 'Y'
+WHEN legend.areasymbol = 'AL113' THEN 'Y'
+WHEN legend.areasymbol = 'AL115' THEN 'Y'
+WHEN legend.areasymbol = 'AL117' THEN 'Y'
+WHEN legend.areasymbol = 'AL119' THEN 'Y'
+WHEN legend.areasymbol = 'AL121' THEN 'Y'
+WHEN legend.areasymbol = 'AL123' THEN 'Y'
+WHEN legend.areasymbol = 'AL125' THEN 'Y'
+WHEN legend.areasymbol = 'AL127' THEN 'Y'
+WHEN legend.areasymbol = 'AL129' THEN 'Y'
+WHEN legend.areasymbol = 'AL131' THEN 'Y'
+WHEN legend.areasymbol = 'AL133' THEN 'Y'
+WHEN legend.areasymbol = 'FL001' THEN 'Y'
+WHEN legend.areasymbol = 'FL003' THEN 'Y'
+WHEN legend.areasymbol = 'FL005' THEN 'Y'
+WHEN legend.areasymbol = 'FL007' THEN 'Y'
+WHEN legend.areasymbol = 'FL013' THEN 'Y'
+WHEN legend.areasymbol = 'FL015' THEN 'Y'
+WHEN legend.areasymbol = 'FL017' THEN 'Y'
+WHEN legend.areasymbol = 'FL019' THEN 'Y'
+WHEN legend.areasymbol = 'FL023' THEN 'Y'
+WHEN legend.areasymbol = 'FL027' THEN 'Y'
+WHEN legend.areasymbol = 'FL029' THEN 'Y'
+WHEN legend.areasymbol = 'FL031' THEN 'Y'
+WHEN legend.areasymbol = 'FL033' THEN 'Y'
+WHEN legend.areasymbol = 'FL035' THEN 'Y'
+WHEN legend.areasymbol = 'FL037' THEN 'Y'
+WHEN legend.areasymbol = 'FL039' THEN 'Y'
+WHEN legend.areasymbol = 'FL041' THEN 'Y'
+WHEN legend.areasymbol = 'FL043' THEN 'Y'
+WHEN legend.areasymbol = 'FL045' THEN 'Y'
+WHEN legend.areasymbol = 'FL047' THEN 'Y'
+WHEN legend.areasymbol = 'FL049' THEN 'Y'
+WHEN legend.areasymbol = 'FL053' THEN 'Y'
+WHEN legend.areasymbol = 'FL055' THEN 'Y'
+WHEN legend.areasymbol = 'FL057' THEN 'Y'
+WHEN legend.areasymbol = 'FL059' THEN 'Y'
+WHEN legend.areasymbol = 'FL061' THEN 'Y'
+WHEN legend.areasymbol = 'FL063' THEN 'Y'
+WHEN legend.areasymbol = 'FL065' THEN 'Y'
+WHEN legend.areasymbol = 'FL067' THEN 'Y'
+WHEN legend.areasymbol = 'FL069' THEN 'Y'
+WHEN legend.areasymbol = 'FL071' THEN 'Y'
+WHEN legend.areasymbol = 'FL073' THEN 'Y'
+WHEN legend.areasymbol = 'FL075' THEN 'Y'
+WHEN legend.areasymbol = 'FL077' THEN 'Y'
+WHEN legend.areasymbol = 'FL079' THEN 'Y'
+WHEN legend.areasymbol = 'FL081' THEN 'Y'
+WHEN legend.areasymbol = 'FL083' THEN 'Y'
+WHEN legend.areasymbol = 'FL089' THEN 'Y'
+WHEN legend.areasymbol = 'FL091' THEN 'Y'
+WHEN legend.areasymbol = 'FL093' THEN 'Y'
+WHEN legend.areasymbol = 'FL095' THEN 'Y'
+WHEN legend.areasymbol = 'FL097' THEN 'Y'
+WHEN legend.areasymbol = 'FL101' THEN 'Y'
+WHEN legend.areasymbol = 'FL103' THEN 'Y'
+WHEN legend.areasymbol = 'FL105' THEN 'Y'
+WHEN legend.areasymbol = 'FL107' THEN 'Y'
+WHEN legend.areasymbol = 'FL109' THEN 'Y'
+WHEN legend.areasymbol = 'FL113' THEN 'Y'
+WHEN legend.areasymbol = 'FL115' THEN 'Y'
+WHEN legend.areasymbol = 'FL117' THEN 'Y'
+WHEN legend.areasymbol = 'FL119' THEN 'Y'
+WHEN legend.areasymbol = 'FL121' THEN 'Y'
+WHEN legend.areasymbol = 'FL123' THEN 'Y'
+WHEN legend.areasymbol = 'FL125' THEN 'Y'
+WHEN legend.areasymbol = 'FL127' THEN 'Y'
+WHEN legend.areasymbol = 'FL129' THEN 'Y'
+WHEN legend.areasymbol = 'FL131' THEN 'Y'
+WHEN legend.areasymbol = 'FL133' THEN 'Y'
+WHEN legend.areasymbol = 'FL607' THEN 'Y'
+WHEN legend.areasymbol = 'FL608' THEN 'Y'
+WHEN legend.areasymbol = 'FL609' THEN 'Y'
+WHEN legend.areasymbol = 'GA001' THEN 'Y'
+WHEN legend.areasymbol = 'GA003' THEN 'Y'
+WHEN legend.areasymbol = 'GA005' THEN 'Y'
+WHEN legend.areasymbol = 'GA019' THEN 'Y'
+WHEN legend.areasymbol = 'GA021' THEN 'Y'
+WHEN legend.areasymbol = 'GA025' THEN 'Y'
+WHEN legend.areasymbol = 'GA029' THEN 'Y'
+WHEN legend.areasymbol = 'GA031' THEN 'Y'
+WHEN legend.areasymbol = 'GA033' THEN 'Y'
+WHEN legend.areasymbol = 'GA035' THEN 'Y'
+WHEN legend.areasymbol = 'GA039' THEN 'Y'
+WHEN legend.areasymbol = 'GA043' THEN 'Y'
+WHEN legend.areasymbol = 'GA049' THEN 'Y'
+WHEN legend.areasymbol = 'GA051' THEN 'Y'
+WHEN legend.areasymbol = 'GA053' THEN 'Y'
+WHEN legend.areasymbol = 'GA061' THEN 'Y'
+WHEN legend.areasymbol = 'GA065' THEN 'Y'
+WHEN legend.areasymbol = 'GA069' THEN 'Y'
+WHEN legend.areasymbol = 'GA075' THEN 'Y'
+WHEN legend.areasymbol = 'GA079' THEN 'Y'
+WHEN legend.areasymbol = 'GA087' THEN 'Y'
+WHEN legend.areasymbol = 'GA093' THEN 'Y'
+WHEN legend.areasymbol = 'GA095' THEN 'Y'
+WHEN legend.areasymbol = 'GA097' THEN 'Y'
+WHEN legend.areasymbol = 'GA101' THEN 'Y'
+WHEN legend.areasymbol = 'GA103' THEN 'Y'
+WHEN legend.areasymbol = 'GA107' THEN 'Y'
+WHEN legend.areasymbol = 'GA109' THEN 'Y'
+WHEN legend.areasymbol = 'GA113' THEN 'Y'
+WHEN legend.areasymbol = 'GA127' THEN 'Y'
+WHEN legend.areasymbol = 'GA129' THEN 'Y'
+WHEN legend.areasymbol = 'GA131' THEN 'Y'
+WHEN legend.areasymbol = 'GA133' THEN 'Y'
+WHEN legend.areasymbol = 'GA145' THEN 'Y'
+WHEN legend.areasymbol = 'GA147' THEN 'Y'
+WHEN legend.areasymbol = 'GA153' THEN 'Y'
+WHEN legend.areasymbol = 'GA159' THEN 'Y'
+WHEN legend.areasymbol = 'GA161' THEN 'Y'
+WHEN legend.areasymbol = 'GA165' THEN 'Y'
+WHEN legend.areasymbol = 'GA171' THEN 'Y'
+WHEN legend.areasymbol = 'GA173' THEN 'Y'
+WHEN legend.areasymbol = 'GA177' THEN 'Y'
+WHEN legend.areasymbol = 'GA179' THEN 'Y'
+WHEN legend.areasymbol = 'GA183' THEN 'Y'
+WHEN legend.areasymbol = 'GA185' THEN 'Y'
+WHEN legend.areasymbol = 'GA191' THEN 'Y'
+WHEN legend.areasymbol = 'GA193' THEN 'Y'
+WHEN legend.areasymbol = 'GA197' THEN 'Y'
+WHEN legend.areasymbol = 'GA199' THEN 'Y'
+WHEN legend.areasymbol = 'GA207' THEN 'Y'
+WHEN legend.areasymbol = 'GA211' THEN 'Y'
+WHEN legend.areasymbol = 'GA215' THEN 'Y'
+WHEN legend.areasymbol = 'GA221' THEN 'Y'
+WHEN legend.areasymbol = 'GA223' THEN 'Y'
+WHEN legend.areasymbol = 'GA225' THEN 'Y'
+WHEN legend.areasymbol = 'GA229' THEN 'Y'
+WHEN legend.areasymbol = 'GA231' THEN 'Y'
+WHEN legend.areasymbol = 'GA235' THEN 'Y'
+WHEN legend.areasymbol = 'GA239' THEN 'Y'
+WHEN legend.areasymbol = 'GA243' THEN 'Y'
+WHEN legend.areasymbol = 'GA245' THEN 'Y'
+WHEN legend.areasymbol = 'GA249' THEN 'Y'
+WHEN legend.areasymbol = 'GA251' THEN 'Y'
+WHEN legend.areasymbol = 'GA255' THEN 'Y'
+WHEN legend.areasymbol = 'GA259' THEN 'Y'
+WHEN legend.areasymbol = 'GA261' THEN 'Y'
+WHEN legend.areasymbol = 'GA263' THEN 'Y'
+WHEN legend.areasymbol = 'GA267' THEN 'Y'
+WHEN legend.areasymbol = 'GA269' THEN 'Y'
+WHEN legend.areasymbol = 'GA271' THEN 'Y'
+WHEN legend.areasymbol = 'GA273' THEN 'Y'
+WHEN legend.areasymbol = 'GA277' THEN 'Y'
+WHEN legend.areasymbol = 'GA283' THEN 'Y'
+WHEN legend.areasymbol = 'GA285' THEN 'Y'
+WHEN legend.areasymbol = 'GA289' THEN 'Y'
+WHEN legend.areasymbol = 'GA293' THEN 'Y'
+WHEN legend.areasymbol = 'GA297' THEN 'Y'
+WHEN legend.areasymbol = 'GA299' THEN 'Y'
+WHEN legend.areasymbol = 'GA305' THEN 'Y'
+WHEN legend.areasymbol = 'GA307' THEN 'Y'
+WHEN legend.areasymbol = 'GA315' THEN 'Y'
+WHEN legend.areasymbol = 'GA321' THEN 'Y'
+WHEN legend.areasymbol = 'GA601' THEN 'Y'
+WHEN legend.areasymbol = 'GA602' THEN 'Y'
+WHEN legend.areasymbol = 'GA603' THEN 'Y'
+WHEN legend.areasymbol = 'GA604' THEN 'Y'
+WHEN legend.areasymbol = 'GA605' THEN 'Y'
+WHEN legend.areasymbol = 'GA606' THEN 'Y'
+WHEN legend.areasymbol = 'GA608' THEN 'Y'
+WHEN legend.areasymbol = 'GA609' THEN 'Y'
+WHEN legend.areasymbol = 'GA610' THEN 'Y'
+WHEN legend.areasymbol = 'GA611' THEN 'Y'
+WHEN legend.areasymbol = 'GA612' THEN 'Y'
+WHEN legend.areasymbol = 'GA613' THEN 'Y'
+WHEN legend.areasymbol = 'GA615' THEN 'Y'
+WHEN legend.areasymbol = 'GA616' THEN 'Y'
+WHEN legend.areasymbol = 'GA617' THEN 'Y'
+WHEN legend.areasymbol = 'GA618' THEN 'Y'
+WHEN legend.areasymbol = 'GA620' THEN 'Y'
+WHEN legend.areasymbol = 'GA621' THEN 'Y'
+WHEN legend.areasymbol = 'GA623' THEN 'Y'
+WHEN legend.areasymbol = 'GA625' THEN 'Y'
+WHEN legend.areasymbol = 'GA626' THEN 'Y'
+WHEN legend.areasymbol = 'GA627' THEN 'Y'
+WHEN legend.areasymbol = 'GA628' THEN 'Y'
+WHEN legend.areasymbol = 'GA629' THEN 'Y'
+WHEN legend.areasymbol = 'GA630' THEN 'Y'
+WHEN legend.areasymbol = 'GA631' THEN 'Y'
+WHEN legend.areasymbol = 'GA634' THEN 'Y'
+WHEN legend.areasymbol = 'GA636' THEN 'Y'
+WHEN legend.areasymbol = 'GA638' THEN 'Y'
+WHEN legend.areasymbol = 'GA639' THEN 'Y'
+WHEN legend.areasymbol = 'GA640' THEN 'Y'
+WHEN legend.areasymbol = 'GA641' THEN 'Y'
+WHEN legend.areasymbol = 'GA642' THEN 'Y'
+WHEN legend.areasymbol = 'GA643' THEN 'Y'
+WHEN legend.areasymbol = 'GA644' THEN 'Y'
+WHEN legend.areasymbol = 'GA645' THEN 'Y'
+WHEN legend.areasymbol = 'GA646' THEN 'Y'
+WHEN legend.areasymbol = 'GA647' THEN 'Y'
+WHEN legend.areasymbol = 'GA649' THEN 'Y'
+WHEN legend.areasymbol = 'GA650' THEN 'Y'
+WHEN legend.areasymbol = 'GA652' THEN 'Y'
+WHEN legend.areasymbol = 'GA654' THEN 'Y'
+WHEN legend.areasymbol = 'GA655' THEN 'Y'
+WHEN legend.areasymbol = 'GA658' THEN 'Y'
+WHEN legend.areasymbol = 'LA003' THEN 'Y'
+WHEN legend.areasymbol = 'LA011' THEN 'Y'
+WHEN legend.areasymbol = 'LA103' THEN 'Y'
+WHEN legend.areasymbol = 'LA105' THEN 'Y'
+WHEN legend.areasymbol = 'LA115' THEN 'Y'
+WHEN legend.areasymbol = 'LA117' THEN 'Y'
+WHEN legend.areasymbol = 'MS031' THEN 'Y'
+WHEN legend.areasymbol = 'MS035' THEN 'Y'
+WHEN legend.areasymbol = 'MS039' THEN 'Y'
+WHEN legend.areasymbol = 'MS041' THEN 'Y'
+WHEN legend.areasymbol = 'MS045' THEN 'Y'
+WHEN legend.areasymbol = 'MS047' THEN 'Y'
+WHEN legend.areasymbol = 'MS059' THEN 'Y'
+WHEN legend.areasymbol = 'MS067' THEN 'Y'
+WHEN legend.areasymbol = 'MS073' THEN 'Y'
+WHEN legend.areasymbol = 'MS091' THEN 'Y'
+WHEN legend.areasymbol = 'MS109' THEN 'Y'
+WHEN legend.areasymbol = 'MS111' THEN 'Y'
+WHEN legend.areasymbol = 'MS131' THEN 'Y'
+WHEN legend.areasymbol = 'MS153' THEN 'Y'
+WHEN legend.areasymbol = 'NC007' THEN 'Y'
+WHEN legend.areasymbol = 'NC013' THEN 'Y'
+WHEN legend.areasymbol = 'NC017' THEN 'Y'
+WHEN legend.areasymbol = 'NC019' THEN 'Y'
+WHEN legend.areasymbol = 'NC031' THEN 'Y'
+WHEN legend.areasymbol = 'NC047' THEN 'Y'
+WHEN legend.areasymbol = 'NC049' THEN 'Y'
+WHEN legend.areasymbol = 'NC051' THEN 'Y'
+WHEN legend.areasymbol = 'NC057' THEN 'Y'
+WHEN legend.areasymbol = 'NC061' THEN 'Y'
+WHEN legend.areasymbol = 'NC085' THEN 'Y'
+WHEN legend.areasymbol = 'NC093' THEN 'Y'
+WHEN legend.areasymbol = 'NC103' THEN 'Y'
+WHEN legend.areasymbol = 'NC105' THEN 'Y'
+WHEN legend.areasymbol = 'NC123' THEN 'Y'
+WHEN legend.areasymbol = 'NC125' THEN 'Y'
+WHEN legend.areasymbol = 'NC129' THEN 'Y'
+WHEN legend.areasymbol = 'NC133' THEN 'Y'
+WHEN legend.areasymbol = 'NC137' THEN 'Y'
+WHEN legend.areasymbol = 'NC141' THEN 'Y'
+WHEN legend.areasymbol = 'NC151' THEN 'Y'
+WHEN legend.areasymbol = 'NC153' THEN 'Y'
+WHEN legend.areasymbol = 'NC155' THEN 'Y'
+WHEN legend.areasymbol = 'NC163' THEN 'Y'
+WHEN legend.areasymbol = 'NC165' THEN 'Y'
+WHEN legend.areasymbol = 'NC167' THEN 'Y'
+WHEN legend.areasymbol = 'SC003' THEN 'Y'
+WHEN legend.areasymbol = 'SC005' THEN 'Y'
+WHEN legend.areasymbol = 'SC009' THEN 'Y'
+WHEN legend.areasymbol = 'SC011' THEN 'Y'
+WHEN legend.areasymbol = 'SC013' THEN 'Y'
+WHEN legend.areasymbol = 'SC015' THEN 'Y'
+WHEN legend.areasymbol = 'SC017' THEN 'Y'
+WHEN legend.areasymbol = 'SC025' THEN 'Y'
+WHEN legend.areasymbol = 'SC027' THEN 'Y'
+WHEN legend.areasymbol = 'SC029' THEN 'Y'
+WHEN legend.areasymbol = 'SC031' THEN 'Y'
+WHEN legend.areasymbol = 'SC033' THEN 'Y'
+WHEN legend.areasymbol = 'SC035' THEN 'Y'
+WHEN legend.areasymbol = 'SC037' THEN 'Y'
+WHEN legend.areasymbol = 'SC039' THEN 'Y'
+WHEN legend.areasymbol = 'SC041' THEN 'Y'
+WHEN legend.areasymbol = 'SC043' THEN 'Y'
+WHEN legend.areasymbol = 'SC047' THEN 'Y'
+WHEN legend.areasymbol = 'SC049' THEN 'Y'
+WHEN legend.areasymbol = 'SC051' THEN 'Y'
+WHEN legend.areasymbol = 'SC053' THEN 'Y'
+WHEN legend.areasymbol = 'SC055' THEN 'Y'
+WHEN legend.areasymbol = 'SC057' THEN 'Y'
+WHEN legend.areasymbol = 'SC061' THEN 'Y'
+WHEN legend.areasymbol = 'SC063' THEN 'Y'
+WHEN legend.areasymbol = 'SC065' THEN 'Y'
+WHEN legend.areasymbol = 'SC067' THEN 'Y'
+WHEN legend.areasymbol = 'SC069' THEN 'Y'
+WHEN legend.areasymbol = 'SC071' THEN 'Y'
+WHEN legend.areasymbol = 'SC075' THEN 'Y'
+WHEN legend.areasymbol = 'SC079' THEN 'Y'
+WHEN legend.areasymbol = 'SC081' THEN 'Y'
+WHEN legend.areasymbol = 'SC085' THEN 'Y'
+WHEN legend.areasymbol = 'SC089' THEN 'Y'
+WHEN legend.areasymbol = 'SC610' THEN 'Y'
+WHEN legend.areasymbol = 'SC615' THEN 'Y'
+WHEN legend.areasymbol = 'SC665' THEN 'Y'
+WHEN legend.areasymbol = 'SC690' THEN 'Y'
+WHEN legend.areasymbol = 'SC696' THEN 'Y'
+WHEN legend.areasymbol = 'TX001' THEN 'Y'
+WHEN legend.areasymbol = 'TX005' THEN 'Y'
+WHEN legend.areasymbol = 'TX073' THEN 'Y'
+WHEN legend.areasymbol = 'TX199' THEN 'Y'
+WHEN legend.areasymbol = 'TX225' THEN 'Y'
+WHEN legend.areasymbol = 'TX241' THEN 'Y'
+WHEN legend.areasymbol = 'TX291' THEN 'Y'
+WHEN legend.areasymbol = 'TX339' THEN 'Y'
+WHEN legend.areasymbol = 'TX347' THEN 'Y'
+WHEN legend.areasymbol = 'TX351' THEN 'Y'
+WHEN legend.areasymbol = 'TX373' THEN 'Y'
+WHEN legend.areasymbol = 'TX403' THEN 'Y'
+WHEN legend.areasymbol = 'TX405' THEN 'Y'
+WHEN legend.areasymbol = 'TX419' THEN 'Y'
+WHEN legend.areasymbol = 'TX455' THEN 'Y'
+WHEN legend.areasymbol = 'TX457' THEN 'Y'
+WHEN legend.areasymbol = 'TX471' THEN 'Y'
+WHEN legend.areasymbol = 'TX611' THEN 'Y'
+WHEN legend.areasymbol = 'TX617' THEN 'Y'
+WHEN legend.areasymbol = 'TX619' THEN 'Y'
+WHEN legend.areasymbol = 'VA001' THEN 'Y'
+WHEN legend.areasymbol = 'VA025' THEN 'Y'
+WHEN legend.areasymbol = 'VA053' THEN 'Y'
+WHEN legend.areasymbol = 'VA073' THEN 'Y'
+WHEN legend.areasymbol = 'VA081' THEN 'Y'
+WHEN legend.areasymbol = 'VA093' THEN 'Y'
+WHEN legend.areasymbol = 'VA095' THEN 'Y'
+WHEN legend.areasymbol = 'VA115' THEN 'Y'
+WHEN legend.areasymbol = 'VA131' THEN 'Y'
+WHEN legend.areasymbol = 'VA149' THEN 'Y'
+WHEN legend.areasymbol = 'VA175' THEN 'Y'
+WHEN legend.areasymbol = 'VA181' THEN 'Y'
+WHEN legend.areasymbol = 'VA183' THEN 'Y'
+WHEN legend.areasymbol = 'VA199' THEN 'Y'
+WHEN legend.areasymbol = 'VA550' THEN 'Y'
+WHEN legend.areasymbol = 'VA650' THEN 'Y'
+WHEN legend.areasymbol = 'VA653' THEN 'Y'
+WHEN legend.areasymbol = 'VA695' THEN 'Y'
+WHEN legend.areasymbol = 'VA700' THEN 'Y'
+WHEN legend.areasymbol = 'VA710' THEN 'Y'
+WHEN legend.areasymbol = 'VA715' THEN 'Y'
+WHEN legend.areasymbol = 'VA735' THEN 'Y'
+WHEN legend.areasymbol = 'VA740' THEN 'Y'
+WHEN legend.areasymbol = 'VA800' THEN 'Y'
+WHEN legend.areasymbol = 'VA810' THEN 'Y'
+WHEN legend.areasymbol = 'VA830' THEN 'Y'
+ else 'N' END  as mu_lleaf
+-- Determine if the component mentions long leaf pine (PIPA2).
+, (select TOP 1 cotreestomng.plantsym from cotreestomng where c.cokey=cotreestomng.cokey and cotreestomng.plantsym = 'PIPA2') AS llpine_cotreestomng 
+, (select TOP 1 coeplants.plantsym from coeplants where c.cokey=coeplants.cokey and coeplants.plantsym = 'PIPA2') as llpine_coeplants 
+, (select TOP 1 coforprod.plantsym from coforprod where c.cokey=coforprod.cokey and coforprod.plantsym = 'PIPA2') AS llpine_coforprod
+-- Determine if the component could support long leaf pine.
+, (SELECT CASE when min(soimoistdept_r) is null then '999' else cast(min(soimoistdept_r) as varchar) END
+          from component left outer join comonth left outer join cosoilmoist
+            on comonth.comonthkey = cosoilmoist.comonthkey
+            on component.cokey = comonth.cokey
+         where component.cokey = c.cokey and soimoiststat in ('Wet', 'Saturation')) as llp_wt
+, case when exists (select texture FROM component inner join chorizon on c.cokey=chorizon.cokey inner join chtexturegrp on chorizon.chkey=chtexturegrp.chkey WHERE texture IN ('COS', 'FS', 'VFS', 'LCOS', 'LS', 'LFS', 'LVFS', 'COSL', 'SL', 'FSL', 'VFSL') and hzdept_r <30) Then 'Y' ELSE 'N' END as llp_texture
+, case when exists (select ph1to1h2o_r FROM component inner join chorizon on c.cokey=chorizon.cokey WHERE ph1to1h2o_r > 6 and hzdept_r <30) Then 'N' ELSE 'Y' END as llp_pH
+-- Calculate a simple leaching index.
+, cast (case WHEN taxorder like 'Histosols' Then 1 
+WHEN hydgrp like '%D'  Then 1 
+WHEN hydgrp like 'C' And ((om_r * hzdepb_r/2.54) <= 10) And kwfact >= .28 Then 1 
+WHEN hydgrp like 'C' And ((om_r * hzdepb_r/2.54) >= 10) Then 1 
+WHEN hydgrp like 'B' And ((om_r * hzdepb_r/2.54) >= 35) And kwfact >= .40 Then 1 
+WHEN hydgrp like 'B' And ((om_r * hzdepb_r/2.54) >= 45) And kwfact >= .20 Then 1 
+WHEN hydgrp like 'A' and ((om_r * hzdepb_r/2.54) <= 30) Then 3 
+WHEN hydgrp like 'B' and ((om_r * hzdepb_r/2.54) <= 9) and kwfact <= .48  Then 3 
+WHEN hydgrp like 'B' And ((om_r * hzdepb_r/2.54) <= 15) And kwfact <= .26 Then 3 
+WHEN hydgrp like 'A' And ((om_r * hzdepb_r/2.54) > 30)  Then 2 
+WHEN hydgrp like 'B'  Then 2 
+WHEN hydgrp like 'C' Then 2 ELSE 0 END as varchar) as mu_leach 
+, c.wei AS mu_ifactor 
+--, case when ch.kffact is null then 0.02 else ch.kffact END AS mu_kfactor
+-- Histosols and Histic epipedons are ok with 0.02
+, case when taxorder like 'Histosols' or taxsubgrp like 'Histic%' then 0.02 else kwfact END AS mu_kfactor
+-- Palouse areas updated 2/20/18. 
+, case when legend.areasymbol IN ('ID620', 'ID057', 'OR021', 'OR049', 'OR055', 'OR625', 'OR667', 'OR670', 'OR673', 'WA001',
+ 'WA021', 'WA025', 'WA043', 'WA063', 'WA071', 'WA075', 'WA603', 'WA605', 'WA613', 'WA617', 'WA623', 'WA639', 'WA676', 'WA677') then 'Y' else 'N' END as palouse 
+, c.tfact AS mu_tfactor 
+, c.slope_r 
+, c.slopelenusle_r 
+, case when (map_l < 382 and wei > 55 and  claytotal_r < 21 and om_r < 3 and texcl not like '%sand' 
+and left(legend.areasymbol,2) IN ('WA', 'OR', 'CA', 'ID') ) then 'Y' else 'N' END as WESL 
+, case when nirrcapcl is null then 'Z' 
+when nirrcapscl is null then nirrcapcl 
+else nirrcapcl + nirrcapscl  end as nirrcapclass 
+
+--, case when nirrcapscl is null then nirrcapcl else nirrcapcl + nirrcapscl end as nirrcapclass 
+-- Sometimes cap class is null and it should not be.
+, 'SDM' as source 
+, (SELECT interphr FROM component left outer join cointerp ON component.cokey = cointerp.cokey WHERE component.cokey=c.cokey and ruledepth = 0 AND mrulename like 'NCCPI - National Commodity Crop Productivity Index (Ver 3.0)') as NCCPI_Value_dcp 
+INTO #step1 
+
+FROM legend left outer join mapunit on legend.lkey = mapunit.lkey and legend.areatypename = 'Non-MLRA Soil Survey Area' and LEFT (legend.areasymbol, 1) like '[%]'
+left outer JOIN component c ON mapunit.mukey = c.mukey and c.cokey = (SELECT TOP 1 component.cokey FROM 
+component WHERE component.mukey=mapunit.mukey ORDER BY component.comppct_r DESC) 
+--compromise to avoid organic surface horizons since many O horizons are still called H1.
+left outer JOIN chorizon ch ON c.cokey=ch.cokey and hzdept_r = (select MIN(hzdept_r) FROM chorizon WHERE om_r < 18 and c.cokey = chorizon.cokey)
+
+
+left outer JOIN chtexturegrp on ch.chkey=chtexturegrp.chkey and rvindicator = 'yes' 
+left outer JOIN chtexture on chtexture.chtgkey=chtexturegrp.chtgkey
+ORDER BY legend.areasymbol, mapunit.musym, c.comppct_r DESC
+
+SELECT
+ cokey
+, case 
+--WHEN mu_lleaf like 'Y' 
+--     and llpine_cotreestomng is null 
+--     and llpine_coeplants is null 
+--     and llpine_coforprod is null THEN 'N'
+WHEN mu_lleaf like 'Y' 
+     and llpine_cotreestomng is null  
+     and llpine_coeplants is null  
+     and llpine_coforprod is null  
+     and llp_wt > 30 
+     and llp_texture like 'N' 
+     and llp_pH like 'Y' THEN 'N'
+WHEN mu_lleaf like 'Y' 
+     and llpine_cotreestomng is null  
+     and llpine_coeplants is null 
+     and llpine_coforprod is null  
+     and llp_wt > 30 
+     and llp_texture like 'Y' 
+     and llp_pH like 'N' THEN 'N'
+WHEN mu_lleaf like 'Y' 
+     and llpine_cotreestomng is null 
+     and llpine_coeplants is null  
+     and llpine_coforprod is null  
+     and llp_wt > 30 
+     and llp_texture like 'Y' 
+     and llp_pH like 'Y' THEN 'Y' 
+WHEN mu_lleaf like 'Y' 
+     and llpine_cotreestomng is null  
+     and llpine_coeplants is null  
+     and llpine_coforprod is null  
+     and llp_wt < 30 
+     and llp_texture like 'Y' 
+     and llp_pH like 'N' THEN 'N'
+WHEN mu_lleaf like 'Y' 
+     and llpine_cotreestomng is null  
+     and llpine_coeplants is null  
+     and llpine_coforprod is null  
+     and llp_wt < 30 
+     and llp_texture like 'N' 
+     and llp_pH like 'Y' THEN 'N'
+WHEN mu_lleaf like 'Y' 
+     and (llpine_cotreestomng is not null or llpine_coeplants is not null  or llpine_coforprod is not null) THEN 'Y'
+ELSE 'N' END as llpine
+, cast(case 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 0 and slope_r < 0.75) Then 100 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 0.75 and slope_r < 1.5) Then 200 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 1.5 and slope_r < 2.5) Then 300 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 2.5 and slope_r < 3.5) Then 200 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 3.5 and slope_r < 4.5) Then 180 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 4.5 and slope_r < 5.5) Then 160 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 5.5 and slope_r < 6.5) Then 150 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 6.5 and slope_r < 7.5) Then 140 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 7.5 and slope_r < 8.5) Then 130 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 8.5 and slope_r < 9.5) Then 125 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 9.5 and slope_r < 10.5) Then 120 
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 10.5 and slope_r < 11.5) Then 110
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 11.5 and slope_r < 12.5) Then 100
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 12.5 and slope_r < 13.5) Then 90
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 13.5 and slope_r < 14.5) Then 80
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 14.5 and slope_r < 15.5) Then 70
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >= 15.5 and slope_r < 17.5) Then 60
+WHEN palouse like 'N' and slopelenusle_r is null and (slope_r >=  17.5) Then 50 
+WHEN palouse like 'Y' and slopelenusle_r is null and (slope_r >= 0 and slope_r < 5.5) Then 350 
+WHEN palouse like 'Y' and slopelenusle_r is null and (slope_r >= 5.5 and slope_r < 10.5) Then 275
+WHEN palouse like 'Y' and slopelenusle_r is null and (slope_r >= 10.5 and slope_r < 15.5) Then 225
+WHEN palouse like 'Y' and slopelenusle_r is null and (slope_r >= 15.5 and slope_r < 20.5) Then 175
+WHEN palouse like 'Y' and slopelenusle_r is null and (slope_r >= 20.5 and slope_r < 25.5) Then 150
+WHEN palouse like 'Y' and slopelenusle_r is null and (slope_r >= 25.5 and slope_r < 35.5) Then 125
+WHEN palouse like 'Y' and slopelenusle_r is null and (slope_r >= 35.5)  Then 100 Else slopelenusle_r 
+* 3.28  END as int) as rvslopelenusle 
+, slope_r
+INTO #step2 
+FROM #step1
+
+SELECT
+#step2.cokey
+, llpine
+, case 
+WHEN rvslopelenusle < 4.5 Then 1
+WHEN rvslopelenusle >= 4.5 And rvslopelenusle < 7.5 Then 2 
+WHEN rvslopelenusle >= 7.5 And rvslopelenusle < 10.5 Then 3 
+WHEN rvslopelenusle >= 10.5 And rvslopelenusle < 13.5 Then 4 
+WHEN rvslopelenusle >= 13.5 And rvslopelenusle < 20 Then 5 
+WHEN rvslopelenusle >= 20 And rvslopelenusle < 37.5 Then 6 
+WHEN rvslopelenusle >= 37.5 And rvslopelenusle < 62.5 Then 7 
+WHEN rvslopelenusle >= 62.6 And rvslopelenusle < 87.5 Then 8 
+WHEN rvslopelenusle >= 87.5 And rvslopelenusle < 125 Then 9 
+WHEN rvslopelenusle >= 125 And rvslopelenusle < 175 Then 10 
+WHEN rvslopelenusle >= 175 And rvslopelenusle < 225 Then 11 
+WHEN rvslopelenusle >= 225 And rvslopelenusle < 275 Then 12 
+WHEN rvslopelenusle >= 275 And rvslopelenusle < 350 Then 13 
+WHEN rvslopelenusle >= 350 And rvslopelenusle < 500 Then 14 
+WHEN rvslopelenusle >= 500 And rvslopelenusle < 700 Then 15 
+WHEN rvslopelenusle >= 700 And rvslopelenusle < 900 Then 16 Else 17 END as columnx 
+, case 
+WHEN slope_r < 0.35 Then 1 
+WHEN slope_r >= 45 And slope_r < 55 Then 18 
+WHEN slope_r >= 35 And slope_r < 45 Then 17 
+WHEN slope_r >= 27.5 And slope_r < 35 Then 16 
+WHEN slope_r >= 22.5 And slope_r < 27.5 Then 15 
+WHEN slope_r >= 18.0 And slope_r < 22.5 Then 14 
+WHEN slope_r >= 15.0 And slope_r < 18 Then 13 
+WHEN slope_r >= 13.0 And slope_r < 15 Then 12 
+WHEN slope_r >= 11.0 And slope_r < 13 Then 11 
+WHEN slope_r >= 9.0 And slope_r < 11 Then 10 
+WHEN slope_r >= 7.0 And slope_r < 9 Then 9 
+WHEN slope_r >= 5.5 And slope_r < 7 Then 8 
+WHEN slope_r >= 4.5 And slope_r < 5.5 Then 7 
+WHEN slope_r >= 3.5 And slope_r < 4.5 Then 6 
+WHEN slope_r >= 2.5 And slope_r < 3.5 Then 5 
+WHEN slope_r >= 1.5 And slope_r < 2.5 Then 4 
+WHEN slope_r >= 0.75 And slope_r < 1.5 Then 3 
+WHEN slope_r >= 0.35 And slope_r < 0.75 Then 2 Else 19 END as row 
+INTO #step3 
+FROM #step2
+
+
+SELECT
+#step3.cokey
+, llpine
+, case 
+WHEN row = 1 and columnx = 1 then 0.05 
+WHEN row = 1 and columnx = 2 then 0.05 
+WHEN row = 1 and columnx = 3 then 0.05 
+WHEN row = 1 and columnx = 4 then 0.05 
+WHEN row = 1 and columnx = 5 then 0.05 
+WHEN row = 1 and columnx = 6 then 0.05 
+WHEN row = 1 and columnx = 7 then 0.05 
+WHEN row = 1 and columnx = 8 then 0.05 
+WHEN row = 1 and columnx = 9 then 0.05 
+WHEN row = 1 and columnx = 10 then 0.05 
+WHEN row = 1 and columnx = 11 then 0.05 
+WHEN row = 1 and columnx = 12 then 0.05 
+WHEN row = 1 and columnx = 13 then 0.05 
+WHEN row = 1 and columnx = 14 then 0.06 
+WHEN row = 1 and columnx = 15 then 0.06 
+WHEN row = 1 and columnx = 16 then 0.06 
+WHEN row = 1 and columnx = 17 then 0.06 
+WHEN row = 2 and columnx = 1 then 0.07 
+WHEN row = 2 and columnx = 2 then 0.07 
+WHEN row = 2 and columnx = 3 then 0.07 
+WHEN row = 2 and columnx = 4 then 0.07 
+WHEN row = 2 and columnx = 5 then 0.07 
+WHEN row = 2 and columnx = 6 then 0.08 
+WHEN row = 2 and columnx = 7 then 0.08 
+WHEN row = 2 and columnx = 8 then 0.08 
+WHEN row = 2 and columnx = 9 then 0.09 
+WHEN row = 2 and columnx = 10 then 0.09 
+WHEN row = 2 and columnx = 11 then 0.09 
+WHEN row = 2 and columnx = 12 then 0.09 
+WHEN row = 2 and columnx = 13 then 0.09 
+WHEN row = 2 and columnx = 14 then 0.1 
+WHEN row = 2 and columnx = 15 then 0.1 
+WHEN row = 2 and columnx = 16 then 0.1 
+WHEN row = 2 and columnx = 17 then 0.1 
+WHEN row = 3 and columnx = 1 then 0.11 
+WHEN row = 3 and columnx = 2 then 0.11 
+WHEN row = 3 and columnx = 3 then 0.11 
+WHEN row = 3 and columnx = 4 then 0.11 
+WHEN row = 3 and columnx = 5 then 0.11 
+WHEN row = 3 and columnx = 6 then 0.12 
+WHEN row = 3 and columnx = 7 then 0.13 
+WHEN row = 3 and columnx = 8 then 0.14 
+WHEN row = 3 and columnx = 9 then 0.14 
+WHEN row = 3 and columnx = 10 then 0.15 
+WHEN row = 3 and columnx = 11 then 0.16 
+WHEN row = 3 and columnx = 12 then 0.17 
+WHEN row = 3 and columnx = 13 then 0.17 
+WHEN row = 3 and columnx = 14 then 0.18 
+WHEN row = 3 and columnx = 15 then 0.19 
+WHEN row = 3 and columnx = 16 then 0.2 
+WHEN row = 3 and columnx = 17 then 0.2 
+WHEN row = 4 and columnx = 1 then 0.17 
+WHEN row = 4 and columnx = 2 then 0.17 
+WHEN row = 4 and columnx = 3 then 0.17 
+WHEN row = 4 and columnx = 4 then 0.17 
+WHEN row = 4 and columnx = 5 then 0.17 
+WHEN row = 4 and columnx = 6 then 0.19 
+WHEN row = 4 and columnx = 7 then 0.22 
+WHEN row = 4 and columnx = 8 then 0.25 
+WHEN row = 4 and columnx = 9 then 0.27 
+WHEN row = 4 and columnx = 10 then 0.29 
+WHEN row = 4 and columnx = 11 then 0.31 
+WHEN row = 4 and columnx = 12 then 0.33 
+WHEN row = 4 and columnx = 13 then 0.35 
+WHEN row = 4 and columnx = 14 then 0.37 
+WHEN row = 4 and columnx = 15 then 0.41 
+WHEN row = 4 and columnx = 16 then 0.44 
+WHEN row = 4 and columnx = 17 then 0.47 
+WHEN row = 5 and columnx = 1 then 0.22 
+WHEN row = 5 and columnx = 2 then 0.22 
+WHEN row = 5 and columnx = 3 then 0.22 
+WHEN row = 5 and columnx = 4 then 0.22 
+WHEN row = 5 and columnx = 5 then 0.22 
+WHEN row = 5 and columnx = 6 then 0.25 
+WHEN row = 5 and columnx = 7 then 0.32 
+WHEN row = 5 and columnx = 8 then 0.36 
+WHEN row = 5 and columnx = 9 then 0.39 
+WHEN row = 5 and columnx = 10 then 0.44 
+WHEN row = 5 and columnx = 11 then 0.48 
+WHEN row = 5 and columnx = 12 then 0.52 
+WHEN row = 5 and columnx = 13 then 0.55 
+WHEN row = 5 and columnx = 14 then 0.6 
+WHEN row = 5 and columnx = 15 then 0.68 
+WHEN row = 5 and columnx = 16 then 0.75 
+WHEN row = 5 and columnx = 17 then 0.8 
+WHEN row = 6 and columnx = 1 then 0.26 
+WHEN row = 6 and columnx = 2 then 0.26 
+WHEN row = 6 and columnx = 3 then 0.26 
+WHEN row = 6 and columnx = 4 then 0.26 
+WHEN row = 6 and columnx = 5 then 0.26 
+WHEN row = 6 and columnx = 6 then 0.31 
+WHEN row = 6 and columnx = 7 then 0.4 
+WHEN row = 6 and columnx = 8 then 0.47 
+WHEN row = 6 and columnx = 9 then 0.52 
+WHEN row = 6 and columnx = 10 then 0.6 
+WHEN row = 6 and columnx = 11 then 0.67 
+WHEN row = 6 and columnx = 12 then 0.72 
+WHEN row = 6 and columnx = 13 then 0.77 
+WHEN row = 6 and columnx = 14 then 0.86 
+WHEN row = 6 and columnx = 15 then 0.99 
+WHEN row = 6 and columnx = 16 then 1.1 
+WHEN row = 6 and columnx = 17 then 1.19 
+WHEN row = 7 and columnx = 1 then 0.3 
+WHEN row = 7 and columnx = 2 then 0.3 
+WHEN row = 7 and columnx = 3 then 0.3 
+WHEN row = 7 and columnx = 4 then 0.3 
+WHEN row = 7 and columnx = 5 then 0.3 
+WHEN row = 7 and columnx = 6 then 0.37 
+WHEN row = 7 and columnx = 7 then 0.49 
+WHEN row = 7 and columnx = 8 then 0.58 
+WHEN row = 7 and columnx = 9 then 0.65 
+WHEN row = 7 and columnx = 10 then 0.76 
+WHEN row = 7 and columnx = 11 then 0.85 
+WHEN row = 7 and columnx = 12 then 0.93 
+WHEN row = 7 and columnx = 13 then 1.01 
+WHEN row = 7 and columnx = 14 then 1.13 
+WHEN row = 7 and columnx = 15 then 1.33 
+WHEN row = 7 and columnx = 16 then 1.49 
+WHEN row = 7 and columnx = 17 then 1.63 
+WHEN row = 8 and columnx = 1 then 0.34 
+WHEN row = 8 and columnx = 2 then 0.34 
+WHEN row = 8 and columnx = 3 then 0.34 
+WHEN row = 8 and columnx = 4 then 0.34 
+WHEN row = 8 and columnx = 5 then 0.34 
+WHEN row = 8 and columnx = 6 then 0.43 
+WHEN row = 8 and columnx = 7 then 0.58 
+WHEN row = 8 and columnx = 8 then 0.69 
+WHEN row = 8 and columnx = 9 then 0.78 
+WHEN row = 8 and columnx = 10 then 0.93 
+WHEN row = 8 and columnx = 11 then 1.05 
+WHEN row = 8 and columnx = 12 then 1.16 
+WHEN row = 8 and columnx = 13 then 1.25 
+WHEN row = 8 and columnx = 14 then 1.42 
+WHEN row = 8 and columnx = 15 then 1.69 
+WHEN row = 8 and columnx = 16 then 1.91 
+WHEN row = 8 and columnx = 17 then 2.11 
+WHEN row = 9 and columnx = 1 then 0.42 
+WHEN row = 9 and columnx = 2 then 0.42 
+WHEN row = 9 and columnx = 3 then 0.42 
+WHEN row = 9 and columnx = 4 then 0.42 
+WHEN row = 9 and columnx = 5 then 0.42 
+WHEN row = 9 and columnx = 6 then 0.53 
+WHEN row = 9 and columnx = 7 then 0.74 
+WHEN row = 9 and columnx = 8 then 0.91 
+WHEN row = 9 and columnx = 9 then 1.04 
+WHEN row = 9 and columnx = 10 then 1.26 
+WHEN row = 9 and columnx = 11 then 1.45 
+WHEN row = 9 and columnx = 12 then 1.62 
+WHEN row = 9 and columnx = 13 then 1.77 
+WHEN row = 9 and columnx = 14 then 2.03 
+WHEN row = 9 and columnx = 15 then 2.47 
+WHEN row = 9 and columnx = 16 then 2.83 
+WHEN row = 9 and columnx = 17 then 3.15 
+WHEN row = 10 and columnx = 1 then 0.46 
+WHEN row = 10 and columnx = 2 then 0.48 
+WHEN row = 10 and columnx = 3 then 0.5 
+WHEN row = 10 and columnx = 4 then 0.51 
+WHEN row = 10 and columnx = 5 then 0.52 
+WHEN row = 10 and columnx = 6 then 0.67 
+WHEN row = 10 and columnx = 7 then 0.97 
+WHEN row = 10 and columnx = 8 then 1.19 
+WHEN row = 10 and columnx = 9 then 1.38 
+WHEN row = 10 and columnx = 10 then 1.71 
+WHEN row = 10 and columnx = 11 then 1.98 
+WHEN row = 10 and columnx = 12 then 2.22 
+WHEN row = 10 and columnx = 13 then 2.44 
+WHEN row = 10 and columnx = 14 then 2.84 
+WHEN row = 10 and columnx = 15 then 3.5 
+WHEN row = 10 and columnx = 16 then 4.06 
+WHEN row = 10 and columnx = 17 then 4.56 
+WHEN row = 11 and columnx = 1 then 0.47 
+WHEN row = 11 and columnx = 2 then 0.53 
+WHEN row = 11 and columnx = 3 then 0.58 
+WHEN row = 11 and columnx = 4 then 0.61 
+WHEN row = 11 and columnx = 5 then 0.64 
+WHEN row = 11 and columnx = 6 then 0.84 
+WHEN row = 11 and columnx = 7 then 1.23 
+WHEN row = 11 and columnx = 8 then 1.53 
+WHEN row = 11 and columnx = 9 then 1.79 
+WHEN row = 11 and columnx = 10 then 2.23 
+WHEN row = 11 and columnx = 11 then 2.61 
+WHEN row = 11 and columnx = 12 then 2.95 
+WHEN row = 11 and columnx = 13 then 3.26 
+WHEN row = 11 and columnx = 14 then 3.81 
+WHEN row = 11 and columnx = 15 then 4.75 
+WHEN row = 11 and columnx = 16 then 5.56 
+WHEN row = 11 and columnx = 17 then 6.28 
+WHEN row = 12 and columnx = 1 then 0.48 
+WHEN row = 12 and columnx = 2 then 0.58 
+WHEN row = 12 and columnx = 3 then 0.65 
+WHEN row = 12 and columnx = 4 then 0.7 
+WHEN row = 12 and columnx = 5 then 0.75 
+WHEN row = 12 and columnx = 6 then 1 
+WHEN row = 12 and columnx = 7 then 1.48 
+WHEN row = 12 and columnx = 8 then 1.86 
+WHEN row = 12 and columnx = 9 then 2.19 
+WHEN row = 12 and columnx = 10 then 2.76 
+WHEN row = 12 and columnx = 11 then 3.25 
+WHEN row = 12 and columnx = 12 then 3.69 
+WHEN row = 12 and columnx = 13 then 4.09 
+WHEN row = 12 and columnx = 14 then 4.82 
+WHEN row = 12 and columnx = 15 then 6.07 
+WHEN row = 12 and columnx = 16 then 7.15 
+WHEN row = 12 and columnx = 17 then 8.11 
+WHEN row = 13 and columnx = 1 then 0.49 
+WHEN row = 13 and columnx = 2 then 0.63 
+WHEN row = 13 and columnx = 3 then 0.72 
+WHEN row = 13 and columnx = 4 then 0.79 
+WHEN row = 13 and columnx = 5 then 0.85 
+WHEN row = 13 and columnx = 6 then 1.15 
+WHEN row = 13 and columnx = 7 then 1.73 
+WHEN row = 13 and columnx = 8 then 2.2 
+WHEN row = 13 and columnx = 9 then 2.6 
+WHEN row = 13 and columnx = 10 then 3.3 
+WHEN row = 13 and columnx = 11 then 3.9 
+WHEN row = 13 and columnx = 12 then 4.45 
+WHEN row = 13 and columnx = 13 then 4.95 
+WHEN row = 13 and columnx = 14 then 5.86 
+WHEN row = 13 and columnx = 15 then 7.43 
+WHEN row = 13 and columnx = 16 then 8.79 
+WHEN row = 13 and columnx = 17 then 10.02 
+WHEN row = 14 and columnx = 1 then 0.52 
+WHEN row = 14 and columnx = 2 then 0.71 
+WHEN row = 14 and columnx = 3 then 0.85 
+WHEN row = 14 and columnx = 4 then 0.96 
+WHEN row = 14 and columnx = 5 then 1.06 
+WHEN row = 14 and columnx = 6 then 1.45 
+WHEN row = 14 and columnx = 7 then 2.22 
+WHEN row = 14 and columnx = 8 then 2.85 
+WHEN row = 14 and columnx = 9 then 3.4 
+WHEN row = 14 and columnx = 10 then 4.36 
+WHEN row = 14 and columnx = 11 then 5.21 
+WHEN row = 14 and columnx = 12 then 5.97 
+WHEN row = 14 and columnx = 13 then 6.68 
+WHEN row = 14 and columnx = 14 then 7.97 
+WHEN row = 14 and columnx = 15 then 10.23 
+WHEN row = 14 and columnx = 16 then 12.2 
+WHEN row = 14 and columnx = 17 then 13.99 
+WHEN row = 15 and columnx = 1 then 0.56 
+WHEN row = 15 and columnx = 2 then 0.8 
+WHEN row = 15 and columnx = 3 then 1 
+WHEN row = 15 and columnx = 4 then 1.16 
+WHEN row = 15 and columnx = 5 then 1.3 
+WHEN row = 15 and columnx = 6 then 1.81 
+WHEN row = 15 and columnx = 7 then 2.82 
+WHEN row = 15 and columnx = 8 then 3.65 
+WHEN row = 15 and columnx = 9 then 4.39 
+WHEN row = 15 and columnx = 10 then 5.69 
+WHEN row = 15 and columnx = 11 then 6.83 
+WHEN row = 15 and columnx = 12 then 7.88 
+WHEN row = 15 and columnx = 13 then 8.86 
+WHEN row = 15 and columnx = 14 then 10.65 
+WHEN row = 15 and columnx = 15 then 13.8 
+WHEN row = 15 and columnx = 16 then 16.58 
+WHEN row = 15 and columnx = 17 then 19.13 
+WHEN row = 16 and columnx = 1 then 0.59 
+WHEN row = 16 and columnx = 2 then 0.89 
+WHEN row = 16 and columnx = 3 then 1.13 
+WHEN row = 16 and columnx = 4 then 1.34 
+WHEN row = 16 and columnx = 5 then 1.53 
+WHEN row = 16 and columnx = 6 then 2.15 
+WHEN row = 16 and columnx = 7 then 3.39 
+WHEN row = 16 and columnx = 8 then 4.42 
+WHEN row = 16 and columnx = 9 then 5.34 
+WHEN row = 16 and columnx = 10 then 6.98 
+WHEN row = 16 and columnx = 11 then 8.43 
+WHEN row = 16 and columnx = 12 then 9.76 
+WHEN row = 16 and columnx = 13 then 11.01 
+WHEN row = 16 and columnx = 14 then 13.3 
+WHEN row = 16 and columnx = 15 then 17.37 
+WHEN row = 16 and columnx = 16 then 20.99 
+WHEN row = 16 and columnx = 17 then 24.31 
+WHEN row = 17 and columnx = 1 then 0.65 
+WHEN row = 17 and columnx = 2 then 1.05 
+WHEN row = 17 and columnx = 3 then 1.38 
+WHEN row = 17 and columnx = 4 then 1.68 
+WHEN row = 17 and columnx = 5 then 1.95 
+WHEN row = 17 and columnx = 6 then 2.77 
+WHEN row = 17 and columnx = 7 then 4.45 
+WHEN row = 17 and columnx = 8 then 5.87 
+WHEN row = 17 and columnx = 9 then 7.14 
+WHEN row = 17 and columnx = 10 then 9.43 
+WHEN row = 17 and columnx = 11 then 11.47 
+WHEN row = 17 and columnx = 12 then 13.37 
+WHEN row = 17 and columnx = 13 then 15.14 
+WHEN row = 17 and columnx = 14 then 18.43 
+WHEN row = 17 and columnx = 15 then 24.32 
+WHEN row = 17 and columnx = 16 then 29.6 
+WHEN row = 17 and columnx = 17 then 34.48 
+WHEN row = 18 and columnx = 1 then 0.71 
+WHEN row = 18 and columnx = 2 then 1.18 
+WHEN row = 18 and columnx = 3 then 1.59 
+WHEN row = 18 and columnx = 4 then 1.97 
+WHEN row = 18 and columnx = 5 then 2.32 
+WHEN row = 18 and columnx = 6 then 3.32 
+WHEN row = 18 and columnx = 7 then 5.4 
+WHEN row = 18 and columnx = 8 then 7.17 
+WHEN row = 18 and columnx = 9 then 8.78 
+WHEN row = 18 and columnx = 10 then 11.66 
+WHEN row = 18 and columnx = 11 then 14.26 
+WHEN row = 18 and columnx = 12 then 16.67 
+WHEN row = 18 and columnx = 13 then 18.94 
+WHEN row = 18 and columnx = 14 then 23.17 
+WHEN row = 18 and columnx = 15 then 30.78 
+WHEN row = 18 and columnx = 16 then 37.65 
+WHEN row = 18 and columnx = 17 then 44.02 
+WHEN row = 19 and columnx = 1 then 0.76 
+WHEN row = 19 and columnx = 2 then 1.3 
+WHEN row = 19 and columnx = 3 then 1.78 
+WHEN row = 19 and columnx = 4 then 2.23 
+WHEN row = 19 and columnx = 5 then 2.65 
+WHEN row = 19 and columnx = 6 then 3.81 
+WHEN row = 19 and columnx = 7 then 6.24 
+WHEN row = 19 and columnx = 8 then 8.33 
+WHEN row = 19 and columnx = 9 then 10.23 
+WHEN row = 19 and columnx = 10 then 13.65 
+WHEN row = 19 and columnx = 11 then 16.76 
+WHEN row = 19 and columnx = 12 then 19.64 
+WHEN row = 19 and columnx = 13 then 22.36 
+WHEN row = 19 and columnx = 14 then 27.45 
+WHEN row = 19 and columnx = 15 then 36.63 
+WHEN row = 19 and columnx = 16 then 44.96 
+WHEN row = 19 and columnx = 17 then 52.7 Else 53 END as mu_LS 
+INTO #step4 
+FROM #step3
+
+SELECT distinct
+ LEFT(State_County_ID, 2) as st_alpha_fips_cd
+, cast(case  
+ WHEN LEFT(State_County_ID, 2) like 'AK' THEN '02'
+ WHEN LEFT(State_County_ID, 2) like 'AL' THEN '01'
+ WHEN LEFT(State_County_ID, 2) like 'AR' THEN '05'
+ WHEN LEFT(State_County_ID, 2) like 'AS' THEN '60'
+ WHEN LEFT(State_County_ID, 2) like 'AZ' THEN '04'
+ WHEN LEFT(State_County_ID, 2) like 'CA' THEN '06'
+ WHEN LEFT(State_County_ID, 2) like 'CO' THEN '08'
+ WHEN LEFT(State_County_ID, 2) like 'CT' THEN '09'
+ WHEN LEFT(State_County_ID, 2) like 'DC' THEN '11'
+ WHEN LEFT(State_County_ID, 2) like 'DE' THEN '10'
+ WHEN LEFT(State_County_ID, 2) like 'FL' THEN '12'
+ WHEN LEFT(State_County_ID, 2) like 'GA' THEN '13'
+ WHEN LEFT(State_County_ID, 2) like 'GU' THEN '66'
+ WHEN LEFT(State_County_ID, 2) like 'HI' THEN '15'
+ WHEN LEFT(State_County_ID, 2) like 'IA' THEN '19'
+ WHEN LEFT(State_County_ID, 2) like 'ID' THEN '16'
+ WHEN LEFT(State_County_ID, 2) like 'IL' THEN '17'
+ WHEN LEFT(State_County_ID, 2) like 'IN' THEN '18'
+ WHEN LEFT(State_County_ID, 2) like 'KS' THEN '20'
+ WHEN LEFT(State_County_ID, 2) like 'KY' THEN '21'
+ WHEN LEFT(State_County_ID, 2) like 'LA' THEN '22'
+ WHEN LEFT(State_County_ID, 2) like 'MA' THEN '25'
+ WHEN LEFT(State_County_ID, 2) like 'MD' THEN '24'
+ WHEN LEFT(State_County_ID, 2) like 'ME' THEN '23'
+ WHEN LEFT(State_County_ID, 2) like 'MI' THEN '26'
+ WHEN LEFT(State_County_ID, 2) like 'MN' THEN '27'
+ WHEN LEFT(State_County_ID, 2) like 'MO' THEN '29'
+ WHEN LEFT(State_County_ID, 2) like 'MS' THEN '28'
+ WHEN LEFT(State_County_ID, 2) like 'MT' THEN '30'
+ WHEN LEFT(State_County_ID, 2) like 'NC' THEN '37'
+ WHEN LEFT(State_County_ID, 2) like 'ND' THEN '38'
+ WHEN LEFT(State_County_ID, 2) like 'NE' THEN '31'
+ WHEN LEFT(State_County_ID, 2) like 'NH' THEN '33'
+ WHEN LEFT(State_County_ID, 2) like 'NJ' THEN '34'
+ WHEN LEFT(State_County_ID, 2) like 'NM' THEN '35'
+ WHEN LEFT(State_County_ID, 2) like 'NV' THEN '32'
+ WHEN LEFT(State_County_ID, 2) like 'NY' THEN '36'
+ WHEN LEFT(State_County_ID, 2) like 'OH' THEN '39'
+ WHEN LEFT(State_County_ID, 2) like 'OK' THEN '40'
+ WHEN LEFT(State_County_ID, 2) like 'OR' THEN '41'
+ WHEN LEFT(State_County_ID, 2) like 'PA' THEN '42'
+ WHEN LEFT(State_County_ID, 2) like 'PR' THEN '72'
+ WHEN LEFT(State_County_ID, 2) like 'RI' THEN '44'
+ WHEN LEFT(State_County_ID, 2) like 'SC' THEN '45'
+ WHEN LEFT(State_County_ID, 2) like 'SD' THEN '46'
+ WHEN LEFT(State_County_ID, 2) like 'TN' THEN '47'
+ WHEN LEFT(State_County_ID, 2) like 'TX' THEN '48'
+ WHEN LEFT(State_County_ID, 2) like 'UT' THEN '49'
+ WHEN LEFT(State_County_ID, 2) like 'VA' THEN '51'
+ WHEN LEFT(State_County_ID, 2) like 'VI' THEN '78'
+ WHEN LEFT(State_County_ID, 2) like 'VT' THEN '50'
+ WHEN LEFT(State_County_ID, 2) like 'WA' THEN '53'
+ WHEN LEFT(State_County_ID, 2) like 'WI' THEN '55'
+ WHEN LEFT(State_County_ID, 2) like 'WV' THEN '54'
+ WHEN LEFT(State_County_ID, 2) like 'WY' THEN '56' 
+ END as varchar) as st_fips_cd
+, RIGHT(State_County_ID, 3) as cnty_fips_cd
+, Soil_Survey_Area_ID as soil_srvy_ar_cd
+, musym as soil_map_unit_cd
+, muname as soil_map_unit_name
+, mapkey
+, mu_kfactor as wtr_erod_fctr
+, mu_tfactor as soil_loss_tolr_fctr
+, mu_ifactor as wind_erod_idx
+, mu_LS as soil_slp_lgth_fctr
+, llpine as long_leaf_suit_ind
+, WESL as wesl_ind
+, mu_leach as soil_lch_ind
+, source
+, cast(NCCPI_Value_dcp as decimal(3,2)) as NCCPI
+, nirrcapclass
+FROM #step4 
+INNER JOIN #step1 on #step1.cokey=#step4.cokey
+WHERE nirrcapclass like '%' 
+--WHERE nirrcapclass like '6e' or LEFT(nirrcapclass, 1) < 5 
+ORDER BY st_alpha_fips_cd, cnty_fips_cd, musym
+

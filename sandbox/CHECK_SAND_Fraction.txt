@@ -1,0 +1,13 @@
+SELECT l.mlraoffice, LEFT((l.areasymbol), 2) as state, l.areasymbol, m.musym, m.muname, c.compname, hzdept_r, sandtotal_r, cast((sandvc_r+sandco_r+sandmed_r+sandfine_r+sandvf_r) as numeric) as CalcTotalSand, sandvc_r, sandco_r, sandmed_r, sandfine_r, sandvf_r, silttotal_r, claytotal_r, c.cokey, ch.chkey, cast((sandtotal_r) as numeric) as Sandtotalpop
+INTO #SAND
+FROM legend l 
+    inner join mapunit m ON l.lkey = m.lkey
+    inner join component c ON m.mukey = c.mukey
+  inner join chorizon ch ON c.cokey = ch.cokey
+WHERE l.areasymbol <> 'US' AND majcompflag = 'yes' --AND sandtotal_r <>(sandvc_r+sandco_r+sandmed_r+sandfine_r+sandvf_r)
+ORDER by l.mlraoffice, l.areasymbol, m.musym, c.compname, ch.hzdept_r 
+
+SELECT mlraoffice, state, areasymbol, musym, compname, cokey, chkey, hzdept_r, CalcTotalSand, Sandtotalpop
+FROM #SAND
+WHERE CalcTotalSand != Sandtotalpop
+ORDER BY mlraoffice, state, areasymbol, musym, compname, cokey, chkey 
