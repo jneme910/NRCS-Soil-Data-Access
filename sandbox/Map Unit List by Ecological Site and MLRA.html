@@ -1,0 +1,257 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<title>Non-Tech Description</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<style type="text/css">
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .scrolltable > .header {
+        }
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+	
+	</head>
+<body>
+	<h3>Map Unit Description (Brief, Generated) 	<a name='top'></h3>
+	<p>
+	An SDA-populated select list is used to pick a state, SSA and map unit.
+	Select mapunit and aggregated data values are displayed for the mapunit components "Map Unit Description (Brief, Generated)" based upon those selections. The data is not static; it hits Soil Data Access Live. 
+	<a href='#reportref'> For more information about the table, </a>
+	</p>
+
+	
+	
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedmlraid"><p>(no MLRA selected)</p></div>
+	
+	<select id="selectId2" onchange="ChangeSelectedSSA(event)">
+		<option value='' style="display: none" id="remove">(select a Ecological Site)</option>
+	</select>
+	
+	<div id="selectedSSAId"><p>(no Ecological Site)</p></div>
+	
+	<select id="selectId3" onchange="ChangeSelectedMapunit(event)">
+		<option value='' style="display: none" id="remove">(select a mapunit)</option>
+	</select>
+	<br></br>
+	<div id="id1"></div>
+	<br></br>
+	<p>Notes: <a href='#top'>Back to top</a></p>
+	<ul>
+	<li>When the page is loaded the State selection option set is loaded from SDA.</li>
+	<li>At first selection the "(select a state)" option is removed.</li>
+	<li>The selection also triggers a second SDA query for the SSAs for that state.</li>
+	<li>The mapunit selection is similar, the mapunit selection presents a table.</li>
+	</ul>
+<font color='red'>
+	<h3>
+	<a name="77"></a> Map Unit Description</h3></font>	
+	<p> The map units delineated on the detailed soil maps in a soil survey represent the soils or miscellaneous areas in the survey area. The map unit descriptions in this report, along with the maps, can be used to determine the composition and properties of a unit.:</p>
+
+<p>A map unit delineation on a soil map represents an area dominated by one or more major kinds of soil or miscellaneous areas. A map unit is identified and named according to the taxonomic classification of the dominant soils. Within a taxonomic class there are precisely defined limits for the properties of the soils. On the landscape, however, the soils are natural phenomena, and they have the characteristic variability of all natural phenomena. Thus, the range of some observed properties may extend beyond the limits defined for a taxonomic class. Areas of soils of a single taxonomic class rarely, if ever, can be mapped without including areas of other taxonomic classes. Consequently, every map unit is made up of the soils or miscellaneous areas for which it is named and some minor components that belong to taxonomic classes other than those of the major soils.:</p>
+
+<p>The Map Unit Description (Brief, Generated) report displays a generated description of the major soils that occur in a map unit. Descriptions of non-soil (miscellaneous areas) and minor map unit components are not included. This description is generated from the underlying soil attribute data.:</p>
+
+<p>Additional information about the map units described in this report is available in other Soil Data Mart reports, which give properties of the soils and the limitations, capabilities, and potentials for many uses. Also, the narratives that accompany the Soil Data Mart reports define some of the properties included in the map unit descriptions.:</p>
+	
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var mlraid = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "SELECT areasymbol, areasymbol AS mlraid, areaname AS MLRA_Name FROM laoverlap WHERE laoverlap.areatypename ='MLRA' GROUP BY areasymbol ,  areaname ORDER BY areasymbol ASC;",
+				
+
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a MLRA");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch SSA names and symbols
+			var mlraid = event.target.value;
+			var notification = $("#selectedmlraid");
+			notification[0].innerHTML = "<p>selected mlraid = " + mlraid + "</p>";
+			
+			query =
+				"SELECT  ecoclassid, ecoclassname,  lao.areasymbol AS MLRA, lao.areaname AS MLRA_Name, ecoclasstypename,  ecoclassref "
+				+ "FROM  legend INNER JOIN laoverlap AS lao ON legend.lkey = lao.lkey AND lao.areasymbol = '" + mlraid + "'" 
+				+ "INNER JOIN muaoverlap AS mua ON mua.lareaovkey = lao.lareaovkey AND lao.areatypename='mlra' "
+				+ "INNER JOIN mapunit AS mu ON mu.mukey = mua.mukey "
+				+ "INNER JOIN component c ON c.mukey = mu.mukey AND compkind = 'series' "
+				+ "INNER JOIN coecoclass on c.cokey = coecoclass.cokey and coecoclass.ecoclassref like 'Ecological Site Description Database'"
+				+ " GROUP BY lao.areasymbol , lao.areaname, ecoclasstypename, ecoclassid, ecoclassname, ecoclassref  "
+				+ "ORDER BY lao.areasymbol ASC, ecoclassid;";
+		
+		
+
+
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId2", callbackData.Table, 1, 0, "select an Ecological Site");
+				}, 
+				"json");
+		}
+		
+		function ChangeSelectedSSA(event) {
+			// Update the selected state text area and then fetch mapunit records
+			var ssaId = event.target.value;
+			var notification = $("#selectedSSAId");
+			notification[0].innerHTML = "<p>selected Ecological Site = " + ssaId + "</p>";
+			
+			var query = 
+				"select MU.mukey, muname "
+				+ "from legend L left join mapunit MU on L.lkey = MU.lkey "
+				+ "where L.areatypename = 'Non-MLRA Soil Survey Area' "
+				+ "and L.areasymbol='" + ssaId + "';";
+				
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId3", callbackData.Table, 0, 1, "select a mapunit");
+				}, 
+				"json");			
+		}
+		
+		function ChangeSelectedMapunit(event) {
+			// Given the mukey, get the "extended" mapunit attributes
+			var mukey = event.target.value;
+			
+			query = 
+		"SELECT lao.areasymbol AS MLRA, lao.areaname AS MLRA_Name,  ecoclassid, ecoclassname, muname, mu.mukey, musym,  nationalmusym, legend.areasymbol, legend.areaname"
+			+ "FROM  legend "
+			+ "INNER JOIN laoverlap AS lao ON legend.lkey = lao.lkey AND lao.areasymbol = '77B'"
+			+ "INNER JOIN muaoverlap AS mua ON mua.lareaovkey = lao.lareaovkey AND lao.areatypename='mlra' "
+			+ "INNER JOIN mapunit AS mu ON mu.mukey = mua.mukey "
+			+ "INNER JOIN component c ON c.mukey = mu.mukey AND compkind = 'series' "
+			+ "INNER JOIN coecoclass on c.cokey = coecoclass.cokey and coecoclass.ecoclassref = 'Ecological Site Description Database' AND ecoclassid = 'R067BY015CO'"
+			+ "GROUP BY lao.areasymbol , lao.areaname, ecoclassid, ecoclassname, muname, mu.mukey, musym,  nationalmusym, legend.areasymbol, legend.areaname  ORDER BY lao.areasymbol ASC, ecoclassid"
+				
+		+ ";";
+
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+	</script>
+</body>
+</html>

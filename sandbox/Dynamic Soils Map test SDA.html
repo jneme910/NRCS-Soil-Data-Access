@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Leaflet Web Map</title>
+
+<!-- reference to Leaflet CSS -->
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+
+<!-- reference to Leaflet JavaScript -->
+<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+
+<!-- set width and height styles for map -->
+<style>
+#map {
+    width: 960px;
+    height:500px;
+}
+</style>
+
+</head>
+
+<body>
+
+    <!-- place holder for map -->
+    <div id="map"></div>
+
+<script>
+
+    // create map object, tell it to live in 'map' div and give initial latitude, longitude, zoom values
+    // pass option to turn scroll wheel zoom off
+    var map = L.map('map',{scrollWheelZoom:false}).setView([43.64701, -79.39425], 15);
+
+    // add base map tiles from OpenStreetMap and attribution info to 'map' div
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // define array of points for polygon
+    var area = [ -89.600416911750472 43.759177196007421, -89.6003693023366 43.7591059498229, -89.60031331086256 43.7590653812884, -89.600200993583584 43.759055154975471, -89.599969485818846 43.759076948233151, -89.599681651187211 43.759136627486114, -89.599607219910567 43.7591678084105, -89.599449472580275 43.759189097671474, -89.599411585354389 43.759183063499066, -89.59933581365388 43.759137297875668, -89.599306476906634 43.759006037639573, -89.599590959013568 43.758811073965369, -89.599685506167845 43.75869288969399, -89.600171154798161 43.758753406713, -89.600736764907168 43.7588615329295, -89.600987719676809 43.758883158042423, -89.601174635707522 43.75882398238619, -89.601210174936369 43.758798333126116, -89.601174301213561 43.758884499164452, -89.600972296741219 43.759008552138468, -89.60063148889185 43.759145177193986, -89.600475752235951 43.759183230545972, -89.600416911750472 43.759177196007421 ];
+
+    // add polygon from area array points to map with some basic styling
+    L.polygon(area,{color:'purple',opacity:.6}).addTo(map);
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section>
+<title> Conservation Tree/Shrub Suitability Groups (CTSG)</title>
+	
+	<para>
+	A Conservation Tree/Shrub Group (CTSG) is a physiographic unit or area having similar climatic and edaphic characteristics that control the selection and height growth of trees and shrubs. It consists mainly of two elements: 1) Major Land Resource Area, and 2) Soil Group.
+	</para>
+	
+	<orderedlist>
+	<listitem>
+	<para>The first part of a CTSG is the designated Major Land Resource Area or MLRA. This refines the list of woody plant species selection and adaptation to a specified geographic area with similarities in climate. MLRAs are defined in USDA Agricultural Handbook 296 (2006) re. 
+	<ulink url="https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs142p2_050898.pdf">Land Resource Regions and Major Land Resource Areas of the United States, the Caribbean, and the Pacific Basin (U.S. Department of Agriculture Handbook 296, 2006)</ulink>
+	. As needed, States will subdivide an MLRA where there are varying elevations (e.g., hardiness zones) and diverse ranges of average annual precipitation that influence species selection and performance.
+		</para></listitem>
+	
+	<listitem><para>
+	The second part is the Soil Group. This part of the CTSG further refines the list of woody plants based on groupings of edaphic conditions. Rather than try to correlate plant data for each and every soil component, a component is evaluated against criteria and placed in a soil group. Woody plants are then correlated to a specific soil group within the identified MLRA (or subdivision thereof). The calculation of soil group uses criteria displayed in Exhibit 537-15. Local, custom criteria can be used to override the calculated soil group as well as recognize additional local soil groups if needed.
+	</para></listitem>
+	</orderedlist>
+	<para>
+	The correlation and display of adapted woody species, height performance, other attributes, and associated practices and measures using the CTSG system need to be clearly understood by clients. The performance of species is expressed as the expected height at a base age (usually 20 years in continental U.S. and Alaska and 10 years for tropical and subtropical areas). Other attributes may be correlated to each species such as longevity, wildlife value, and crown shape and spread. In addition to height performance and other attributes, the CTSG MLRA (or subdivision thereof) and soil group may be used to determine facilitating practices and measures that can enhance survival and growth of woody species for correlated soil components. For example, a soil component in 
+	<emphasis role="italic"> Soil Group 7 (sandy)</emphasis> in an agricultural area in <emphasis role="italic">MLRA B7</emphasis>  will likely have blowing sand that will damage new seedlings in a zone of low precipitation. Permanent irrigation (e.g., Irrigation System - Microirrigation, 441) and moisture-conserving “weed barrier” (e.g., Mulching, 484) in combination with small physical barriers on the windward side of planted seedlings (e.g., straw bales or snow-fence) could offer mitigating actions to insure better survival and establishment.
+	</para>
+	
+	<para>States are responsible for developing CTSG interpretations for MLRAs that occur wholly within their state. For MLRAs that cross state boundaries, the individual state with the greatest extent of the MLRA is responsible for developing CTSG interpretations but must coordinate with adjacent states having the MLRA. States will use the national CTSG soil group criteria (NASIS calculation) or, if needed, a modified version done by individual MLRA (requires coordination of all states with the MLRA). All states must develop subdivisions of an MLRA, as needed, to accommodate cold hardiness zones, precipitation zones, or other plant-influencing landscape-level conditions. In so far as possible, these subdivisions should align with established Land Resource Units. States make periodic reviews and updates to such displays so that information and data are current in section II of the eFOTG, Web Soil Survey, Soil Data Mart, and other documents as applicable. Although the CTSG designation is very helpful in conservation planning, it does not override the need for on-site evaluation for properly selecting trees and shrubs and estimating design heights and other planning requirements.
+	</para>
+	<br></br>
+	<table>
+	<colspec width='0.5*' />
+	<colspec width='1*' />
+	<colspec width='1*' />
+	<thead>
+	
+	 <tr>
+	<td><emphasis role="italic"> 	GROUP</emphasis></td>
+	<td><emphasis role="italic">  	Soil Depth (cm)</emphasis></td>
+	<td><emphasis role="italic">  	Avail-able Water Capacity(cm)</emphasis></td>
+	<td><emphasis role="italic"> 	CaCO3 Equiv. (%, 0- 30cm)and [Sodium Adsorption Ratio, SAR]</emphasis></td>
+	<td><emphasis role="italic">  	pH(0-30cm)</emphasis></td>
+	<td><emphasis role="italic"> 	Electrical Cond.(mmhos, 0-30cm)</emphasis></td>
+	<td><emphasis role="italic">  	Depth to Growing Season Water Table(cm)</emphasis></td>
+	<td><emphasis role="italic"> 	Texture and Other Notes (AWC is a primary criterion with texture being an important supplemental criterion for some groups. Histosols are applicable only to groups 1h and 2h)</emphasis></td>
+	<td><emphasis role="italic">  	Typical Associated Family Taxomic Particle Size Class</emphasis></td>
+	<td><emphasis role="italic">  	Associated General Group Concept</emphasis></td>
+	</tr>
+	
+	</thead>
+	<tbody>
+	<tr>
+	<td>Sandy</td>
+	<td>Less than 1.60</td>
+	<td rowspan="2"> More than 1.80</td>
+	</tr>
+	
+	<tr>
+	<td>Loamy</td>
+	<td>Less than 1.40</td>
+	
+	</tr>
+	
+	
+	<tr>
+	<td>Clayey</td>
+	<td>Less than 1.10</td>
+	<td>More than 1.47</td>
+	</tr>
+	</tbody>
+	</table>
+	
+</section>

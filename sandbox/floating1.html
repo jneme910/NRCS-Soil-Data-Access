@@ -1,0 +1,292 @@
+<html>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perspiciatis recusandae maxime maiores doloribus natus iure reiciendis praesentium fugit nihil, quae eius rerum velit quos earum nemo, repellendus, esse, eligendi unde!</p>
+<style> .table--fixed th,
+.table--fixed td {
+  padding: 8px;  
+}
+
+.table--fixed thead th {
+  background-color:#333;
+  color:white;
+}
+
+.table--fixed tbody tr:nth-child(odd){
+  background-color:#DDD;
+}
+
+
+/*Flexbox logic */
+
+.table--fixed {
+  display: flex;
+  width: 50%;
+  flex-flow: column;
+}
+
+.table--fixed thead {
+  display: block;
+  > tr {
+    display: flex;
+    >th {
+      flex: 1;      
+    }
+    >th:nth-child(2) {
+      flex: 0 0 20px;
+    }
+  }
+}
+
+.table--fixed tbody { 
+  height: 150px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.table--fixed tbody {
+  display: block;
+  > tr {
+    display: flex;
+    // flex-wrap:nowrap;
+    >td {
+      flex: 1;
+      // display:flex;
+      // justify-content:flex-start;
+    }
+    >td:nth-child(2){
+      flex: 0 0 26px;
+    }
+  }
+}</style>
+<table class="table table--fixed">
+  <thead class="row header">
+    <tr>
+      <th class="cell">
+        Name
+      </th>
+      <th class="cell age-cell">
+        Age
+      </th>
+      <th class="cell">
+        Occupation
+      </th>
+      <th class="cell">
+        Location
+      </th>
+      <tr>
+  </thead>
+  <tbody>
+
+    <tr class="row">
+      <td class="cell name-cell">
+        Raja J
+      </td>
+      <td class="cell age-cell">
+        25
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Rajesh
+      </td>
+      <td class="cell">
+        35
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        Singapore, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Ganesh
+      </td>
+      <td class="cell">
+        28
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, MA
+      </td>
+    </tr>
+     <tr class="row">
+      <td class="cell name-cell">
+        Raja J
+      </td>
+      <td class="cell age-cell">
+        25
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Rajesh
+      </td>
+      <td class="cell">
+        35
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        Singapore, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Ganesh
+      </td>
+      <td class="cell">
+        28
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, MA
+      </td>
+    </tr>
+     <tr class="row">
+      <td class="cell name-cell">
+        Raja J
+      </td>
+      <td class="cell age-cell">
+        25
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Rajesh
+      </td>
+      <td class="cell">
+        35
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        Singapore, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Ganesh
+      </td>
+      <td class="cell">
+        28
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, MA
+      </td>
+    </tr>
+     <tr class="row">
+      <td class="cell name-cell">
+        Raja J
+      </td>
+      <td class="cell age-cell">
+        25
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Rajesh
+      </td>
+      <td class="cell">
+        35
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        Singapore, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Ganesh
+      </td>
+      <td class="cell">
+        28
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, MA
+      </td>
+    </tr>
+     <tr class="row">
+      <td class="cell name-cell">
+        Raja J
+      </td>
+      <td class="cell age-cell">
+        25
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Rajesh
+      </td>
+      <td class="cell">
+        35
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        Singapore, TN
+      </td>
+    </tr>
+    <tr class="row">
+      <td class="cell">
+        Ganesh
+      </td>
+      <td class="cell">
+        28
+      </td>
+      <td class="cell">
+        Freelance Web Developer
+      </td>
+      <td class="cell">
+        India, MA
+      </td>
+    </tr>
+    
+  </tbody>
+</table>
+</html>

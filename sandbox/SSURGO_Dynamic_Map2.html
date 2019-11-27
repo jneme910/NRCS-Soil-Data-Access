@@ -1,0 +1,203 @@
+<!-- DOCTYPE html>
+<html>
+<!-- D:\notes\2016\12\NRCS_trip_December_2016\follow-up\ex5.html 
+
+DO NOT PUBLICALLY PUBLISH with Bing key as shown herein - it is only for USDA use!!!
+
+-->
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"
+  integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
+  crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"
+  integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+  crossorigin=""></script>
+	
+	
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/wicket/1.3.2/wicket.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/wicket/1.3.2/wicket-leaflet.min.js"></script>
+
+	 <script src="https://maps.googleapis.com/maps/api/js?v=3&libraries=places&sensor=false"></script>
+</head>
+<body>
+	Leaflet SDA sample - clicking on the map presents a popup with some mapunit data and highlights the current mupolygon.
+	<ul>
+	<li>Soil lines are from the SDA "Web Map Service" (WMS). Note that the WMS allows
+	for a "Styled Layer Description" allowing considerable control over the
+	appearance of the soil polygons and their labels. That feature is not used here.</li>
+	<li>The soil polygons are drawn using tiled SDA Web Map Service requests. The selected
+	polygon is drawn by retrieving the polygon as WKT and drawing the selected polygon.
+	Note that an SDA "User Defined Function" (UDF) is used to perform the spatial search.
+	See the SDA <a href="https://sdmdataaccess.sc.egov.usda.gov/documents/AdvancedQueries.html">Advanced Queries</a>
+	page for details.
+	</ul>
+	<p/>
+	<div id="map" style="height: 85%;"></div>
+	<script type="text/javascript">
+	
+	
+	
+		// The following Bing key is provided for USDA-use only.
+	var Esri_WorldImagery = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+});
+		//var bingTiles = new L.BingLayer("AmmH5JF22z1SVTlmW5RBL9Qs24jux_Rn2C6MSGoRHohVCySTPQBcsOf4VEqIvtye", {type: 'Aerial'});
+		var map = L.map('map').setView([38.5643, -121.5838], 14);
+		var features = [];	// holder for selected polygon boundary
+		map.defaults = {
+			icon: new L.Icon({
+				iconUrl: 'red_dot.png',
+				iconSize: [16, 16],
+				iconAnchor: [8, 8],
+				shadowUrl: 'dot_shadow.png',
+				shadowSize: [16, 16],
+				shadowAnchor: [8, 8]
+			}),
+			editable: true,
+			color: '#AA0000',
+			weight: 3,
+			opacity: 1.0,
+			editable: true,
+			fillColor: '#AA0000',
+			fillOpacity: 0.2
+        };
+			
+	// start the map in Fort Collins CO
+		map.setView(new L.LatLng(43.0766, -89.4125),14);
+		map.addLayer(Esri_WorldImagery);
+		L.tileLayer.wms("https://SDMDataAccess.sc.egov.usda.gov/Spatial/SDM.wms", {
+            layers: 'mapunitpoly',
+            format: 'image/png',
+            transparent: true,
+            attribution: "SDA WMS",
+            maxZoom: 18,
+            minZoom: 10,
+        }).addTo(map);
+		
+		var popup = L.popup();
+		
+		function onMapClick(e) {
+			var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+			var wkt = "point(" + e.latlng.lng + " " + e.latlng.lat + ")";
+			// carry the coordinates along as the first returned record set. What a hack!
+			var query1 = 
+				"select " + e.latlng.lat + " [lat], " + e.latlng.lng + " [lng];";
+			var query2 = 
+				"select top 1 MU.musym, MU.nationalmusym, MU.muname, MU.farmlndcl "
+				+ "from mapunit MU, "
+				+ "SDA_Get_Mukey_from_intersection_with_WktWgs84('" + wkt + "') K "
+				+ "where MU.mukey = K.mukey;";
+			// An SDA User Defined Function (SDA_Get_Mupolygonkey_from_intersection_with_WktWgs84)
+			// is used to greatly optimize the spatially-indexed retrieval.
+			// See https://sdmdataaccess.sc.egov.usda.gov/documents/AdvancedQueries.html .
+			var query3 = 
+				"select top 1 mupolygongeo from mupolygon MU, "
+				+ "SDA_Get_Mupolygonkey_from_intersection_with_WktWgs84('" + wkt + "') K "
+				+ "where MU.mupolygonkey = K.mupolygonkey;";
+			var data = {
+				query: query1 + query2 + query3,
+				format: "json+columnname"
+			};
+			
+			$.post(url, data, function( callbackData ) {
+					// The first returned Table has the lat, long in the second row.
+					var latlngTable = callbackData.Table;
+					var latlng = [latlngTable[1][0], latlngTable[1][1]]
+					// the second table has the column names and values
+					var payloadTable = callbackData.Table1;
+					var content = "<table>";
+					icol = 0;
+					while (icol < payloadTable[0].length) {
+						content += "<tr><td>" + payloadTable[0][icol] + "</td><td>" + payloadTable[1][icol] + "</td></tr>";
+						icol++;
+					};
+					// the third table contains the identified polygon as WKT,
+					// convert to a Leaflet geometry
+					for (i in features) {
+						if (features.hasOwnProperty(i)) {
+							map.removeLayer(features[i]);
+						};
+					};
+					features.length = 0;
+					var polyWktTable = callbackData.Table2;
+					var polyWkt = polyWktTable[1][0];
+					wkt = new Wkt.Wkt(polyWkt);
+					obj = wkt.toObject(map.defaults);
+					if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
+						for (i in obj) {
+							if (obj.hasOwnProperty(i) && !Wkt.isArray(obj[i])) {
+								obj[i].addTo(map);
+								features.push(obj[i]);
+							};
+						};
+					} else {
+						obj.addTo(map); // Add it to the map
+						features.push(obj);
+					};
+			
+					// Pan the map to the feature
+					if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
+						// For objects that have defined bounds or a way to get them
+						map.fitBounds(obj.getBounds());
+					} else {
+						if (obj.getLatLng !== undefined && typeof obj.getLatLng === 'function') {
+							map.panTo(obj.getLatLng());
+						};
+					};
+			
+					popup
+						.setLatLng(latlng)
+						.setContent(content)
+						.openOn(map);
+				}, 
+				"json");				
+		};
+
+		map.on('click', onMapClick);
+		
+		var GooglePlacesSearchBox = L.Control.extend({
+  onAdd: function() {
+    var element = document.createElement("input");
+    element.id = "searchBox";
+    return element;
+  }
+});
+(new GooglePlacesSearchBox).addTo(map);
+
+var input = document.getElementById("searchBox");
+var searchBox = new google.maps.places.SearchBox(input);
+
+searchBox.addListener('places_changed', function() {
+  var places = searchBox.getPlaces();
+
+  if (places.length == 0) {
+    return;
+  }
+
+  var group = L.featureGroup();
+
+  places.forEach(function(place) {
+
+    // Create a marker for each place.
+    var marker = L.marker([
+      place.geometry.location.lat(),
+      place.geometry.location.lng()
+    ]);
+    group.addLayer(marker);
+  });
+
+  group.addTo(map);
+  map.fitBounds(group.getBounds());
+
+}
+
+
+);
+		
+	</script>
+
+</body>
+</html>

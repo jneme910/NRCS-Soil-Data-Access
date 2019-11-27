@@ -1,0 +1,25 @@
+
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["imagebarchart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          ['Type', 'Other', 'Region', 'Retired', 'State'],
+          ['Instances',  90,  384, 133, 4939], 
+		  ['Hours',  68,  2307, 962, 8973] 
+        ]);
+
+        var chart = new google.visualization.ImageBarChart(document.getElementById('chart_div'));
+
+        chart.draw(data, {width: 400, height: 240, min: 0});
+      }
+    </script>
+  </head>
+  <body>
+    <div id="chart_div" style="width: 400px; height: 240px;"></div>
+  </body>
+</html>

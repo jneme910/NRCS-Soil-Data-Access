@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+   <title>Fixed Header - Scrollable Table</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+
+<style type="text/css"> body {background:#cfa;} table#header th {border-right:solid 1px #000} table#header th#right-border {padding:0 4px 0 3px;border-right:none;} table#tbl-content td {border-bottom:solid 1px #bbb;border-right:solid 1px #bbb;} table#tbl-content tr#bottom td {border-bottom:none;}
+</style>
+<script>$(window).resize(function(){
+    $.each($('table tbody tr:eq(0) td'), function(k,v){
+        $('thead tr:eq(0) th:eq(' + k + ')').width($(v).width());
+        $('tfoot tr:eq(0) td:eq(' + k + ')').width($(v).width());
+    });
+}); 
+</script>
+</head>
+<body>
+<div id="wrapper" style="font-family:tahoma,arial;font-size:80%;">
+<div id="content" style="width:807px;margin:100px auto;">
+<div id="boundary" style="margin-right:-2px;background:#ffe629;border:solid 1px #000;">
+<table id="header" cellpadding="3" cellspacing="0" border="0" style="width:790px;text-align:left;table-layout:fixed;">
+   <tr>
+      <th style="width:18%">BRIDE</th>
+      <th style="width:17%">FATHER</th>
+      <th style="width:18%">MOTHER</th>
+      <th style="width:19%">WITNESSES</th>
+      <th style="width:10%">DATE</th>
+      <th id="right-border" style="width:18%;">GROOM</th>
+   </tr>
+</table>
+</div><!--end #boundary-->
+<div id="box" style="width:100%;height:194px;overflow-y:auto;border:solid 1px #000;border-top:none;">
+<table id="tbl-content" cellpadding="3" cellspacing="0" border="0" style="width:790px;table-layout:fixed;background:#fff;">
+   <tr>
+      <td style="width:18%">BARROW, Martha G.</td>
+      <td style="width:17%">BARROW, Martin</td>
+      <td style="width:18%">HUGHES, Eliza J.</td>
+      <td style="width:19%">O'BRIEN, Edward <br>COMMESFORD, Anna</td>
+      <td style="width:10%">23 Nov 1887</td>
+      <td style="width:18%">O'BRIEN, Timothy C.</td>
+   </tr>
+   <tr>
+      <td>DOLAN, Catherine</td>
+      <td>DOLAN, Patrick</td>
+      <td>GRAY, Maria</td>
+      <td>HARTLEY, James J. <br>?HASIMA, E. J.</td>
+      <td>19 Dec 1887</td>
+      <td>ZIMMERMAN, Andrew</td>
+   </tr>
+   <tr>
+      <td>DWYRE, Catherine</td>
+      <td>DWYRE, John</td>
+      <td>Not named</td>
+      <td>FLANNIGAN, Patrick W. <br>McLOUGHLIN, Catherine</td>
+      <td>15 Nov 1887</td>
+      <td>BEGY, Philip</td>
+   </tr>
+   <tr>
+      <td>EPPING, Barbara</td>
+      <td>EPPING, Frank</td>
+      <td>FISHER, Mary</td>
+      <td>HARTLEY, James J. <br>HOUSIA, Edw. J.</td>
+      <td>16 Nov 1887</td>
+      <td>BOGART, Charles V.</td>
+   </tr>
+   <tr>
+      <td>HYATT, Phoebe</td>
+      <td>HYATT, Theodore</td>
+      <td>MALONE, Eliza</td>
+      <td>HYATT, William <br>LEAHY, Hannah</td>
+      <td>  7 Dec 1887</td>
+      <td>O'BRIEN,  Patrick C.</td>
+   </tr>
+   <tr>
+      <td>KEARNS, Maria</td>
+      <td>KEARNS, Richard</td>
+      <td>CULLEN, Mary</td>
+      <td>SMITH, William H. <br>BURGER, Margaret</td>
+      <td>14 Dec 1887</td>
+      <td>MOORE, Richard</td>
+   </tr>
+   <tr>
+      <td>MAXCY, Bridget</td>
+      <td>MAXCY, Jeremiah</td>
+      <td>McLOUGHLIN, Margaret</td>
+      <td>VECH, Joseph <br>MAXCY, Ida</td>
+      <td>21 Nov 1887</td>
+      <td>CORNELL, William</td>
+   </tr>
+   <tr>
+      <td>McEVOY, Catherine</td>
+      <td>McEVOY, Peter</td>
+      <td>BLACKBURN, Anna</td>
+      <td>BURKE, John<br>BURNS, Bridget</td>
+      <td>19 Nov 1887</td>
+      <td>CARR, Hugh</td>
+   </tr>
+   <tr>
+      <td>O'KEEFE, Ellen J.</td>
+      <td>O'KEEFE, Michael</td>
+      <td>REYNOLDS, Hannah M.</td>
+      <td>SMITH, Louis<br>O'KEEFE, Charlotte</td>
+      <td>16 Nov 1887</td>
+      <td>SNYDER, John L.</td>
+   </tr>
+   <tr>
+      <td>PURCELL, Margaret</td>
+      <td>PURCELL, Thomas</td>
+      <td>DOYLE, Mary</td>
+      <td>EMBLOW, William<br>BACON, Eupheima</td>
+      <td>23 Nov 1887</td>
+      <td>HARRISON, George H.</td>
+   </tr>
+   <tr id="bottom">
+      <td>RYAN, Margaret</td>
+      <td>RYAN, Thomas</td>
+      <td>FITZGERALD, Mary</td>
+      <td>STUPP, Charles<br>RYAN, Mary</td>
+      <td>30 Nov 1887</td>
+      <td>BAINES, William</td>
+   </tr>
+</table>
+</div><!--end #box-->
+</div><!--end #content-->
+</div><!--end #wrapper-->
+</body>
+</html>

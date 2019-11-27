@@ -1,0 +1,521 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<title>NRCS State Hydric Soils List</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<input type="button" id="btnExport" value="Export" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="table2excel.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#btnExport").click(function () {
+            $("#tblCustomers").table2excel({
+                filename: "Table.xls"
+            });
+        });
+    });
+</script>
+
+ <script type="text/javascript">(function ($, window, document, undefined) {
+    var pluginName = "table2excel",
+
+    defaults = {
+        exclude: ".noExl",
+        name: "Table2Excel",
+        filename: "table2excel",
+        fileext: ".xls",
+        exclude_img: true,
+        exclude_links: true,
+        exclude_inputs: true
+    };
+
+    // The actual plugin constructor
+    function Plugin(element, options) {
+        this.element = element;
+        // jQuery has an extend method which merges the contents of two or
+        // more objects, storing the result in the first object. The first object
+        // is generally empty as we don't want to alter the default options for
+        // future instances of the plugin
+        //
+        this.settings = $.extend({}, defaults, options);
+        this._defaults = defaults;
+        this._name = pluginName;
+        this.init();
+    }
+
+    Plugin.prototype = {
+        init: function () {
+            var e = this;
+
+            var utf8Heading = "<meta http-equiv=\"content-type\" content=\"application/vnd.ms-excel; charset=UTF-8\">";
+            e.template = {
+                head: "<html xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\" xmlns=\"http://www.w3.org/TR/REC-html40\">" + utf8Heading + "<head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>",
+                sheet: {
+                    head: "<x:ExcelWorksheet><x:Name>",
+                    tail: "</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>"
+                },
+                mid: "</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>",
+                table: {
+                    head: "<table>",
+                    tail: "</table>"
+                },
+                foot: "</body></html>"
+            };
+
+            e.tableRows = [];
+
+            // get contents of table except for exclude
+            $(e.element).each(function (i, o) {
+                var tempRows = "";
+                $(o).find("tr").not(e.settings.exclude).each(function (i, p) {
+
+                    tempRows += "<tr>";
+                    $(p).find("td,th").not(e.settings.exclude).each(function (i, q) { // p did not exist, I corrected
+
+                        var rc = {
+                            rows: $(this).attr("rowspan"),
+                            cols: $(this).attr("colspan"),
+                            flag: $(q).find(e.settings.exclude)
+                        };
+
+                        if (rc.flag.length > 0) {
+                            tempRows += "<td> </td>"; // exclude it!!
+                        } else {
+                            if (rc.rows & rc.cols) {
+                                tempRows += "<td>" + $(q).html() + "</td>";
+                            } else {
+                                tempRows += "<td";
+                                if (rc.rows > 0) {
+                                    tempRows += " rowspan=\'" + rc.rows + "\' ";
+                                }
+                                if (rc.cols > 0) {
+                                    tempRows += " colspan=\'" + rc.cols + "\' ";
+                                }
+                                tempRows += "/>" + $(q).html() + "</td>";
+                            }
+                        }
+                    });
+
+                    tempRows += "</tr>";
+                    console.log(tempRows);
+
+                });
+                // exclude img tags
+                if (e.settings.exclude_img) {
+                    tempRows = exclude_img(tempRows);
+                }
+
+                // exclude link tags
+                if (e.settings.exclude_links) {
+                    tempRows = exclude_links(tempRows);
+                }
+
+                // exclude input tags
+                if (e.settings.exclude_inputs) {
+                    tempRows = exclude_inputs(tempRows);
+                }
+                e.tableRows.push(tempRows);
+            });
+
+            e.tableToExcel(e.tableRows, e.settings.name, e.settings.sheetName);
+        },
+
+        tableToExcel: function (table, name, sheetName) {
+            var e = this, fullTemplate = "", i, link, a;
+
+            e.format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                });
+            };
+
+            sheetName = typeof sheetName === "undefined" ? "Sheet" : sheetName;
+
+            e.ctx = {
+                worksheet: name || "Worksheet",
+                table: table,
+                sheetName: sheetName
+            };
+
+            fullTemplate = e.template.head;
+
+            if ($.isArray(table)) {
+                for (i in table) {
+                    //fullTemplate += e.template.sheet.head + "{worksheet" + i + "}" + e.template.sheet.tail;
+                    fullTemplate += e.template.sheet.head + sheetName + i + e.template.sheet.tail;
+                }
+            }
+
+            fullTemplate += e.template.mid;
+
+            if ($.isArray(table)) {
+                for (i in table) {
+                    fullTemplate += e.template.table.head + "{table" + i + "}" + e.template.table.tail;
+                }
+            }
+
+            fullTemplate += e.template.foot;
+
+            for (i in table) {
+                e.ctx["table" + i] = table[i];
+            }
+            delete e.ctx.table;
+
+            var isIE = /*@cc_on!@*/false || !!document.documentMode; // this works with IE10 and IE11 both :)            
+            //if (typeof msie !== "undefined" && msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // this works ONLY with IE 11!!!
+            if (isIE) {
+                if (typeof Blob !== "undefined") {
+                    //use blobs if we can
+                    fullTemplate = e.format(fullTemplate, e.ctx); // with this, works with IE
+                    fullTemplate = [fullTemplate];
+                    //convert to array
+                    var blob1 = new Blob(fullTemplate, { type: "text/html" });
+                    window.navigator.msSaveBlob(blob1, getFileName(e.settings));
+                } else {
+                    //otherwise use the iframe and save
+                    //requires a blank iframe on page called txtArea1
+                    txtArea1.document.open("text/html", "replace");
+                    txtArea1.document.write(e.format(fullTemplate, e.ctx));
+                    txtArea1.document.close();
+                    txtArea1.focus();
+                    sa = txtArea1.document.execCommand("SaveAs", true, getFileName(e.settings));
+                }
+
+            } else {
+                var blob = new Blob([e.format(fullTemplate, e.ctx)], { type: "application/vnd.ms-excel" });
+                window.URL = window.URL || window.webkitURL;
+                link = window.URL.createObjectURL(blob);
+                a = document.createElement("a");
+                a.download = getFileName(e.settings);
+                a.href = link;
+
+                document.body.appendChild(a);
+
+                a.click();
+
+                document.body.removeChild(a);
+            }
+
+            return true;
+        }
+    };
+
+    function getFileName(settings) {
+        return (settings.filename ? settings.filename : "table2excel");
+    }
+
+    // Removes all img tags
+    function exclude_img(string) {
+        var _patt = /(\s+alt\s*=\s*"([^"]*)"|\s+alt\s*=\s*'([^']*)')/i;
+        return string.replace(/<img[^>]*>/gi, function myFunction(x) {
+            var res = _patt.exec(x);
+            if (res !== null && res.length >= 2) {
+                return res[2];
+            } else {
+                return "";
+            }
+        });
+    }
+
+    // Removes all link tags
+    function exclude_links(string) {
+        return string.replace(/<a[^>]*>|<\/a>/gi, "");
+    }
+
+    // Removes input params
+    function exclude_inputs(string) {
+        var _patt = /(\s+value\s*=\s*"([^"]*)"|\s+value\s*=\s*'([^']*)')/i;
+        return string.replace(/<input[^>]*>|<\/input>/gi, function myFunction(x) {
+            var res = _patt.exec(x);
+            if (res !== null && res.length >= 2) {
+                return res[2];
+            } else {
+                return "";
+            }
+        });
+    }
+
+    $.fn[pluginName] = function (options) {
+        var e = this;
+        e.each(function () {
+            if (!$.data(e, "plugin_" + pluginName)) {
+                $.data(e, "plugin_" + pluginName, new Plugin(this, options));
+            }
+        });
+
+        // chain jQuery functions
+        return e;
+    };
+
+})(jQuery, window, document);
+</script>
+	<style type="text/css">
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .scrolltable > .header {
+        }
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+<h3>State Soil Data Access (SDA) Hydric Soils Rating by Map Unit</h3>
+	<p>
+	An SDA-populated select list is used to pick a state and SSA which enables creation of a "Hydric Soils Report" based upon those selections. The data is not static; it hits Soil Data Access Live. To reset the table change the state dropdown. Once a state is selected and table appears, if a new state is selected it will refresh the table. The report uses a count instead of component percent to determine the hydric rating by map unit. 
+	<a href='#reportref'> For more information about the table, </a>
+	</p>
+	<a name='top'>
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<div id="id1"></div>
+		<br></br>
+	<b>
+		<font color='red'>
+			<a name='reportref'>Report Metadata:</a>
+		</font>
+	</b>
+	<php>
+		<a href='#top'>Back to top</a>
+	</php>
+		<ul>
+	<li><b>areasymbol: </b>A symbol that uniquely identifies a single occurrence of a particular type of area (e.g. Dane Co., Wisconsin is WI025).</li>
+	<li><b>musym: </b> The symbol used to uniquely identify the soil mapunit in the soil survey.</li>
+	<li><b>Mapunit_Name: </b> Correlated name of the mapunit (recommended name or field name for surveys in progress).</li>
+	<li><b>mukey: </b> A non-connotative string of characters used to uniquely identify a record in the Mapunit table.</li>
+	<li><b>hydric_rating: </b> This Hydric Soil Category rating indicates the components of map units that meet the criteria for hydric soils. </li>
+		</ul>
+
+	<b>
+		<font color='red'>
+			<a name='reportref'>Hydric Soil Categories  :</a>
+		</font>
+	</b>	
+	
+<p> This Hydric Soil Category rating indicates the components of map units that meet the criteria for hydric soils. Map units are composed of one or more major soil components or soil types that generally make up 20 percent or more of the map unit and are listed in the map unit name, and they may also have one or more minor contrasting soil components that generally make up less than 20 percent of the map unit. Each major and minor map unit component that meets the hydric criteria is rated 
+<span class="bold">hydric. </span> The map unit class ratings based on the hydric components present are: Hydric, Predominantly Hydric, Partially Hydric, Predominantly Nonhydric, and Nonhydric. The report also shows the total representative percentage of each map unit that the hydric components comprise.</p><p>
+<ul>
+ <li><b><span class="italic">"Hydric"</span></b> means that all major and minor components listed for a given map unit are rated as being hydric. </li>
+ <li><b><span class="italic">"Predominantly Hydric"</span></b> means that all major components listed for a given map unit are rated as hydric, and at least one contrasting minor component is not rated hydric.</li>
+ <li><b><span class="italic">"Partially Hydric" </span></b>means that at least one major component listed for a given map unit is rated as hydric, and at least one other major component is not rated hydric. </li>
+ <li><b><span class="italic">"Predominantly Nonhydric" </span> </b>means that no major component listed for a given map unit is rated as hydric, and at least one contrasting minor component is rated hydric.</li> 
+ <li><b><span class="italic">"Nonhydric" </span></b>means no major or minor components for the map unit are rated hydric. The assumption is that the map unit is nonhydric even if none of the components within the map unit have been rated.</li>
+</ul>
+</p><p> Hydric soils are defined by the National Technical Committee for Hydric Soils (NTCHS) as soils that formed under conditions of saturation, flooding, or ponding long enough during the growing season to develop anaerobic conditions in the upper part (Federal Register, 1994). Under natural conditions, these soils are either saturated or inundated long enough during the growing season to support the growth and reproduction of hydrophytic vegetation. </p><p>If soils are wet enough for a long enough period of time to be considered hydric, they typically exhibit certain properties that can be easily observed in the field. These visible properties are indicators of hydric soils. The indicators used to make onsite determinations of hydric soils are specified in "Field Indicators of Hydric Soils in the United States" (Vasilas, Hurt, and Noble, 2010).</p><p>The NTCHS has developed criteria to identify those soil properties unique to hydric soils (Federal Register, 2012). These criteria are used to identify map unit components that normally are associated with wetlands. The criteria use selected soil properties that are described in “Field Indicators of Hydric Soils in the United States” (Vasilas, Hurt, and Noble, 2010), "Soil Taxonomy" (Soil Survey Staff, 1999), "Keys to Soil Taxonomy" (Soil Survey Staff, 2010), and the "Soil Survey Manual" (Soil Survey Division Staff, 1993).</p><p>The criteria for hydric soils are represented by codes, for example, 2 or 3. Definitions for the codes are as follows:</p>                    <ol>
+                      <li>
+<p>All Histels except for Folistels, and Histosols except for Folists.</p>                      </li>
+                      <li>
+<p> Soils in Aquic suborders, great groups, or subgroups, Albolls suborder, Historthels great group, Histoturbels great group, Pachic subgroups, or Cumulic subgroups that:        </p><ol><li><p>Based on the range of characteristics for the soil series, will at least in part meet one or more Field Indicators of Hydric Soils in the United States, or </p></li><li><p>Show evidence that the soil meets the definition of a hydric soil;</p></li></ol><p></p>                      </li>
+                      <li>
+<p>Soils that are frequently ponded for long or very long duration during the growing season.        </p><ol><li><p>Based on the range of characteristics for the soil series, will at least in part meet one or more Field Indicators of Hydric Soils in the United States, or </p></li><li><p>Show evidence that the soil meets the definition of a hydric soil;</p></li></ol><p></p>                      </li>
+                      <li>
+<p>Map unit components that are frequently flooded for long duration or very long duration during the growing season that:</p><ol><li><p>Based on the range of characteristics for the soil series, will at least in part meet one or more Field Indicators of Hydric Soils in the United States, or </p></li><li><p>Show evidence that the soil meets the definition of a hydric soil;</p></li></ol><p></p>                      </li>
+                    </ol>
+<p>Hydric Condition: Food Security Act information regarding the ability to grow a commodity crop without removing woody vegetation or manipulating hydrology.</p><p>References:</p>                    <ul class="noimage">
+                      <li>
+<span class="italic"></span>                         
+Federal Register. July 13, 1994. Changes in hydric soils of the United States.                      </li>
+                      <li>
+<span class="italic"></span>                         
+Federal Register. February, 28, 2012. Hydric soils of the United States.                      </li>
+                      <li>
+<span class="italic"></span>                         
+Soil Survey Division Staff. 1993. Soil survey manual. Soil Conservation Service. U.S. Department of Agriculture Handbook 18.                      </li>
+                      <li>
+<span class="italic"></span>                         
+Soil Survey Staff. 1999. Soil taxonomy: A basic system of soil classification for making and interpreting soil surveys. 2nd edition. Natural Resources Conservation Service. U.S. Department of Agriculture Handbook 436.                      </li>
+                      <li>
+<span class="italic"></span>                         
+Soil Survey Staff. 2010. Keys to soil taxonomy. 11th edition. U.S. Department of Agriculture, Natural Resources Conservation Service.                      </li>
+                      <li>
+<span class="italic"></span>                         
+Vasilas, L.M., G.W. Hurt, and C.V. Noble, editors. Version 7.0, 2010. Field indicators of hydric soils in the United States.                      </li>
+                    </ul>
+                 
+
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "select statename, stateid from state order by statename;",
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch and display report 1 results
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			var query = 
+
+" SELECT areasymbol, musym, muname, mu.mukey/1  AS mukey,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey) AS comp_count,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes') AS count_maj_comp,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating = 'Yes' ) AS all_hydric,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes' AND hydricrating = 'Yes') AS maj_hydric,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes' AND hydricrating != 'Yes') AS maj_not_hydric,"
++ "   (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag != 'Yes' AND hydricrating  = 'Yes' ) AS hydric_inclusions,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating  != 'Yes') AS all_not_hydric, "
++ "   (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating  IS NULL ) AS hydric_null "
++ "  INTO #main_query"
++ " FROM legend  AS l"
++ " INNER JOIN  mapunit AS mu ON mu.lkey = l.lkey AND  LEFT(l.areasymbol,2) LIKE '" + stateId + "'"
++ " "
++ " SELECT  areasymbol, musym, muname, mukey,"
++ " CASE WHEN comp_count = all_not_hydric + hydric_null THEN  'Nonhydric' "
++ " WHEN comp_count = all_hydric  THEN 'Hydric' "
++ " WHEN comp_count != all_hydric AND count_maj_comp = maj_hydric THEN 'Predominantly Hydric' "
++ " WHEN hydric_inclusions >= 0.5 AND  maj_hydric < 0.5 THEN  'Predominantly Nonydric' "
++ " WHEN maj_not_hydric >= 0.5  AND  maj_hydric >= 0.5 THEN 'Partially Hydric' ELSE 'Error' END AS hydric_rating"
++ " FROM #main_query"
+;
+				
+
+				
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1" id="tblCustomers" >';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+	</script>
+	
+
+</body>
+</html>

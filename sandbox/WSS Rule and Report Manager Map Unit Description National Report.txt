@@ -1,0 +1,706 @@
+#PARAMETER areasym PROMPT "Enter Survey Area Symbol" CHAR.
+#PARAMETER mukeys PROMPT "Or List of Mapunit Keys" MULTIPLE CHAR.
+#PARAMETER useNationalMapunits PROMPT "Display national mapunit symbols?" BOOLEAN.
+
+###editing flooding because it was not picking up very frequent.  It may cause other issues. PRF 8_2_2013
+###edited the typical pedon - its still needs fixing
+
+###edited restriction depth to pick up the RV 3_3_15
+
+### edited salinity class criteria. Changed ">" to ">=" to agree with NSSH Criteria.  Steve Campbell 4_21_2015
+
+### fixed restriction depth section for situations where rv top depth is populated but lows and highs are null.  Steve Campbell 4_23_2015
+
+## removed the SECASE function for the ecological site name.  Steve Campbell 6_2_2015
+
+## added Hydric rating to the report  PRF 8/16/16
+
+BASE TABLE component.
+
+##
+##  Mapunit name and component data
+##
+EXEC SQL 
+SELECT areaname, musym, muname, compname, comppct_r, cokey, localphase, farmlndcl,
+    majcompflag, compkind, slope_l, slope_h, drainagecl, hydgrp, runoff, 
+    nirrcapcl, nirrcapscl, irrcapcl, irrcapscl, mapunit.mukey mukey, nationalmusym, hydricrating
+    FROM legend, mapunit, outer component 
+    WHERE JOIN legend to mapunit and join mapunit TO component
+    AND ( areasymbol=areasym OR mapunit.mukey in (mukeys) )
+    ORDER BY case when useNationalMapunits =0 then areaname else nationalmusym end, 
+    museq, 
+    case when majcompflag is null then 'No' else majcompflag end DESC,
+    comppct_r DESC, component.cokey;
+    AGGREGATE ROWS BY areaname, mukey, cokey.
+
+DEFINE newmu	NEW(mukey).
+DEFINE mutitle 	(IF useNationalMapunits THEN nationalmusym ELSE musym )
+			|| "--" || muname.
+DEFINE areabreak	IF useNationalMapunits THEN "0" ELSE areaname.
+DEFINE majorcomptitle	"Description of " || NMCASE(compname || 
+		(IF NOT ISNULL(localphase) THEN ", " || localphase ELSE "")).
+DEFINE minorcomptitle	SECASE(compname ||
+		(IF ISNULL(localphase) THEN "" ELSE ", " || localphase )).
+DEFINE comppct	sprintf ("%.f percent", comppct_r).
+DEFINE ilc	irrcapcl || irrcapscl.
+DEFINE nilc	nirrcapcl || nirrcapscl.
+DEFINE slope	( IF (slope_l == slope_h) THEN sprintf ("%.f", slope_l)
+		ELSE sprintf ("%.f to %.f", slope_l, slope_h) ) || " percent".
+
+DEFINE reporttitle   INITIAL SCRIPT(REPORT_TITLE).
+DEFINE reporthdrtext IF NEW(mukey) THEN reporthdrtext ELSE "" 
+                     INITIAL SCRIPT(REPORT_HEADER).
+##
+## Retrieve Version information
+##
+EXEC SQL SELECT sacatalog.areasymbol, saversion, saverest, Tabular_Version
+FROM  sacatalog, legend, mapunit, component
+Where join component to mapunit and join mapunit to legend and  sacatalog.areasymbol=legend.areasymbol;.
+
+
+##
+##  Summarized data for all components:
+##  elevation, precip, temperature, frost-free days, landscape
+##
+EXEC SQL
+SELECT DISTINCT geomftname as geotype, geomfname as landscape
+FROM component, outer cogeomordesc 
+WHERE mukey = $mukey
+AND join component to cogeomordesc;
+AGGREGATE COLUMN  geotype NONE, landscape NONE.
+
+EXEC SQL
+SELECT elev_l, elev_h, map_l, map_h,
+airtempa_l, airtempa_h, ffd_l, ffd_h
+FROM component 
+WHERE mukey = $mukey;
+AGGREGATE COLUMN elev_l MIN, elev_h MAX, map_l MIN, map_h MAX, 
+airtempa_l MIN, airtempa_h MAX, ffd_l MIN, ffd_h MAX.
+
+DEFINE elevl	ROUND(elev_l * 3.28, -1).
+DEFINE elevh	ROUND(elev_h * 3.28, -1).
+DEFINE elevation ( IF (elevl == elevh) THEN sprintf ("%'.f", elevl)
+		ELSE sprintf ("%'.f to %'.f", elevl, elevh) ) || " feet".
+DEFINE map	( IF (map_l == map_h) THEN sprintf ("%.f", map_l/25.4)
+		ELSE sprintf ("%.f to %.f", map_l/25.4, map_h/25.4) ) || " inches".
+DEFINE mat	( IF (airtempa_l == airtempa_h) THEN sprintf ("%.f", (airtempa_l*9/5)+32)
+		ELSE sprintf ("%.f to %.f", (airtempa_l*9/5)+32, (airtempa_h*9/5)+32) ) || " degrees F".
+DEFINE ffd	( IF (ffd_l == ffd_h) THEN sprintf ("%.f", ffd_l)
+		ELSE sprintf ("%.f to %.f", ffd_l, ffd_h) ) || " days".
+ASSIGN landscape SECASE (ARRAYCAT (LOOKUP(geotype=="Landsacpe", landscape), ", ")).
+
+
+##
+##  Major components
+##
+EXEC SQL
+SELECT mucmaj.compname majcompname, mucmaj.comppct_r majcomppct,
+mucmaj.localphase majphase, mucmaj.compkind majcompkind
+FROM component mucmaj
+WHERE mucmaj.mukey = $mukey AND
+mucmaj.majcompflag = 'Yes';
+SORT BY majcomppct DESC 
+AGGREGATE COLUMN majcompname NONE, majcomppct NONE, majphase NONE, majcompkind NONE.
+DEFINE complist	SECASE(majcompname) || 
+		(IF ISNULL(majphase) THEN "" ELSE ", " || LOCASE(majphase))
+		|| (IF ISNULL(majcompkind) OR majcompkind == "Miscellaneous area" THEN ": "
+		 ELSE IF ISNULL(majphase) THEN " and similar soils: "
+		 ELSE ", and similar soils: ").
+DEFINE comppcts sprintf ("%.f percent", majcomppct).
+
+##
+##  Minor components
+##
+EXEC SQL
+SELECT mucmin.comppct_r mincomppct
+FROM component mucmin
+WHERE mucmin.mukey = $mukey AND
+(mucmin.majcompflag = 'No' OR mucmin.majcompflag is null);
+AGGREGATE COLUMN mincomppct SUM.
+
+# Note: If there are minor components where majcompflag is null we assume it means "No".
+ASSIGN majcompflag  IF NOT ISNULL(mincomppct) AND ISNULL(majcompflag) THEN "No" ELSE CLIP(majcompflag).
+
+ASSIGN complist	IF ISNULL(mincomppct) THEN complist
+		ELSE APPEND(complist, "Minor components: ").
+ASSIGN comppcts	IF ISNULL(mincomppct) THEN comppcts
+		ELSE APPEND(comppcts, sprintf ("%.f percent", mincomppct)).
+
+##
+##  Geomorphic features
+##
+EXEC SQL
+SELECT geomftname, geomfname, geomfeatid, existsonfeat
+FROM component, cogeomordesc
+WHERE JOIN component TO cogeomordesc; 
+AGGREGATE COLUMN geomftname NONE, geomfname NONE, geomfeatid NONE, existsonfeat NONE.
+DEFINE microfeature SECASE (ARRAYCAT (LOOKUP("Microfeature", geomftname, geomfname), ", ")).
+DEFINE anthrofeature SECASE (ARRAYCAT (LOOKUP("Anthropogenic feature", geomftname, geomfname), ", ")).
+DEFINE lform LOOKUP("Landform", geomftname, geomfname).
+DEFINE featid LOOKUP("Landform", geomftname, geomfeatid).
+DEFINE existson LOOKUP("Landform", geomftname, existsonfeat).
+DEFINE landform	SECASE (ARRAYCAT (GEOMORDESC(lform, featid, existson), ", ")).
+
+##
+##  Landform position (2-D)
+##
+EXEC SQL
+SELECT hillslopeprof
+FROM component, cogeomordesc, cosurfmorphhpp
+WHERE JOIN component TO cogeomordesc AND
+JOIN cogeomordesc TO cosurfmorphhpp;.
+DEFINE hillslope SECASE (ARRAYCAT (hillslopeprof, ", ")).
+
+##
+##  Landform position (3-D)
+##
+EXEC SQL
+SELECT geomposmntn, geomposhill, geompostrce, geomposflats
+FROM component, cogeomordesc, cosurfmorphgc
+WHERE JOIN component TO cogeomordesc AND
+JOIN cogeomordesc TO cosurfmorphgc;.
+DEFINE geomcomp geomposmntn, geomposhill, geompostrce, geomposflats.
+ASSIGN geomcomp SECASE (ARRAYCAT(geomcomp, ", ")).
+
+##
+##  Slope shape
+##
+EXEC SQL
+SELECT shapeacross, shapedown
+FROM component, cogeomordesc, cosurfmorphss
+WHERE JOIN component TO cogeomordesc AND
+JOIN cogeomordesc TO cosurfmorphss;.
+DEFINE shpacross SECASE (ARRAYCAT(shapeacross, ", ")).
+DEFINE shpdown SECASE (ARRAYCAT(shapedown, ", ")).
+
+##
+##  Parent material
+##
+EXEC SQL
+SELECT pmgroupname
+FROM component, copmgrp
+WHERE copmgrp.rvindicator = 'Yes' AND
+JOIN component TO copmgrp;
+AGGREGATE COLUMN pmgroupname LIST "; ".
+ASSIGN pmgroupname SECASE(pmgroupname).
+
+##
+##  Surface fragments
+##
+EXEC SQL
+SELECT sfragcov_r
+FROM component, cosurffrags
+WHERE JOIN component TO cosurffrags
+AND sfragsize_r >= 250;
+AGGREGATE COLUMN sfragcov_r SUM.
+
+DEFINE sfragcov	sprintf ("%.1f percent", sfragcov_r).
+
+##
+##  Restrictive features
+##
+EXEC SQL
+SELECT reskind, resdept_l, resdept_h, resdept_r
+FROM component, corestrictions
+WHERE JOIN component TO corestrictions;
+SORT BY resdept_l
+AGGREGATE COLUMN reskind NONE, resdept_l NONE, resdept_h NONE, resdept_r NONE.
+
+DEFINE restop_r SPRINTF("%0.f", resdept_r/2.54).
+DEFINE restop_l SPRINTF("%0.f", resdept_l/2.54).
+DEFINE restop_h SPRINTF("%0.f", resdept_h/2.54).
+
+DEFINE resdepth	
+IF ISNULL(resdept_r) OR resdept_h == resdept_l 
+THEN restop_r
+ELSE restop_l || " to " || restop_h.
+
+DEFINE resfeat	
+IF  ISNULL(resdept_r)
+THEN "More than 80 inches"
+ELSE resdepth || " inches to " || LOCASE(reskind).
+
+ASSIGN resfeat
+IF (ISNULL(resdept_l) OR ISNULL(resdept_h)) AND NOT ISNULL(resdept_r)
+THEN "About " || restop_r || " inches to " || LOCASE(reskind)
+ELSE resfeat.
+
+DEFINE resfeats	ARRAYCAT(resfeat, "; ").
+
+##
+##  Summarized horizon properties:
+##  Permeability, max carbonates, max gypsum, salinity, max sodium adsorption
+##
+EXEC SQL
+SELECT ksat_l, ksat_h, caco3_h, gypsum_h, ec_l, ec_h, sar_h
+FROM component, chorizon
+WHERE JOIN component TO chorizon;
+AGGREGATE COLUMN ksat_l MIN, ksat_h MIN, caco3_h MAX, gypsum_h MAX, ec_l MAX, ec_h MAX, sar_h MAX.
+		 
+ASSIGN ksat_l	ksat_l * 0.1417.
+ASSIGN ksat_h	ksat_h * 0.1417.
+		 
+DEFINE permcl_l	IF ksat_l >= 14.17 THEN "very high"
+		ELSE IF ksat_l > 1.417 THEN "high"
+		ELSE IF ksat_l > 0.1417 THEN "moderately high"
+		ELSE IF ksat_l > 0.01417 THEN "moderately low"
+		ELSE IF ksat_l >= 0.001417 THEN "low"
+		ELSE "very low".
+DEFINE permcl_h	IF ksat_h >= 14.17 THEN "very high"
+		ELSE IF ksat_h > 1.417 THEN "high"
+		ELSE IF ksat_h > 0.1417 THEN "moderately high"
+		ELSE IF ksat_h > 0.01417 THEN "moderately low"
+		ELSE IF ksat_h >= 0.001417 THEN "low"
+		ELSE "very low".
+DEFINE permcl	SECASE (IF permcl_l == permcl_h THEN permcl_l
+		        ELSE permcl_l || " to " || permcl_h).
+DEFINE perm	permcl || " (" ||
+		( IF (ksat_l == ksat_h) THEN sprintf ("%.2f", ksat_l)
+		  ELSE sprintf ("%.2f to %.2f", ksat_l, ksat_h) ) || " in/hr)".
+		
+DEFINE salcl_l	IF ec_l >= 16 THEN	"strongly saline"
+		ELSE IF ec_l >= 8 THEN	"moderately saline"
+		ELSE IF ec_l >= 4 THEN	"slightly saline"
+		ELSE IF ec_l >= 2 THEN	"very slightly saline"
+		ELSE			"nonsaline".
+DEFINE salcl_h	IF ec_h >= 16 THEN	"strongly saline"
+		ELSE IF ec_h >= 8 THEN	"moderately saline"
+		ELSE IF ec_h >= 4 THEN	"slightly saline"
+		ELSE IF ec_h >= 2 THEN	"very slightly saline"
+		ELSE			"nonsaline".
+DEFINE salcl	SECASE (IF salcl_l == salcl_h THEN salcl_l
+		        ELSE salcl_l || " to " || salcl_h).
+DEFINE salinity	salcl || " (" ||
+			( IF (ec_l == ec_h) THEN sprintf ("%.1f", ec_l)
+		  	ELSE sprintf ("%.1f to %.1f", ec_l, ec_h) ) || " mmhos/cm)".
+
+DEFINE carbonate sprintf ("%.f percent", caco3_h).
+DEFINE gypsum	sprintf ("%.f percent", gypsum_h).
+
+##
+##  Flooding and ponding
+##
+EXEC SQL
+SELECT flodfreqcl, CODESEQ(flodfreqcl) as flodseq
+FROM component, comonth
+WHERE JOIN component TO comonth;
+AGGREGATE COLUMN flodfreqcl UNIQUE, flodseq UNIQUE.
+
+#DEFINE flood flodfreqcl || ": "|| flodseq.
+DEFINE flood	LOOKUP(ARRAYMAX(flodseq), flodseq, flodfreqcl).
+ASSIGN flood	IF ISNULL(flood) THEN "None" ELSE flood.
+#DEFINE flood	IF ISNULL(flodfreqcl) THEN "None" ELSE flodfreqcl.
+
+
+EXEC SQL
+SELECT pondfreqcl, CODESEQ(pondfreqcl) as pondseq
+FROM component, comonth
+WHERE JOIN component TO comonth;
+AGGREGATE COLUMN pondfreqcl UNIQUE, pondseq UNIQUE.
+DEFINE pond	LOOKUP(pondseq==ARRAYMAX(pondseq), pondfreqcl).
+ASSIGN pond	IF ISNULL(pond) THEN "None"
+		ELSE pond.
+##
+##  Ecological site
+##
+EXEC SQL
+SELECT ecoclassid, ecoclassname
+FROM component, coecoclass
+WHERE JOIN component TO coecoclass
+AND ecoclasstypename in ('NRCS Rangeland Site', 'NRCS Forestland Site');
+AGGREGATE COLUMN ecoclassid NONE, ecoclassname NONE.
+DEFINE esys	ecoclassname || 
+		(IF NOT ISNULL(ecoclassid) THEN " (" || ecoclassid || ")" ELSE "").
+ASSIGN esys	ARRAYCAT(esys, ", ").
+
+##
+##  Other vegetative classifications
+##
+EXEC SQL
+SELECT ecoclassid ovegclid, ecoclassname ovegclname
+FROM component, coecoclass
+WHERE JOIN component TO coecoclass
+AND ecoclasstypename not in ('NRCS Rangeland Site', 'NRCS Forestland Site');
+AGGREGATE COLUMN ovegclid NONE, ovegclname NONE.
+DEFINE othveg	ovegclname || 
+		(IF NOT ISNULL(ovegclid) THEN " (" || ovegclid || ")" ELSE "").
+ASSIGN othveg	ARRAYCAT(othveg, ", ").
+
+##
+##  Profile
+##
+EXEC SQL
+SELECT hzname, hzdept_r, hzdepb_r, texture, awc_r, ph1to1h2o_r, chorizon.chkey chkey
+FROM component, chorizon, chtexturegrp
+WHERE chtexturegrp.rvindicator = 'Yes' AND
+JOIN component TO chorizon AND
+JOIN chorizon TO chtexturegrp
+ORDER BY hzdept_r, chorizon.chkey;
+AGGREGATE COLUMN chkey NONE, hzname NONE, hzdept_r NONE, 
+ hzdepb_r NONE, texture NONE, ph1to1h2o_r NONE, awc_r NONE.
+DEFINE hzdt	(REGROUP hzdept_r BY chkey AGGREGATE FIRST)/2.54.
+DEFINE hzdb	(REGROUP hzdepb_r BY chkey AGGREGATE FIRST)/2.54.
+##DEFINE horizon	hzname || " - " || sprintf ("%.f to %.f inches: ", hzdt, hzdb).
+DEFINE horizon	hzname || " - " || sprintf ("%.f to %.f inches: ", hzdept_r/2.54, hzdepb_r/2.54).
+
+ASSIGN texture	TEXTURENAME(texture).
+DEFINE texgrp	(REGROUP texture BY chkey AGGREGATE LIST ", ").
+DEFINE reaction IF ISNULL(ph1to1h2o_r) THEN "" ELSE 
+	IF (ph1to1h2o_r) < 3.5 THEN "ultra acid" ELSE	
+	IF ((ph1to1h2o_r) > 3.45 and (ph1to1h2o_r) < 4.499) THEN "extremely acid" ELSE
+	IF ((ph1to1h2o_r) > 4.45 and (ph1to1h2o_r) < 5.099) THEN "very strongly acid" ELSE
+	IF ((ph1to1h2o_r) > 5.05 and (ph1to1h2o_r) < 5.599) THEN "strongly acid" ELSE
+	IF ((ph1to1h2o_r) > 5.55 and (ph1to1h2o_r) < 6.099) THEN "moderately acid" ELSE
+	IF ((ph1to1h2o_r) > 6.05 and (ph1to1h2o_r) < 6.599) THEN "slightly acid" ELSE
+	IF ((ph1to1h2o_r) > 6.55 and (ph1to1h2o_r) < 7.399) THEN "neutral" ELSE
+	IF ((ph1to1h2o_r) > 7.35 and (ph1to1h2o_r) < 7.899) THEN "slightly alkaline" ELSE
+	IF ((ph1to1h2o_r) > 7.85 and (ph1to1h2o_r) < 8.499) THEN "moderately alkaline" ELSE
+	IF ((ph1to1h2o_r) > 8.45 and (ph1to1h2o_r) <= 9.0) THEN "strongly alkaline" ELSE
+	IF (ph1to1h2o_r) > 9.0 THEN "very strongly alkaline" ELSE "something wrong".
+DEFINE profeat reaction ||", " ||texgrp.
+
+##
+##  Water table
+##
+ 
+EXEC SQL
+SELECT soimoistdept_l wtl, soimoistdept_h wth
+FROM component, comonth, cosoilmoist
+WHERE JOIN component TO comonth 
+AND JOIN comonth TO cosoilmoist 
+AND soimoiststat IN ("wet", "saturation");
+AGGREGATE COLUMN wtl MIN, wth MIN.
+
+DEFINE watertable	"About " || ( IF ISNULL(wth) OR wth == wtl THEN sprintf("%.f", wtl / 2.54) 
+		       ELSE sprintf("%.f to %.f", wtl / 2.54, wth / 2.54) ) || " inches".
+
+##
+##  Available water capacity
+##
+
+# AWC is caleculated for the profile above the first restriction (other than "noncemented" restrictions)
+DEFINE depth ARRAYMIN( LOOKUP(reskind != "noncemented", resdept_r)).
+ASSIGN depth IF ISNULL(depth) OR depth > 152 THEN 152 ELSE depth.
+
+# Find the thickness of each horizon above the restriction.
+define top_in_range     hzdept_r>depth ? depth : hzdept_r.
+define bottom_in_range  hzdepb_r>depth ? depth : hzdepb_r.
+define layer_thickness  bottom_in_range - top_in_range.
+
+# Compute the total AWC weighted by horizon thickness.
+DEFINE awc    arraysum(awc_r * layer_thickness) / 2.54.
+DEFINE awccl	IF awc > 12 THEN	"Very high"
+		ELSE IF awc > 9 THEN	"High"
+		ELSE IF awc > 6 THEN	"Moderate"
+		ELSE IF awc > 3 THEN	"Low"
+		ELSE			"Very low".
+DEFINE availablewater sprintf("%s (about %.1f inches)", awccl, awc).
+
+# Tests for presence of data, to determine which sections to print.
+
+DEFINE HasSetting
+    (NOT ISNULL(landform) OR NOT ISNULL(hillslope) OR NOT ISNULL(geomcomp)
+    OR NOT ISNULL(microfeature) OR NOT ISNULL(anthrofeature) OR NOT ISNULL(shpdown)
+    OR NOT ISNULL(shpacross) OR NOT ISNULL(pmgroupname)).
+DEFINE HasProperties
+    (compkind != "Miscellaneous area" OR NOT ISNULL(resdept_l) OR
+    flood != "None" OR pond != "None" OR NOT ISNULL(wtl)).
+DEFINE HasInterpGroups
+    (NOT ISNULL(irrcapcl) OR NOT ISNULL(nirrcapcl) OR NOT ISNULL(ecoclassname) 
+    OR NOT ISNULL(ovegclname)).
+DEFINE HasProfile
+    NOT ISNULL(hzdt).
+DEFINE HasComponentData
+    (HasSetting OR HasProperties OR HasInterpGroups OR HasProfile).
+
+#
+#   Output formatting
+#
+#
+
+TEMPLATE soilprop
+   ELEMENT "varlistentry" FIELD TAG "term",
+	FIELD TAG "listitem" VALUETAG "para". 
+
+TEMPLATE soilcomp
+   ELEMENT "variablelist" VALUETAG "varlistentry" 
+	FIELD TAG "term",
+	FIELD TAG "listitem" VALUETAG "para".
+
+TEMPLATE soilprofile
+   ELEMENT "variablelist" VALUETAG "varlistentry" 
+	FIELD TAG "term",
+	FIELD TAG "term",
+	FIELD TAG "term".
+
+HEADER
+  ELEMENT OPEN "section" ATTRIB ("label", "SoilReport").
+  ELEMENT "title" reporttitle.
+  IF reporthdrtext!="" ELEMENT "para" ATTRIB ("role", "headnote") reporthdrtext.
+END HEADER.
+
+##
+##  Section for survey area
+##
+SECTION WHEN FIRST OF areabreak
+DATA
+ ELEMENT OPEN "section" ATTRIB ("label", "Survey_Area").
+ IF useNationalMapunits==0 ELEMENT "title" areaname.
+ IF useNationalMapunits!=0 INCLUDE "Subreport for area names" (areasym, mukeys).
+END SECTION.
+
+##
+##  Mapunit name and setting
+##
+SECTION WHEN newmu
+DATA
+ ELEMENT OPEN "section" ATTRIB ("label", "Map_Unit_Description").
+ ELEMENT "title" mutitle.
+END SECTION.
+
+SECTION WHEN newmu AND
+    (NOT ISNULL(landscape) OR NOT ISNULL(elev_l) OR NOT ISNULL(map_l)
+    OR NOT ISNULL(airtempa_l) OR NOT ISNULL(ffd_l))
+ DATA 
+ ELEMENT OPEN "section" ATTRIB ("label", "MU_Setting").
+ ELEMENT "title" "Map Unit Setting".
+ ELEMENT OPEN "variablelist".
+ USING soilprop "National map unit symbol: ", nationalmusym.
+ IF NOT ISNULL(landscape)
+    USING soilprop "Landscape: ", landscape.
+ IF NOT ISNULL(elev_l)
+    USING soilprop "Elevation: ", elevation.
+ IF NOT ISNULL(map_l)
+    USING soilprop "Mean annual precipitation: ", map.
+ IF NOT ISNULL(airtempa_l)
+    USING soilprop "Mean annual air temperature: ", mat.
+ IF NOT ISNULL(ffd_l)
+    USING soilprop "Frost-free period: ", ffd.
+ IF NOT ISNULL(farmlndcl)
+    USING soilprop "Farmland classification: ", farmlndcl.
+ 
+
+ ELEMENT CLOSE "variablelist".
+ ELEMENT CLOSE "section".
+END SECTION.
+ 
+##
+##  Mapunit composition
+##
+SECTION WHEN newmu AND NOT ISNULL(majcomppct)
+ DATA
+ELEMENT OPEN "section" ATTRIB ("label", "MU_Composition").
+ELEMENT "title" "Map Unit Composition".
+
+ USING soilcomp complist, comppcts.
+ USING soilcomp "Estimates are based on observations, descriptions, and transects of the mapunit.".
+
+ELEMENT CLOSE "section".
+END SECTION.
+
+##
+##  Beginning of description of major component
+##
+SECTION WHEN majcompflag == 'Yes' AND HasComponentData
+ DATA
+ELEMENT OPEN "section" ATTRIB ("label", "Component").
+ELEMENT "title" majorcomptitle.
+END SECTION.
+
+##
+##  Major component: setting
+##
+SECTION WHEN majcompflag == 'Yes' AND HasSetting
+ DATA
+ELEMENT OPEN "section" ATTRIB ("label", "Inline").
+ELEMENT "title" "Setting".
+ELEMENT OPEN "variablelist".
+
+ IF NOT ISNULL(landform)
+    USING soilprop "Landform: ", landform.
+ IF NOT ISNULL(hillslope)
+    USING soilprop "Landform position (two-dimensional): ", hillslope.
+ IF NOT ISNULL(geomcomp)
+    USING soilprop "Landform position (three-dimensional): ", geomcomp.
+ IF NOT ISNULL(microfeature)
+    USING soilprop "Microfeatures of landform position: ", microfeature.
+ IF NOT ISNULL(anthrofeature)
+    USING soilprop "Anthropogenic features: ", anthrofeature.
+ IF NOT ISNULL(shpdown)
+    USING soilprop "Down-slope shape: ", shpdown.
+ IF NOT ISNULL(shpacross)
+    USING soilprop "Across-slope shape: ", shpacross.
+ IF NOT ISNULL(pmgroupname)
+    USING soilprop "Parent material: ", pmgroupname.
+
+ELEMENT CLOSE "variablelist".
+ELEMENT CLOSE "section".
+END SECTION.
+
+##
+##  Major component: typical profile
+##
+SECTION WHEN majcompflag == 'Yes' AND HasProfile
+ DATA
+ELEMENT OPEN "section" ATTRIB ("label", "Component_Typical_Profile").
+ELEMENT "title" "Typical profile".
+
+# USING soilcomp horizon, profeat.
+USING soilcomp horizon, texgrp.
+ELEMENT CLOSE "section".
+END SECTION.
+
+
+##
+##  Major component: properties and qualities
+##
+SECTION WHEN majcompflag == 'Yes' AND HasProperties
+ DATA
+ELEMENT OPEN "section" ATTRIB ("label", "Component_Properties_And_Qualities").
+ELEMENT "title" "Properties and qualities".
+ELEMENT OPEN "variablelist".
+
+ IF NOT ISNULL(slope_l)
+    USING soilprop "Slope: ", slope.
+ IF NOT ISNULL(sfragcov_r)
+    USING soilprop "Percent of area covered with surface fragments: ", sfragcov.
+ IF (NOT ISNULL(resdept_l) OR compkind != "Miscellaneous area") and musym != "NOTCOM"
+    USING soilprop "Depth to restrictive feature: ", resfeats.
+ IF NOT ISNULL(drainagecl)
+    USING soilprop "Natural drainage class: ", drainagecl.
+ IF NOT ISNULL(runoff)
+    USING soilprop "Runoff class: ", runoff.
+ IF NOT ISNULL(ksat_l)
+    USING soilprop "Capacity of the most limiting layer to transmit water (Ksat): ", perm.
+ IF ISNULL(wtl) AND compkind != "Miscellaneous area" and musym != "NOTCOM" 
+    USING soilprop "Depth to water table: ", "More than 80 inches".
+ IF NOT ISNULL(wtl)
+    USING soilprop "Depth to water table: ", watertable.
+ IF (flood != "None" OR compkind != "Miscellaneous area") and musym != "NOTCOM"
+    USING soilprop "Frequency of flooding: ", flood.
+ IF (pond != "None" OR compkind != "Miscellaneous area") and musym != "NOTCOM" 
+    USING soilprop "Frequency of ponding: ", pond.
+ IF caco3_h > 0
+    USING soilprop "Calcium carbonate, maximum in profile: ", carbonate.
+ IF gypsum_h > 0
+    USING soilprop "Gypsum, maximum in profile: ", gypsum.
+ IF ec_h > 0
+    USING soilprop "Salinity, maximum in profile: ", salinity.
+ IF sar_h > 0
+    USING soilprop "Sodium adsorption ratio, maximum in profile: ", sar_h decimal 1.
+ IF NOT ISNULL(awc)
+    USING soilprop "Available water storage in profile: ", availablewater.
+
+ELEMENT CLOSE "variablelist".
+ELEMENT CLOSE "section".
+END SECTION.
+
+##
+##  Major component: interpretive groups
+##
+SECTION WHEN majcompflag == 'Yes' AND HasInterpGroups
+ DATA
+ELEMENT OPEN "section" ATTRIB ("label", "Component_Interpretive_Groups").
+ELEMENT "title" "Interpretive groups".
+ELEMENT OPEN "variablelist".
+  IF ISNULL(irrcapcl) 
+    USING soilprop "Land capability classification (irrigated): ", "None specified".
+ IF NOT ISNULL(irrcapcl)
+    USING soilprop "Land capability classification (irrigated): ", ilc.
+ IF NOT ISNULL(nirrcapcl)
+    USING soilprop "Land capability classification (nonirrigated): ", nilc.
+ IF NOT ISNULL(hydgrp)
+    USING soilprop "Hydrologic Soil Group: ", hydgrp. 
+ IF NOT ISNULL(ecoclassname)
+    USING soilprop "Ecological site: ", esys.
+ IF NOT ISNULL(ovegclname)
+    USING soilprop "Other vegetative classification: ", othveg. 
+IF NOT ISNULL(hydricrating)
+    USING soilprop "Hydric soil rating: ", hydricrating.
+
+ELEMENT CLOSE "variablelist".
+ELEMENT CLOSE "section".
+END SECTION.
+
+##
+##  Major component: typical profile
+##
+#SECTION WHEN majcompflag == 'Yes' AND HasProfile
+ #DATA
+#ELEMENT OPEN "section" ATTRIB ("label", "Component_Typical_Profile").
+#ELEMENT "title" "Typical profile".
+
+ #USING soilcomp horizon, texgrp.
+
+#ELEMENT CLOSE "section".
+#END SECTION.
+
+##
+##  End of description of major component
+##
+SECTION WHEN majcompflag == 'Yes' AND HasComponentData
+ DATA
+ELEMENT CLOSE "section".
+END SECTION.
+
+##
+##  Heading for minor components section
+##
+SECTION WHEN FIRST OF mukey, majcompflag
+ DATA 
+ IF majcompflag == 'No' ELEMENT OPEN "section" ATTRIB ("label", "Minor_Components").
+ IF majcompflag == 'No' ELEMENT "title" "Minor Components".
+END SECTION.
+
+##
+##  Minor components: name and setting
+##
+SECTION WHEN majcompflag == 'No'
+ DATA 
+ELEMENT OPEN "section" ATTRIB ("label", "Minor_Component").
+ELEMENT "title" minorcomptitle.
+ELEMENT OPEN "variablelist".
+
+ USING soilprop "Percent of map unit: ", comppct.
+ IF NOT ISNULL(landform)
+    USING soilprop "Landform: ", landform.
+ IF NOT ISNULL(hillslope)
+    USING soilprop "Landform position (two-dimensional): ", hillslope.
+ IF NOT ISNULL(geomcomp)
+    USING soilprop "Landform position (three-dimensional): ", geomcomp.
+ IF NOT ISNULL(microfeature)
+    USING soilprop "Microfeatures of landform position: ", microfeature.
+ IF NOT ISNULL(anthrofeature)
+    USING soilprop "Anthropogenic features: ", anthrofeature.
+ IF NOT ISNULL(shpdown)
+    USING soilprop "Down-slope shape: ", shpdown.
+ IF NOT ISNULL(shpacross)
+    USING soilprop "Across-slope shape: ", shpacross.
+ IF NOT ISNULL(ecoclassname)
+    USING soilprop "Ecological site: ", esys.
+ IF NOT ISNULL(ovegclname)
+    USING soilprop "Other vegetative classification: ", othveg. 
+IF NOT ISNULL(hydricrating)
+    USING soilprop "Hydric soil rating: ", hydricrating.
+
+ELEMENT CLOSE "variablelist".
+ELEMENT CLOSE "section".
+END SECTION.
+
+SECTION WHEN LAST OF mukey
+ DATA
+   IF majcompflag == 'No' ELEMENT CLOSE "section".
+   ELEMENT CLOSE "section".
+END SECTION.
+
+SECTION WHEN LAST OF areabreak
+ DATA
+   ELEMENT CLOSE "section".
+END SECTION.
+
+SECTION WHEN AT END
+ DATA
+   ELEMENT CLOSE "section".
+END SECTION.
+
+

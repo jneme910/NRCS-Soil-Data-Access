@@ -1,0 +1,71 @@
+<HTML XMLNS:IE>
+<HEAD>
+<?import namespace="ie" implementation="#default">
+<STYLE type="text/css">
+.header
+{
+    position:absolute;
+    top:.25in;
+    width:6in;
+    left:1in;
+}
+.footer
+{
+    position:absolute;
+    top:10.5in;
+    width:6in;
+    left:1in;
+}
+</STYLE>
+<SCRIPT language="JScript">
+var headersFootersAdded = false;
+
+function OnRectComplete()
+{
+    if (event.contentOverflow == true)
+        AddNewPage();
+    else if (headersFootersAdded == false)
+    {
+        headfoot.textHead = printer.header;
+        headfoot.textFoot = printer.footer;
+        headfoot.url = dialogArguments.__IE_BrowseDocument.URL;
+        headfoot.title = dialogArguments.__IE_BrowseDocument.title;
+        headfoot.pageTotal = document.all.tags("DEVICERECT").length;
+        for (i = 1; i <= headfoot.pageTotal; i++)
+        {
+            headfoot.page = i;
+            AddHeaderAndFooterToPage(i);
+        }
+        
+        headersFootersAdded = true;
+}
+
+function AddHeaderAndFooterToPage(pageNum)
+{
+    newHeader = headfoot.htmlHead;
+    newFooter = headfoot.htmlFoot;
+    
+    document.all("page" + pageNum).insertAdjacentHTML("afterBegin", newHeader); 
+    document.all("page" + pageNum).insertAdjacentHTML("beforeEnd", newFooter);
+}
+
+function AddNewPage()
+{
+    // This function adds a LAYOUTRECT and possibly a DEVICERECT,
+    // depending on the requirements of this particular print template
+}
+</SCRIPT>
+</HEAD>
+
+<BODY>
+
+<IE:TEMPLATEPRINTER id="printer"/>
+<IE:HEADERFOOTER id="headfoot"/>
+
+<DIV id="pagecontainer">
+    <IE:DEVICERECT id="page1" media="print" class="pagestyle">
+        <IE:LAYOUTRECT id="LRect1" contentsrc="document" 
+                       onlayoutcomplete="OnRectComplete()" 
+                       nextRect="LRect2" class="layoutstyle"/>
+					</BODY>  
+					</HTML>

@@ -1,0 +1,738 @@
+<html>
+<head>
+<STYLE TYPE="text/css"> <!-- body
+{
+	font-family:Verdana, Arial, Helv, Sans-Serif;
+	font-size: 10pt;
+}
+.soilprop
+{
+    FONT: 10pt Verdana, Helvetica, Arial, sans-serif;
+    COLOR: #000000;
+    TEXT-ALIGN: left;
+    LINE-HEIGHT: 12pt;   
+    MARGIN-LEFT: 12pt;
+    TEXT-INDENT: -12pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+div.SoilReport h1
+{
+	font-size: 16px;
+}
+div.SoilReport h2
+{
+	font-size: 14px;
+}
+div.SoilReport h3, div.SoilReport h4, div.SoilReport h5, div.SoilReport h6
+{
+	font-size: 12px;
+}
+div.menu table td
+{
+	font-size: 11px;
+}
+ul.noimage li
+{
+	list-style-type: none;
+	list-style-image: none;
+}
+ul.noimage li p
+{
+	margin-left: 4ex;
+}
+ul.noimage li h1, ul.noimage li h2, ul.noimage li h3, 
+ul.noimage li h4, ul.noimage li h5, ul.noimage li h6 
+{
+	margin-bottom: 0px;
+}
+.first
+{
+	margin-top: 0px !important;
+}
+.numeric, .number
+{
+	text-align: right;
+}
+.bold
+{
+	font-weight: bold;
+	margin-right: 1ex;
+}
+.italic
+{
+	font-style: italic;
+}
+.super
+{
+	vertical-align: super;
+	font-size: smaller;
+}
+.sub
+{
+	vertical-align: sub;
+	font-size: smaller;
+}
+.padded
+{
+	padding: 5px !important;
+}
+.unpadded
+{
+	padding: 0px !important;
+}
+.scrollable
+{
+	overflow-y: auto !important;
+}
+.nowrap
+{
+	white-space: nowrap;
+}
+table
+{
+    border-collapse: collapse;
+}
+table.data th, table.data td 
+{
+	border-width: 1px;
+	border-style: solid;
+	padding: 4px;
+}
+table.data td.begindatagroup
+{
+	border-left-width: 2px;
+	border-left-style: solid;
+}
+table.data td.enddatagroup
+{
+	border-right-width: 2px;
+	border-right-style: solid;
+}
+table.data td.label
+{
+	text-align: right;
+	padding: 5px;
+}
+table.data th
+{
+}
+table.data th.title
+{
+	width: 100%;
+	padding: 2px !important;
+}
+table.data th.title div.title
+{
+	font-weight: bold;
+	padding-left: 1.25em;
+	text-indent: -1em;
+	text-align: left;
+}
+table.data th.control
+{
+	vertical-align: middle;
+	text-align: right;
+}
+table.data td
+{
+	text-align: left;
+	vertical-align: top;
+}
+table.data td.columnhead, table.data tr.columnhead td
+{
+	padding: 2px;
+	font-weight: bold;
+	text-align: center;
+}
+table.data tr.units td
+{
+	font-style: italic;
+	text-align: center;
+}
+table.data td p.mu-name
+{
+	padding-left: 0.5em;
+	text-indent: -0.5em;
+}
+table.data td p.comp-name
+{
+	padding-left: 1em;
+	text-indent: -0.5em;
+}
+table.data td p.class-name
+{
+	text-align: center;
+}
+table.data td p.reason0
+{
+	text-align: left;
+	padding-left: 0.5em;
+	text-indent: -0.5em;
+}
+table.data td p.reason1
+{
+	text-align: left;
+	padding-left: 1em;
+	text-indent: -0.5em;
+}
+table.data td p.reason2
+{
+	text-align: left;
+	padding-left: 1.5em;
+	text-indent: -0.5em;
+}
+table.data td p.hang-list
+{
+	text-align: left;
+	padding-left: 0.5em;
+	text-indent: -0.5em;
+	vertical-align: middle;
+}
+table.data tfoot td
+{
+	font-weight: bold;
+	padding-top: 5px;
+}
+table.data tr.even td
+{
+	background-color: #FDFDEE;
+}
+table.data tr.odd td
+{
+	background-color: #F8F8D8;
+}
+div.menu table
+{
+	color: #000000;
+	background-color: #FBFBE8; 
+}
+div.menu table td
+{
+	border-color: #000000;
+}
+div.menu table td.over
+{
+	background-color: #E5DEBC !important;
+}
+.title, .muname
+{
+    FONT: 14pt bold Helvetica, Arial, sans-serif;
+    COLOR: #000000;
+    TEXT-ALIGN: left;
+    LINE-HEIGHT: 16pt;   
+    MARGIN-TOP: 18pt;
+    MARGIN-BOTTOM: 3pt;
+}
+
+.subtitle
+{
+    FONT: 12pt bold Helvetica, Arial, sans-serif;
+    COLOR: #000000;
+    TEXT-ALIGN: left;
+    LINE-HEIGHT: 14pt;   
+    MARGIN-TOP: 6pt;
+    MARGIN-BOTTOM: 3pt;
+}
+
+.headnote
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;
+    TEXT-ALIGN: center;
+    LINE-HEIGHT: 10pt;   
+    MARGIN: 6pt 8pt 6pt 8pt;
+}
+
+.footnote
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;
+    TEXT-ALIGN: left;
+    LINE-HEIGHT: 10pt;   
+    MARGIN: 6pt 0pt 0pt 0pt;
+}
+
+.reportdesc
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 12pt;   
+    TEXT-ALIGN: left; 
+    TEXT-INDENT: 12pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at4
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;
+    TEXT-ALIGN: left;
+    LINE-HEIGHT: 12pt;   
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at5
+{
+    FONT: 30pt bold Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left;   
+    LINE-HEIGHT: 32pt;   
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at9
+{
+    FONT: 12pt bold Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left;
+    LINE-HEIGHT: 14pt;   
+    MARGIN-TOP: 12pt;
+    MARGIN-BOTTOM: 6pt;
+}
+
+P.at21
+{
+    FONT: 24pt bold Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left;   
+    LINE-HEIGHT: 26pt;   
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at23
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left; 
+    LINE-HEIGHT: 12pt;   
+    MARGIN-LEFT: 18pt;
+    TEXT-INDENT: -18pt;  
+    MARGIN-TOP: 6pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at30
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;
+    TEXT-ALIGN: left;   
+    LINE-HEIGHT: 12pt;   
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at32
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 12pt;   
+    TEXT-ALIGN: left; 
+    TEXT-INDENT: 12pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at33
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left; 
+    LINE-HEIGHT: 12pt;   
+    MARGIN-LEFT: 18pt;
+    TEXT-INDENT: -18pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at41
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left; 
+    LINE-HEIGHT: 12pt;   
+    MARGIN-LEFT: 18pt;
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at53
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left; 
+    LINE-HEIGHT: 10pt;   
+    MARGIN-LEFT: 42pt;
+    MARGIN-RIGHT: 24pt;
+    TEXT-INDENT: -12pt;  
+    MARGIN-TOP: 6pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+P.at54
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left; 
+    LINE-HEIGHT: 10pt;   
+    MARGIN-LEFT: 42pt;
+    MARGIN-RIGHT: 24pt;
+    TEXT-INDENT: -12pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+TD
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    MARGIN: 0pt 0pt 0pt 0pt;
+    PADDING: 0pt 2pt 0pt 2pt;
+}
+
+THEAD TR TD
+{
+    FONT: bold 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: center; 
+    MARGIN: 0pt 0pt 0pt 0pt;
+    PADDING: 0pt 0pt 0pt 0pt;
+    BACKGROUND-COLOR: #E8E8E8;
+    /* BORDER: thin solid black */
+}
+
+.mu-name
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: left; 
+    MARGIN-LEFT: 6pt;
+    TEXT-INDENT: -6pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.comp-name
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: left; 
+    MARGIN-LEFT: 12pt;
+    TEXT-INDENT: -6pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.units
+{
+    FONT: italic 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: center; 
+    MARGIN-LEFT: 0pt;
+    TEXT-INDENT: 0pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.class-name
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: center; 
+    MARGIN-LEFT: 0pt;
+    TEXT-INDENT: 0pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.hang-list
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: left; 
+    MARGIN-LEFT: 6pt;
+    TEXT-INDENT: -6pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.reason0
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: left; 
+    MARGIN-LEFT: 6pt;
+    TEXT-INDENT: -6pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.reason1
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: left; 
+    MARGIN-LEFT: 12pt;
+    TEXT-INDENT: -6pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.reason2
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: left; 
+    MARGIN-LEFT: 18pt;
+    TEXT-INDENT: -6pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.reason3
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: left; 
+    MARGIN-LEFT:24pt;
+    TEXT-INDENT: -6pt;  
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.ratingvalue
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: right; 
+    MARGIN-LEFT: 0pt;
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.number
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    TEXT-ALIGN: right; 
+    MARGIN-LEFT: 0pt;
+    MARGIN-TOP: 0pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.total-line
+{
+    FONT: 8pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    LINE-HEIGHT: 10pt;   
+    PADDING: 6pt 2pt 0pt 2pt;
+    BORDER-TOP: 1px solid black;
+}
+
+.shade0
+{
+	background-color: #FFEEDD;
+}
+
+.shade1
+{
+	background-color: white;
+}
+
+.descrip-mu
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left; 
+    LINE-HEIGHT: 12pt;   
+    MARGIN-LEFT: 0pt;
+    MARGIN-TOP: 12pt;
+    MARGIN-BOTTOM: 0pt;
+}
+
+.descrip-text
+{
+    FONT: 10pt Helvetica, Arial, sans-serif;
+    COLOR: #000000;    
+    TEXT-ALIGN: left; 
+    LINE-HEIGHT: 12pt;   
+    MARGIN-LEFT: 18pt;
+    MARGIN-TOP: 12pt;
+    MARGIN-BOTTOM: 0pt;
+}
+.center
+{
+	text-align: center;
+}
+.right
+{
+	text-align: right;
+}
+.bold
+{
+	font-weight: bold;
+} --> </STYLE>
+</head>
+<body>
+<div class='section'>
+<img alt='NRCS Color logo' border='0' src='http://websoilsurvey.nrcs.usda.gov/app/Resources/HomePage/images/WSSMasthead4.png'>
+</img>
+<br>
+</br>
+<b>Select Soil Survey Area:</b></p>
+<style type='text/css'>
+.fieldset-auto-width { display: inline-block;  }</style>
+<body>
+<form  action="../">
+<fieldset class='fieldset-auto-width'>
+<label>
+Select Area
+</label>
+<select  name="GotoWSS">
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO001">Adair County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO003">Andrew County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO005">Atchison County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO007">Audrain County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO009">Barry County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO011">Barton County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO013">Bates County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO015">Benton County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO017">Bollinger County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO019">Boone County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO021">Buchanan County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO023">Butler County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO025">Caldwell County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO027">Callaway County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO029">Camden County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO031">Cape Girardeau County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO033">Carroll County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO035">Carter County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO037">Cass County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO039">Cedar County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO041">Chariton County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO043">Christian County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO045">Clark County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO047">Clay County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO049">Clinton County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO051">Cole County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO053">Cooper County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO055">Crawford County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO057">Dade County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO059">Dallas County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO061">Daviess County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO063">De Kalb County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO065">Dent County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO067">Douglas County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO069">Dunklin County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO071">Franklin County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO073">Gasconade County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO075">Gentry County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO077">Greene County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO079">Grundy County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO081">Harrison County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO083">Henry County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO085">Hickory County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO087">Holt County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO089">Howard County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO091">Howell County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO093">Iron County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO095">Jackson County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO097">Jasper County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO099">Jefferson County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO101">Johnson County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO103">Knox County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO105">Laclede County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO107">Lafayette County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO109">Lawrence County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO111">Lewis County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO113">Lincoln County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO115">Linn County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO117">Livingston County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO121">Macon County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO123">Madison County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO125">Maries County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO127">Marion County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO119">McDonald County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO129">Mercer County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO131">Miller County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO133">Mississippi County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO135">Moniteau County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO137">Monroe County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO139">Montgomery County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO141">Morgan County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO143">New Madrid County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO145">Newton County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO147">Nodaway County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO149">Oregon County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO151">Osage County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO153">Ozark County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO155">Pemiscot County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO157">Perry County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO159">Pettis County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO161">Phelps County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO163">Pike County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO165">Platte County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO167">Polk County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO169">Pulaski County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO171">Putnam County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO173">Ralls County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO175">Randolph County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO177">Ray County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO179">Reynolds County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO181">Ripley County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO195">Saline County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO197">Schuyler County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO199">Scotland County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO201">Scott County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO203">Shannon County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO205">Shelby County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO183">St. Charles County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO185">St. Clair County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO187">St. Francois County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO189">St. Louis County and St. Louis City, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO193">Ste. Genevieve County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO207">Stoddard County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO209">Stone County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO211">Sullivan County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO213">Taney County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO215">Texas County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO217">Vernon County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO219">Warren County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO221">Washington County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO223">Wayne County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO225">Webster County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO227">Worth County, Missouri</option>
+<option value="http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=MO229">Wright County, Missouri</option>
+
+
+
+
+
+</select>
+<input 
+    type="button"
+    value="Web Soil Survey Go to Soil Survey Area Direct AOI"
+    onclick="location.href=this.form.GotoWSS.options[GotoWSS.selectedIndex].value">
+</fieldset>
+</form>
+</body>
+</div>
+</body></html>

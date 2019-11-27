@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test2 - report 2</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	<p>Soil Data Access (SDA) Test2 - report 2</P
+	<p>
+	An SDA-populated select list is used to pick a state and SSA 
+	which enables creation of "report 2" based upon those selections.
+	</p>
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<select id="selectId2" onchange="ChangeSelectedSSA(event)">
+		<option value='' style="display: none" id="remove">(select a soil survey area)</option>
+	</select>
+	
+	<div id="selectedSSAId"><p>(no SSA selected)</p></div>
+	
+	<div id="id1"></div>
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "select statename, stateid from state order by statename;",
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch SSA names and symbols
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			query =
+				"SELECT distinct c.areaname, c.areasymbol "
+				+ "FROM [dbo].[sastatusmap] c, [dbo].[saspatialver] s "
+				+ "WHERE s.areasymbol = c.areasymbol "
+				+ "AND c.areasymbol IN ("
+				+ "SELECT DISTINCT l.areasymbol "
+				+ "FROM [dbo].[legend] l, [dbo].[laoverlap] o "
+				+ "WHERE o.lkey = l.lkey "
+				+ "AND o.areatypename = 'State or Territory' "
+				+ "AND o.areasymbol = '" + stateId + "' ) "
+				+ "order by c.areaname, c.areasymbol;";
+
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId2", callbackData.Table, 1, 0, "select an SSA");
+				}, 
+				"json");
+		}
+		
+		function ChangeSelectedSSA(event) {
+			// Update the selected SSA text area and then fetch and display report 2 results
+			var ssaId = event.target.value;
+			var notification = $("#selectedSSAId");
+			notification[0].innerHTML = "<p>selected SSA areasymbol = " + ssaId + "</p>";
+			
+			var query = 		
+" SELECT areasymbol, musym, muname, mu.mukey/1  AS mukey,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey) AS comp_count,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes') AS count_maj_comp,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating = 'Yes' ) AS all_hydric,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes' AND hydricrating = 'Yes') AS maj_hydric,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes' AND hydricrating != 'Yes') AS maj_not_hydric,"
++ "   (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag != 'Yes' AND hydricrating  = 'Yes' ) AS hydric_inclusions,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating  != 'Yes') AS all_not_hydric, "
++ "   (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating  IS NULL ) AS hydric_null "
++ "  INTO #main_query"
++ " FROM legend  AS l"
++ " INNER JOIN  mapunit AS mu ON mu.lkey = l.lkey AND  l.areasymbol LIKE '" + ssaId + "'"
++ " "
++ " SELECT  areasymbol, musym, muname, mukey,"
++ " CASE WHEN comp_count = all_not_hydric + hydric_null THEN  'Nonhydric' "
++ " WHEN comp_count = all_hydric  THEN 'Hydric' "
++ " WHEN comp_count != all_hydric AND count_maj_comp = maj_hydric THEN 'Predominantly Hydric' "
++ " WHEN hydric_inclusions >= 0.5 AND  maj_hydric < 0.5 THEN  'Predominantly Nonydric' "
++ " WHEN maj_not_hydric >= 0.5  AND  maj_hydric >= 0.5 THEN 'Partially Hydric' ELSE 'Error' END AS hydric_rating"
++ " FROM #main_query"
+			
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					drawTable("id1", callbackData.Table);;
+				}, 
+				"json");			
+		}
+		
+		function drawTable(id, table) {
+			var tableHtml = '<table border="1">';
+			// for each row...
+			var iRow = 0;
+			while (iRow < table.length) {
+				var row = table[iRow];
+				tableHtml += "<tr>";
+				// for each column in each row...
+				var iCol = 0;
+				while (iCol < row.length) {
+					tableHtml += "<td>" + row[iCol] + "</td>";
+					iCol++;
+				};
+				tableHtml += "</tr>";				                                                                                   
+				iRow++;
+			};
+			tableHtml += '</table>'
+			$("#" + id).append(tableHtml);		
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+
+<!doctype html>
+<html>
+  <head>
+    <title>Pure CSS Fixed Header Variable Width Table</title>
+    <!-- JavaScript is only used to sort of the last table in the demo. -->
+    <script type="text/javascript" src="../js/jquery-1.5.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.tablesorter.js"></script>
+    <script type="text/javascript">
+	$(function() {		
+		$("#tablesorter-demo").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});
+		$("#options").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});
+	});	
+    </script>
+    <style type="text/css">         body {       padding: 20px;       background-color: #FFF7DC;       color: black;       min-width: 530px;     }     h2, h3 {       width: 100%;       text-align: center;       margin: 1.5em 0 .5em 0;     }     p {       width: 50%;       margin: 10px auto;     }         a {       color: black;       text-decoration: underline;     }     a:hover {       text-decoration: none;       background-color: #D5ECFF;     }     td {       border-bottom: 1px solid #ccc;       padding: 5px;       text-align: left; /* IE */     }     td + td {       border-left: 1px solid #ccc;     }     th {       padding: 0 5px;       text-align: left; /* IE */     }     .header-background {       border-bottom: 1px solid black;     }         /* above this is decorative, not part of the test */         .fixed-table-container {       width: 50%;       height: 200px;       border: 1px solid black;       margin: 10px auto;       background-color: white;       /* above is decorative or flexible */       position: relative; /* could be absolute or relative */       padding-top: 30px; /* height of header */     }      .fixed-table-container-inner {       overflow-x: hidden;       overflow-y: auto;       height: 100%;     }          .header-background {       background-color: #D5ECFF;       height: 30px; /* height of header */       position: absolute;       top: 0;       right: 0;       left: 0;     }         table {       background-color: white;       width: 100%;       overflow-x: hidden;       overflow-y: auto;     }      .th-inner {       position: absolute;       top: 0;       line-height: 30px; /* height of header */       text-align: left;       border-left: 1px solid black;       padding-left: 5px;       margin-left: -5px;     }     .first .th-inner {         border-left: none;         padding-left: 6px;       } 		 		/* extra-wrap */ 		 		.extrawrap th { 			text-align: center; 		} 		 		.extra-wrap { 			width: 100%; 		} 		 		/* Zupa styles for centered headers */ 		 		.zupa div.zupa1 { 			margin: 0 auto !important; 			width: 0 !important; 		} 		 		.zupa div.th-inner { 			width: 100%; 			margin-left: -50%; 			text-align: center; 			border: none; 		}      /* for hidden header hack to calculate widths of dynamic content */         .hidden-head {       min-width: 530px; /* enough width to show all header text, or bad things happen */     }         .hidden-header .th-inner {       position: static;       overflow-y: hidden;       height: 0;       white-space: nowrap;       padding-right: 5px;     }         /* for complex headers */         .complex.fixed-table-container {       padding-top: 60px; /* height of header */       overflow-x: hidden; /* for border */     }         .complex .header-background {       height: 60px;     }         .complex-top .th-inner {       border-bottom: 1px solid black;       width: 100%     }         .complex-bottom .th-inner {       top: 30px;       width: 100%     }         .complex-top .third .th-inner { /* double row cell */       height: 60px;       border-bottom: none;       background-color: #D5ECFF;     }         /* for tableSorter headers */      .fixed-table-container.sort-decoration {       overflow-x: hidden;       min-width: 530px; /* enough width to show arrows */     }     .sort-decoration .th-inner {       width: 100%;     }     .header .th-inner {       background-color: #D5ECFF;     }     .headerSortUp .th-inner, .headerSortDown .th-inner {       background-color: #5DDFFD;     }     span.sortArrow {       background: url(icons/bg.gif) 0 4px no-repeat transparent;       padding: 1px 10px;       line-height: 30px;     }     .headerSortUp span.sortArrow {       background: url(icons/asc.gif) 0 7px no-repeat transparent;     }     .headerSortDown span.sortArrow {       background: url(icons/desc.gif) 0 7px no-repeat transparent;     }
+    
+    </style>
+  </head>
+  <body>
+    <h3>Get the full explanation and leave comments at <a href="http://salzerdesign.com/blog/?p=191">salzerdesign.com</a>.</h3>
+
+    <h2>Pure CSS Fixed Header Variable Width Table</h2>
+    <div class="fixed-table-container">
+      <div class="header-background"> </div>
+      <div class="fixed-table-container-inner">
+        <table cellspacing="0">
+          <thead>
+            <tr>
+              <th class="first">
+                <div class="th-inner">First</div>
+              </th>
+              <th class="second">
+                <div class="th-inner">Second</div>
+              </th>
+              <th class="third">
+                <div class="th-inner">Third</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>First</td>
+              <td>First</td>
+              <td>First</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>Second</td>
+              <td>Third</td>
+            </tr>
+            <tr>
+              <td>Last</td>
+              <td>Last</td>
+              <td>Last</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+   
+    
+  </body>
+</html>

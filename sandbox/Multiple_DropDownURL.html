@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Search</title> 
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>    
+<style>
+input[type='text'] { font-size: 24px; }
+</style>
+<script>
+$(document).ready(function(){    
+    $( "#submit_search" ).click(function() {
+        var url = "https://nasis.sc.egov.usda.gov/NasisReportsWebSite/limsreport.aspx?report_name=WEB-NASIS_to_Staging_Server_Export_Fatal_Errors_PreCheck&area_sym="
+        url = url + $( "#area_sym" ).val();
+      
+	
+        window.location = url;
+    });
+});
+</script>   
+
+<script>
+function updateKeyword(){
+
+    var area_sym = document.getElementById("area_sym").value;
+
+    document.forms[0].keyword.value = area_sym;
+}
+</script>
+</head>
+<body>
+<img alt="Wisconsin Soil Science Tile Logo" height="146" src="https://raw.githubusercontent.com/ncss-tech/NASIS/master/Images/stagingserverchecks_banner2.jpg" width="698" />
+
+
+<hr>
+
+<font color='Red'>
+<h4>Select the State Symbol below to run report</h4>
+</font>
+<h1>
+<div class="contentcontainer med left" style="margin-left: 100;">
+<form name="form1" method="post" action="" onsubmit="updateKeyword()">
+
+
+  <select name="area_sym" id="area_sym">
+<option value="0" selected="selected">Select State</option>
+<option value="AK">AK</option>
+<option value="AL">AL</option>
+<option value="AR">AR</option>
+<option value="AS">AS</option>
+<option value="AZ">AZ</option>
+<option value="CA">CA</option>
+<option value="CO">CO</option>
+<option value="CT">CT</option>
+<option value="DC">DC</option>
+<option value="DE">DE</option>
+<option value="FL">FL</option>
+<option value="FM">FM</option>
+<option value="GA">GA</option>
+<option value="GU">GU</option>
+<option value="HI">HI</option>
+<option value="IA">IA</option>
+<option value="ID">ID</option>
+<option value="IL">IL</option>
+<option value="IN">IN</option>
+<option value="KS">KS</option>
+<option value="KY">KY</option>
+<option value="LA">LA</option>
+<option value="MA">MA</option>
+<option value="MD">MD</option>
+<option value="ME">ME</option>
+<option value="MH">MH</option>
+<option value="MI">MI</option>
+<option value="MN">MN</option>
+<option value="MO">MO</option>
+<option value="MP">MP</option>
+<option value="MS">MS</option>
+<option value="MT">MT</option>
+<option value="MX">MX</option>
+<option value="NC">NC</option>
+<option value="ND">ND</option>
+<option value="NE">NE</option>
+<option value="NH">NH</option>
+<option value="NJ">NJ</option>
+<option value="NM">NM</option>
+<option value="NV">NV</option>
+<option value="NY">NY</option>
+<option value="OH">OH</option>
+<option value="OK">OK</option>
+<option value="OR">OR</option>
+<option value="PA">PA</option>
+<option value="PR">PR</option>
+<option value="PW">PW</option>
+<option value="RI">RI</option>
+<option value="SC">SC</option>
+<option value="SD">SD</option>
+<option value="TN">TN</option>
+<option value="TX">TX</option>
+<option value="UT">UT</option>
+<option value="VA">VA</option>
+<option value="VT">VT</option>
+<option value="WA">WA</option>
+<option value="WI">WI</option>
+<option value="WV">WV</option>
+<option value="WY">WY</option>
+
+  </select>
+
+
+<input name="Search" id="submit_search" type="button" value="Submit" width="48" height="48"/>
+
+</form>
+</div>
+</h1>
+</body>
+</html>

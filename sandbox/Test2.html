@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>ex3 - load select list</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	<p>Soil Data Access (SDA) example #3</P
+	<p>
+	An SDA-populated select list is used to pick a state, SSA and map unit.
+	Select mapunit and aggregated data values are displayed for the mapunit.
+	</p>
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<select id="selectId2" onchange="ChangeSelectedSSA(event)">
+		<option value='' style="display: none" id="remove">(select a soil survey area)</option>
+	</select>
+	
+	<div id="selectedSSAId"><p>(no SSA selected)</p></div>
+	
+
+
+	<div id="id1"></div>
+	
+	<p>Notes:</p>
+	<ul>
+	<li>When the page is loaded the State selection option set is loaded from SDA.</li>
+	<li>At first selection the "(select a state)" option is removed.</li>
+	<li>The selection also triggers a second SDA query for the SSAs for that state.</li>
+	<li>The mapunit selection is similar, the mapunit selection presents a table.</li>
+	</ul>
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "select statename, stateid from state order by statename;",
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch SSA names and symbols
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			query =
+				"SELECT distinct c.areaname, c.areasymbol "
+				+ "FROM [dbo].[sastatusmap] c, [dbo].[saspatialver] s "
+				+ "WHERE s.areasymbol = c.areasymbol "
+				+ "AND c.areasymbol IN ("
+				+ "SELECT DISTINCT l.areasymbol "
+				+ "FROM [dbo].[legend] l, [dbo].[laoverlap] o "
+				+ "WHERE o.lkey = l.lkey "
+				+ "AND o.areatypename = 'State or Territory' "
+				+ "AND o.areasymbol = '" + stateId + "' ) "
+				+ "order by c.areaname, c.areasymbol;";
+
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId2", callbackData.Table, 1, 0, "select an SSA");
+				}, 
+				"json");
+		}
+		
+		function ChangeSelectedSSA(event) {
+			// Update the selected state text area and then fetch mapunit records
+			var ssaId = event.target.value;
+			var notification = $("#selectedSSAId");
+			notification[0].innerHTML = "<p>selected SSA areasymbol = " + ssaId + "</p>";
+			
+			var query = "SELECT  LEFT((areasymbol), 2) as State_sym,  l.areasymbol as Area_Symbol,  l.areaname as Area_Name,  mu.mukey,  mu.musym as Mapunit_Symbol,  mu.muname as Mapunit_Name,  case when localphase is null then compname else compname + ', ' + localphase end as Component_Name_and_phase,  comppct_r/1 as Component_Representative_Percentage,  majcompflag,  ((muacres*comppct_r)/100) as Component_Acres,  (SELECT TOP 1 cogeomordesc.geomfname FROM cogeomordesc WHERE c.cokey = cogeomordesc.cokey AND cogeomordesc.rvindicator='yes' and cogeomordesc.geomftname = 'Landform')  as Component_Landform,  hydricrating as Hydric_Rating, SUBSTRING(  (  SELECT ( ', ' + hydriccriterion) FROM cohydriccriteria WHERE c.cokey = cohydriccriteria.cokey ORDER BY hydriccriterion ASC FOR XML PATH('') ), 3, 1000) as restrictions 						FROM legend l 						INNER JOIN mapunit mu ON mu.lkey = l.lkey 						INNER JOIN  muaggatt mg on mu.mukey=mg.mukey 						INNER JOIN component c ON mu.mukey=c.mukey  AND (hydricrating like 'yes') 						 AND  l.areasymbol = " + ssaId  + ";";
+			
+				
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+		
+		
+	</script>
+</body>
+</html>
