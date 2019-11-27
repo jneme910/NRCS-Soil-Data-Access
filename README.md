@@ -1,37 +1,21 @@
 ## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/jneme910/NRCS-Soil-Data-Access/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+Soil Data Access is the name of a suite of web services and applications whose purpose is to meet requirements for requesting and delivering soil survey spatial and tabular data that are not being met by the current Web Soil Survey and Geospatial Data Gateway websites.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+# sda-lib 
+[GitHub sda-lib Wiki Home](https://github.com/ncss-tech/sda-lib/wiki) 
 
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/jneme910/NRCS-Soil-Data-Access/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+## Soil Data Access Query Page
+1. [Submitting a Query](https://sdmdataaccess.nrcs.usda.gov/Query.aspx) Submit your own SQL or SQL Data Shaping query to retrieve data from the Soil Data Mart.
+2. [Using Soil Data Access web services Help](https://sdmdataaccess.nrcs.usda.gov/Help.aspx) Soil Data Access Web Service Help.
+3. [Creating my own custom database queries Help](https://sdmdataaccess.nrcs.usda.gov/QueryHelp.aspx) Soil Data Access Query Help. This page provides information one needs in order to effectively query Soil Data Access. Documents and other guides.
+3. [Using the Soil Data Access website Help](https://sdmdataaccess.nrcs.usda.gov/Help.aspx)  Soil Data Access Help. The purpose of this page is to provide you with general information about this site and to help you resolve some common issues that may be experienced whilst browsing. 
+4. [Citing Soil Data Access as a source of soils data.](https://sdmdataaccess.nrcs.usda.gov/Citation.htm)
+5. [Advanced Queries](https://sdmdataaccess.nrcs.usda.gov/documents/AdvancedQueries.html) Soil Data Access provides two advanced features for querying spatial data:
+    * Tabular Functions act as "virtual" tables that can be used in the "FROM" clause of a query.
+    * Macros are condensed statements that SDA expands into full SQL statements.
+    
+   ## Soil Data Access Script Examples with Explanation
+ list:
+   *  [Soil Organic Carbon Stocks by Map Unit](https://ncss-tech.github.io/sda-lib/chapters/Soil%20Organic%20Carbon%20Stocks.html) 
+  *  [Geometry Intersect by Map Unit Acres](https://ncss-tech.github.io/sda-lib/chapters/) 
