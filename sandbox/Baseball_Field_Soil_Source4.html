@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<title>Potential Soil Source Baseball Fields</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	
+	
+	<style type="text/css">
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .scrolltable > .header {
+        }
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+<b>
+		<font color='red'>
+<h3>Potential Baseball Field Soil Source</h3>
+		</font>
+	</b>
+<h4> State Soil Data Access (SDA) Report </h3>
+	<p>
+	An SDA-populated select list is used to pick a state and SSA which enables creation of a "Baseball Field Soil Source" based upon those selections. The data is not static; it hits Soil Data Access Live.
+	This table gives information about the soils as potential sources of soil material suitable for baseball field. Normal compaction, minor processing, and other standard construction practices are assumed. Criteria for this report is sand content between 60 and 65 percent and silt to clay ratio is between 0.75 to 1. Ideally, medium sand to total sand ratio should be greater than 0.5  
+	<br>
+	<a href='#reportref'> For more information about the table, </a>
+	</p>
+	<a name='top'>
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<div id="id1"></div>
+		<br></br>
+	<b>
+		<font color='red'>
+			<a name='reportref'>Report Metadata:</a>
+		</font>
+	</b>
+	<php>
+		<a href='#top'>Back to top</a>
+	</php>
+		<ul>
+
+<li><b>areaname: </b>	The name given to the specified geographic area.</li>
+<li><b>areasymbol: </b>	A symbol that uniquely identifies a single occurrence of a particular type of area (e.g. Lancaster Co., Nebraska is NE109).</li>
+<li><b>chkey: </b>	A non-connotative string of characters used to uniquely identify a record in the Horizon table.</li>
+<li><b>claytotal_r: </b>	Mineral particles less than 0.002mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.</li>
+<li><b>cokey: </b>	A non-connotative string of characters used to uniquely identify a record in the Component table.</li>
+<li><b>compname: </b>	Name assigned to a component based on its range of properties.</li>
+<li><b>comppct_r: </b>	The percentage of the component of the mapunit.</li>
+<li><b>hzdepb_r: </b>	The distance from the top of the soil to the base of the soil horizon.</li>
+<li><b>hzdept_r: </b>	The distance from the top of the soil to the upper boundary of the soil horizon.</li>
+
+<li><b>hzname: </b>The concatenated string of four kinds of symbols (five data elements) used to distinguish different kinds of layers in the soil.  (SSM)</li>
+<li><b>mukey: </b>	A non-connotative string of characters used to uniquely identify a record in the Mapunit table.</li>
+<li><b>muname: </b>	Correlated name of the mapunit (recommended name or field name for surveys in progress).</li>
+<li><b>sandmed_r: </b>	Mineral particles 0.25mm to 0.5mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.</li>
+<li><b>sandtotal_r: </b>	Mineral particles 0.05mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.</li>
+<li><b>silttotal_r: </b>	Mineral particles 0.002 to 0.05mm in equivalent diameter as a weight percentage of the less than 2.0mm fraction.</li>
+<li><b>Soil_Web:</b> Link to Soil Web by Map Unit Key </li>
+<li><b>silt_clay_ratio</b> Total Silt divided by Total Clay ratio</li>
+<li><b>med_sand_ratio</b>  Medium Sand divided Total Sand ratio</li>
+		</ul>
+
+	<b>
+		<font color='red'>
+			<a name='reportref'>Report Description  :</a>
+		</font>
+	</b>
+
+<p>The suitability of the material for specific purposes is not evaluated, nor are factors that affect excavation of the material. The properties used to evaluate the soil as a source of particle size are gradation of grain sizes (as indicated by the Unified classification of the soil), the thickness of suitable material, and the content of rock fragments. If the bottom layer of the soil contains sand or gravel, the soil is considered a likely source regardless of thickness. The assumption is that the sand or gravel layer below the depth of observation exceeds the minimum thickness. The ratings are for the whole soil, from the surface to a depth of about 6 feet.</p>
+<p>Information in this table is intended for land use planning, for evaluating land use alternatives, and for planning site investigations prior to design and construction. The information, however, has limitations. For example, estimates and other data generally apply only to that part of the soil between the surface and a depth of 5 to 7 feet. Because of the map scale, small areas of different soils may be included within the mapped areas of a specific soil.</p>
+<p>The information is not site specific and does not eliminate the need for onsite investigation of the soils or for testing and analysis by personnel experienced in the design and construction of engineering works. </p>	
+	<script>
+	$(document).ready(function() {
+    $('#example').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+            'copyHtml5',
+            'excelHtml5',
+            'csvHtml5',
+            'pdfHtml5'
+        ]
+    } );
+} );
+	</script>
+	<script>
+		var url =  "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "select statename, stateid from state  WHERE stateid IN ('DC','DE','FL','IN','MD','MI','NJ','PA','WA','WI','WY')order by statename;",
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+ 
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch and display report 1 results
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			var query = 
+			
+"	SELECT  LEFT (areasymbol,2) AS state_sym,  areaname, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,'http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=', areasymbol, 'zz>', areasymbol,'</a>'), 'zz', '''') AS areasymbol, muname, mu.mukey, compname, c.cokey,  comppct_r, hzname, hzdept_r, hzdepb_r,  sandtotal_r, silttotal_r, sandmed_r, claytotal_r,"
++ " REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,'https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=', mu.mukey, 'zz>Click Here</a>'), 'zz', '''') AS [Soil_Web_Link] ,"
++ " LEFT (ROUND (CASE WHEN  silttotal_r = 0 THEN 0 WHEN claytotal_r = 0 THEN 0 ELSE [silttotal_r]/[claytotal_r] END,2),4) AS silt_clay_ratio, "
++ " LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) AS med_sand_ratio, chkey "
+
++ " FROM legend  AS l "
++ " INNER JOIN mapunit AS mu ON mu.lkey=l.lkey AND LEFT(l.areasymbol,2)  = '" + stateId + "'"
++ " INNER JOIN  component AS c ON c.mukey = mu.mukey  AND majcompflag = 'Yes' "
++ " INNER JOIN  chorizon AS ch ON c.cokey = ch.cokey AND ([sandtotal_r] BETWEEN 60 AND 65 AND [claytotal_r] IS NOT NULL AND [silttotal_r] IS NOT NULL AND [sandmed_r] IS NOT NULL "
++ "  AND CASE WHEN  silttotal_r = 0 THEN 0 WHEN claytotal_r = 0 THEN 0 ELSE [silttotal_r]/[claytotal_r] END BETWEEN 0.75 AND 1 )"
+//AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .0
++ " GROUP BY areaname, areasymbol, muname, mu.mukey, compname, c.cokey,  comppct_r, hzname, hzdept_r, hzdepb_r,  sandtotal_r, silttotal_r, sandmed_r, claytotal_r, chkey "
++ " ORDER BY areasymbol ASC,areaname,  muname, mu.mukey, comppct_r DESC, c.cokey, hzdept_r ASC, chkey	"	
+
+;
+				
+
+				
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			//+ " AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .40 ) "
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+	</script>
+</body>
+</html>

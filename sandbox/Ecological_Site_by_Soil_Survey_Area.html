@@ -1,0 +1,447 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<title>NRCS Hydric Soils List</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script> function demoFromHTML() {
+    var pdf = new jsPDF('p', 'pt', 'letter');
+    // source can be HTML-formatted string, or a reference
+    // to an actual DOM element from which the text will be scraped.
+    source = $('#customers')[0];
+
+    // we support special element handlers. Register them with jQuery-style 
+    // ID selector for either ID or node name. ("#iAmID", "div", "span" etc.)
+    // There is no support for any other type of selectors 
+    // (class, of compound) at this time.
+    specialElementHandlers = {
+        // element with id of "bypass" - jQuery style selector
+        '#bypassme': function (element, renderer) {
+            // true = "handled elsewhere, bypass text extraction"
+            return true
+        }
+    };
+    margins = {
+        top: 80,
+        bottom: 60,
+        left: 10,
+        width: 700
+    };
+    // all coords and widths are in jsPDF instance's declared units
+    // 'inches' in this case
+    pdf.fromHTML(
+    source, // HTML string or DOM elem ref.
+    margins.left, // x coord
+    margins.top, { // y coord
+        'width': margins.width, // max width of content on PDF
+        'elementHandlers': specialElementHandlers
+    },
+
+    function (dispose) {
+        // dispose: object with X, Y of the last line add to the PDF 
+        //          this allow the insertion of new lines after html
+        pdf.save('Test.pdf');
+    }, margins);
+}
+</script>
+</head>
+<style type="text/css">
+
+<style>
+
+<style type="text/css">
+
+<style>
+
+	<style type="text/css">
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .scrolltable > .header {
+        }
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #d9e0f9;
+        }
+    </style>
+
+
+<body>
+<!--<img src="https://websoilsurvey.sc.egov.usda.gov/App/Resources/HomePage/images/WSSMasthead4.png" alt="WSS Logo" style="width:650px;height:150px;"> -->
+
+<hr style="border: none; border-bottom: 4px solid grey;">
+<font color="blue">
+		<h2>Ecological Site Descriptions in EDIT</h2>
+		</font>
+	
+
+
+	<p>An SDA-populated select list is used to pick a state and SSA which enables creation of a "Ecological Site Descriptions in EDIT" based upon those selections. The data is not static; it hits Soil Data Access Live. Once a survey is selected and table appears, if a new survey is selected it will append to the table at the bottom. </p>
+	<p>This report generates a list of components and any associated ecological sites. Hyperlinks are created for each ecological site and clicking on the hyperlink will open the Ecological Site Description in the USDA-Natural Resource Conservation Service (USDA-NRCS) Ecological Site Interpretative Tool (EDIT). Not all Ecological Site Descriptions are publicly available in EDIT. Please contact your local State Soil Scientist if you have problems viewing the ecological site description within EDIT.	</p>
+	<p>EDIT is an online information system that contains the official list of publicly available USDA-NRCS ecological sites. It replaces the out-of-date Ecological Site Information System (ESIS).The report only displays information for those soils that are within the Area of Interest and are linked to an ecological site in the Soil Survey Geographic Database (SSURGO). If a soil (component) is not linked to an ecological site, it will not be displayed in the report.The report displays soil map unit names and symbols, ecological site IDs, ecological site names, and available links to the EDIT website.
+	<a href='#reportref'> For more information about the table, </a>
+	</p>
+	<a name='top'>
+
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<select id="selectId2" onchange="ChangeSelectedSSA(event)">
+		<option value='' style="display: none" id="remove">(select a soil survey area)</option>
+	</select>
+	
+	<div id="selectedSSAId"><p>(no SSA selected)</p></div>
+	
+	<div class="container" id="id1"></div>
+	<br></br>
+
+<b>
+		<font color='red'>
+			<a name='reportref'>Report Metadata:</a>
+		</font>
+	</b>
+	</h3>
+	<php>
+		<a href='#top'>Back to top</a>
+	</php>
+	
+	<ul>
+	<li><b>Mapunit Symbol: </b> The symbol used to uniquely identify the soil mapunit in the soil survey.</li>
+	<li><b>Mapunit Name: </b> Correlated name of the mapunit (recommended name or field name for surveys in progress).</li>
+	<li><b>Component: </b> Component name - Name assigned to a component based on its range of properties. Local Phase - Phase criterion to be used at a local level, in conjunction with "component name" to help identify a soil component.</li>
+	<li><b>Component Percct</b> The percentage of the component of the mapunit.</li>
+		<li><b>Ecological Site ID</b> The identifier of a particular ecological community. For NRCS ecological sites, it is the concatenated form of ecological site type, ecological
+site MLRA, ecological site LRU, ecological site number and ecological site state FIPS alpha code.</li>
+			<li><b>Ecological Site Name</b> The descriptive name of a particular ecological community. For NRCS ecological sites, it is the concatenated form of three or six other
+fields. The actual fields that are concatenated together to form this name differ between range and forest ecological sites.</li>	
+
+	
+	</ul>
+
+
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "select statename, stateid from state order by statename;",
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch SSA names and symbols
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			query =
+				"SELECT distinct c.areaname, c.areasymbol "
+				+ "FROM [dbo].[sastatusmap] c, [dbo].[saspatialver] s "
+				+ "WHERE s.areasymbol = c.areasymbol "
+				+ "AND c.areasymbol IN ("
+				+ "SELECT DISTINCT l.areasymbol "
+				+ "FROM [dbo].[legend] l, [dbo].[laoverlap] o "
+				+ "WHERE o.lkey = l.lkey "
+				+ "AND o.areatypename = 'State or Territory' "
+				+ "AND o.areasymbol = '" + stateId + "' ) "
+				+ "order by c.areaname, c.areasymbol;";
+
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId2", callbackData.Table, 1, 0, "select an SSA");
+				}, 
+				"json");
+		}
+		
+		function ChangeSelectedSSA(event) {
+			// Update the selected SSA text area and then fetch and display report 2 results
+			var ssaId = event.target.value;
+			var notification = $("#selectedSSAId");
+			notification[0].innerHTML = "<p>selected SSA areasymbol = " + ssaId + "</p>";
+			
+		query = "SELECT "
++" musym, muname, compname AS Component,  comppct_r AS [Percent of map unit], CASE WHEN ecoclassid IS NULL THEN '' ELSE ecoclassid END  AS [Ecological Site ID] , CASE WHEN ecoclassid IS NULL THEN '' ELSE ecoclassname END AS [Ecological Site Name], "
++" CASE WHEN ecoclassid IS NULL THEN '' ELSE REPLACE (CONCAT ('<a target=',   QUOTENAME ('_blank', ''' ')    , ' ',    ' href=', '~https://edit.jornada.nmsu.edu/catalogs/esd/',SUBSTRING (ecoclassid, 2, 4 ), '/' , ecoclassid  ,  '~>Click Here</a>') , '~', '''') END AS [Hyperlink to Ecological Site Description]"
++"			FROM  legend "
++"			INNER JOIN mapunit AS mu ON mu.lkey = legend.lkey AND areasymbol = '"  + ssaId + "'"
++"			INNER JOIN component c ON c.mukey = mu.mukey AND compkind = 'series'"
++"			LEFT OUTER JOIN coecoclass on c.cokey = coecoclass.cokey and coecoclass.ecoclassref like 'Ecological Site Description Database'"
++" ORDER BY musym ASC, comppct_r DESC "
+;
+			
+					var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1">';
+					// for each row...
+		                var iRow = 0;
+                while (iRow < callbackData.Table.length) {
+                                var row = callbackData.Table[iRow];
+                                tableHtml += "<tr>";
+                                // for each column in each row...
+                                var iCol = 0;
+                                while (iCol < row.length) {
+                                                if (iRow == 0) {
+                                                                tableHtml += "<th>" + row[iCol] + "</th>";
+                                                } else {
+                                                                tableHtml += "<td>" + row[iCol] + "</td>";
+                                                }
+                                                iCol++;
+                                };
+                                tableHtml += "</tr>";                                  
+                                iRow++;
+                };
+
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+	</script>
+	
+<script>
+$(function(){
+	$('table').each(function() {
+		if($(this).find('thead').length > 0 && $(this).find('th').length > 0) {
+			// Clone <thead>
+			var $w	   = $(window),
+				$t	   = $(this),
+				$thead = $t.find('thead').clone(),
+				$col   = $t.find('thead, tbody').clone();
+
+			// Add class, remove margins, reset width and wrap table
+			$t
+			.addClass('sticky-enabled')
+			.css({
+				margin: 0,
+				width: '100%'
+			}).wrap('<div class="sticky-wrap" />');
+
+			if($t.hasClass('overflow-y')) $t.removeClass('overflow-y').parent().addClass('overflow-y');
+
+			// Create new sticky table head (basic)
+			$t.after('<table class="sticky-thead" />');
+
+			// If <tbody> contains <th>, then we create sticky column and intersect (advanced)
+			if($t.find('tbody th').length > 0) {
+				$t.after('<table class="sticky-col" /><table class="sticky-intersect" />');
+			}
+
+			// Create shorthand for things
+			var $stickyHead  = $(this).siblings('.sticky-thead'),
+				$stickyCol   = $(this).siblings('.sticky-col'),
+				$stickyInsct = $(this).siblings('.sticky-intersect'),
+				$stickyWrap  = $(this).parent('.sticky-wrap');
+
+			$stickyHead.append($thead);
+
+			$stickyCol
+			.append($col)
+				.find('thead th:gt(0)').remove()
+				.end()
+				.find('tbody td').remove();
+
+			$stickyInsct.html('<thead><tr><th>'+$t.find('thead th:first-child').html()+'</th></tr></thead>');
+			
+			// Set widths
+			var setWidths = function () {
+					$t
+					.find('thead th').each(function (i) {
+						$stickyHead.find('th').eq(i).width($(this).width());
+					})
+					.end()
+					.find('tr').each(function (i) {
+						$stickyCol.find('tr').eq(i).height($(this).height());
+					});
+
+					// Set width of sticky table head
+					$stickyHead.width($t.width());
+
+					// Set width of sticky table col
+					$stickyCol.find('th').add($stickyInsct.find('th')).width($t.find('thead th').width())
+				},
+				repositionStickyHead = function () {
+					// Return value of calculated allowance
+					var allowance = calcAllowance();
+				
+					// Check if wrapper parent is overflowing along the y-axis
+					if($t.height() > $stickyWrap.height()) {
+						// If it is overflowing (advanced layout)
+						// Position sticky header based on wrapper scrollTop()
+						if($stickyWrap.scrollTop() > 0) {
+							// When top of wrapping parent is out of view
+							$stickyHead.add($stickyInsct).css({
+								opacity: 1,
+								top: $stickyWrap.scrollTop()
+							});
+						} else {
+							// When top of wrapping parent is in view
+							$stickyHead.add($stickyInsct).css({
+								opacity: 0,
+								top: 0
+							});
+						}
+					} else {
+						// If it is not overflowing (basic layout)
+						// Position sticky header based on viewport scrollTop
+						if($w.scrollTop() > $t.offset().top && $w.scrollTop() < $t.offset().top + $t.outerHeight() - allowance) {
+							// When top of viewport is in the table itself
+							$stickyHead.add($stickyInsct).css({
+								opacity: 1,
+								top: $w.scrollTop() - $t.offset().top
+							});
+						} else {
+							// When top of viewport is above or below table
+							$stickyHead.add($stickyInsct).css({
+								opacity: 0,
+								top: 0
+							});
+						}
+					}
+				},
+				repositionStickyCol = function () {
+					if($stickyWrap.scrollLeft() > 0) {
+						// When left of wrapping parent is out of view
+						$stickyCol.add($stickyInsct).css({
+							opacity: 1,
+							left: $stickyWrap.scrollLeft()
+						});
+					} else {
+						// When left of wrapping parent is in view
+						$stickyCol
+						.css({ opacity: 0 })
+						.add($stickyInsct).css({ left: 0 });
+					}
+				},
+				calcAllowance = function () {
+					var a = 0;
+					// Calculate allowance
+					$t.find('tbody tr:lt(3)').each(function () {
+						a += $(this).height();
+					});
+					
+					// Set fail safe limit (last three row might be too tall)
+					// Set arbitrary limit at 0.25 of viewport height, or you can use an arbitrary pixel value
+					if(a > $w.height()*0.25) {
+						a = $w.height()*0.25;
+					}
+					
+					// Add the height of sticky header
+					a += $stickyHead.height();
+					return a;
+				};
+
+			setWidths();
+
+			$t.parent('.sticky-wrap').scroll($.throttle(250, function() {
+				repositionStickyHead();
+				repositionStickyCol();
+			}));
+
+			$w
+			.load(setWidths)
+			.resize($.debounce(250, function () {
+				setWidths();
+				repositionStickyHead();
+				repositionStickyCol();
+			}))
+			.scroll($.throttle(250, repositionStickyHead));
+		}
+	});
+});
+</script>
+</body>
+</html>

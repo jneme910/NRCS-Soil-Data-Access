@@ -1,0 +1,1 @@
+select statename, stateid from state  WHERE stateid IN ('DC','DE','FL','IN','MD','MI','NJ','PA','WA','WI','WY')order by statename

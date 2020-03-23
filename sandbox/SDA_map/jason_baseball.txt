@@ -1,0 +1,162 @@
+-- Demo 
+--   Create an SDA "Mapunit Key List" AOI using SDA queries
+--   and associate two "Ad-Hoc" ratings for use in displaying thematic maps.
+--   Note: the number of mukey values may not exceed 1,000.
+--   (p.anzel 3/6/2020)
+
+-- The general steps:
+-- 1. Perform the desired interpretation against the SDM database,
+--  accumulating desired interpretation data.
+-- 2. Reduce the interpretation data to form a table of mukey values.
+-- 3. Define an SDA "Mapunit Key List" and retain the aoi ID value.
+-- 4. Create one or more mapunit/rating (and optional rating/legend)
+--   tables and retain the rating ID value(s).
+-- 5. Use the SDA WMS/GetMap to display the AOI and/or rating ("thematic") maps.
+
+-- Suggested use for this example:
+-- 1. In a browser other than IE (Chrome is the most tested), open 
+--   https://sdmdataaccess.sc.egov.usda.gov/test/testpost.html
+-- 2. Under "Test 1: Perform REST/POST Tabular Query", in the "Query" input area,
+--  paste the contents of this file.
+-- 3. In the "Format" area, enter the text "json+columnname" (omit the quotation marks).
+-- 4. Click on the "run isung POST" button.
+-- 5. Below the button you will see results similar to 
+--   {"Table":[["aoiid","interpresultid_1","interpresultid_2"],["201623","3352","3353"]]}
+-- 6. Note that the AOI and related interpretations will persist for 24 hours.
+-- 7. In a browser other than IE (Chrome is the most tested), open 
+--   https://sdmdataaccess.sc.egov.usda.gov/test/testwms.html
+-- 8. In the layer selection menu (click on the three horizontal bars), view the AOI.
+--  - Click on the "aoiid" radio button to enable it and enter the aoiid value 
+--   returned from testpost.html, in this example it is 201623.
+--  - Make sure that only the "mapunitpoly" and "aoi" layers are selected.
+--  - Click on the "update map" button.
+--  - Collapse the layer selection menu (click on its title bar).
+--  - Note the message along the lower left of the browser window, it may show 
+--    text similar to "zoom level 7".
+--  - Note that the cyan AOI boundary shown is the union of the envelopes of 
+--   each mapunit.
+--  - Zoom in to the northeastern AOI rectangle. The mapunit polygons are  
+--    visible at zoom levels 11 to 18 inclusive with orange outlines.
+--  9. In the layer selection menu (click on the three horizontal bars), view the first 
+--    interpretation results (all one color).
+--  - Click on the "interpresultid" radio button to enable it and enter the "interpresultid_1" value 
+--   returned from testpost.html, in this example it is 3352.
+--  - Make sure that only the "mapunitpolythematic" and "aoi" layers are selected.
+--  - Click on the "update map" button.
+--  - Collapse the layer selection menu (click on its title bar).
+--  - Zoom in to the northeastern AOI rectangle. The thematic mapunit polygons are  
+--    visible at zoom levels 11 to 18 inclusive with a gray outline and pale 
+--    mauve fill.
+--  10. In the layer selection menu (click on the three horizontal bars), view the second 
+--    interpretation results (three colors).
+--  - Click on the "interpresultid" radio button to enable it and enter the "interpresultid_2" value 
+--   returned from testpost.html, in this example it is 3353.
+--  - Make sure that only the "mapunitpolythematic" and "aoi" layers are selected.
+--  - Click on the "update map" button.
+--  - Collapse the layer selection menu (click on its title bar).
+--  - Zoom in to the northeastern AOI rectangle. The thematic mapunit polygons are  
+--    visible at zoom levels 11 to 18 inclusive with a gray outline and three different 
+--    peach color fills.
+
+
+-- Step 1. Get interpretation data
+
+~DeclareChar(@state_sym,2)~
+select @state_sym = 'in';
+
+SELECT  LEFT (areasymbol,2) AS state_sym, areaname, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,'http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=', areasymbol, 'zz>', areasymbol,'</a>'), 'zz', '''') AS areasymbol, muname,  musym, mu.mukey,
+REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,'https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=', mu.mukey, 'zz>Click Here</a>'), 'zz', '''') AS [Soil_Web],
+CASE WHEN compkind = 'series' THEN REPLACE (CONCAT ('<a target=zzzzz_blankzzzzz href=zzzzz' ,'https://casoilresource.lawr.ucdavis.edu/see/#', compname, 'zzzzz>Click Here</a>'), 'zzzzz', '''') ELSE '' END AS [soil_series_extent],
+CASE WHEN compkind = 'series' THEN REPLACE (CONCAT ('<a target=zzzzz_blankzzzzz href=zzzzz' ,'https://casoilresource.lawr.ucdavis.edu/sde/?series=', compname, 'zzzzz>Click Here</a>'), 'zzzzz', '''') ELSE '' END AS [soil_data_explorer],
+compname, c.cokey,  comppct_r, majcompflag, hzdept_r, hzdepb_r,  sandtotal_r, silttotal_r, sandmed_r, 
+LEFT (ROUND (CASE WHEN  silttotal_r = 0 THEN 0 WHEN claytotal_r = 0 THEN 0 ELSE [silttotal_r]/[claytotal_r] END,2),4) AS silt_clay_ratio,
+LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) AS med_sand_ratio, chkey
+
+into #interpretationData
+
+FROM legend  AS l
+INNER JOIN mapunit AS mu ON mu.lkey=l.lkey AND LEFT(l.areasymbol,2)  <> 'US'
+INNER JOIN  component AS c ON c.mukey = mu.mukey  AND majcompflag = 'Yes' 
+INNER JOIN  chorizon AS ch ON c.cokey = ch.cokey AND ([sandtotal_r] BETWEEN 60 AND 65 AND [claytotal_r] IS NOT NULL AND [silttotal_r] IS NOT NULL AND [sandmed_r] IS NOT NULL--AND [sand_medium] >= 50
+AND CASE WHEN  silttotal_r = 0 THEN 0 WHEN claytotal_r = 0 THEN 0 ELSE [silttotal_r]/[claytotal_r] END BETWEEN 0.75 AND 1 
+AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .0
+)
+
+where left(areasymbol,2) = @state_sym
+
+GROUP BY areaname, areasymbol, muname,  musym, mu.mukey, compname, c.cokey,  comppct_r, majcompflag, hzdept_r, hzdepb_r,  sandtotal_r, silttotal_r, sandmed_r, claytotal_r, chkey, compkind
+ORDER BY areasymbol ASC,areaname,  muname, mu.mukey, comppct_r DESC, c.cokey, hzdept_r ASC, chkey
+
+-- Step 2: Reduce interpretation data to a set of mapunits
+
+-- Note that this defines an SDA-specific table type with one column, "i", of type "int".
+-- There must be 1,000 or fewer records.
+
+~DeclareIntTable(@mukeyList)~
+
+insert into @mukeyList
+select top 1000 mukey from (select distinct mukey from #interpretationData) mukeyUnique
+
+-- Step 3: Create the SDA "Mapunit Key List"
+~CreateAoiFromMukeyList(@mukeyList,@aoiid,@message_aoiCreation)~
+
+-- Step 4: (first example) Create an Ad-Hoc Rating
+
+-- In this example we will give mapunit the same numeric and text rating value with 
+-- the associated single color. We will not use a legend table.
+
+~DeclareAdHocRatingTable(@ratingTable_1)~
+
+-- Assume that every mapunit is suitable for "Infield Mix", we will associate a constant number 
+-- "42" with it for no good reason whatsoever.
+insert into @ratingTable_1
+select 
+	i as MapUnitKey,
+	'Infield Mix' as MapUnitRatingString,
+	42 as MapUnitRatingNumeric,
+	'#ece7f2' as RgbString
+from @mukeyList;
+
+~LoadAdHocInterpretation(@aoiid,@ratingTable_1,@interpresultid_1,@message_rating_1)~
+
+-- Step 4: (second example) Create an Ad-Hoc Rating
+
+-- In this example we will arbitrarily assign one of three rating values 
+-- based upon the modulo of the mukey value. This is completely 
+-- meaningless but paints a pretty picture.
+-- The legend table is populated but it is not used when 
+-- displaying the rating results in TestWMS.
+
+-- if mukey mod 3 == 0 then 'Infield Mix', 0, '#fee8c8'
+-- if mukey mod 3 == 1 then 'Warning Track', 1, '#fdbb84'
+-- if mukey mod 3 == 2 then 'Pitchers Mound', 1, '#e34a33'
+
+-- We'll use the legend table's sequence number not only for 
+-- the normal ordering but also that gives us a lookup 
+-- when inserting into the rating table.
+
+~DeclareAdHocLegendTable(@legendTable)~
+insert into @legendTable values
+(0, 'Infield Mix', '#fee8c8'),
+(1, 'Warning Track', '#fdbb84'),
+(2, 'Pitchers Mound', '#e34a33');
+
+
+~DeclareAdHocRatingTable(@ratingTable_2)~
+insert into @ratingTable_2
+select 
+	i as MapUnitKey,
+	LT.LegendText  as MapUnitRatingString,
+	LT.sequence as MapUnitRatingNumeric,
+	LT.RgbString as RgbString 
+from @mukeyList MUK, @legendTable LT
+where (MUK.i % 3) = LT.sequence
+
+~LoadAdHocInterpretation(@aoiid,@ratingTable_2,@legendTable,@interpresultid_2,@message_rating_2)~
+
+select @aoiid as [aoiid], @interpresultid_1 as [interpresultid_1], @interpresultid_2 as [interpresultid_2]
+
+-- From work by Jason Nemecek at
+-- https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcseprd1551418.html
+-- Output from TestPost, if using "json+columnname", will be similar to:
+-- {"Table":[["aoiid","interpresultid_1","interpresultid_2"],["201623","3352","3353"]]}

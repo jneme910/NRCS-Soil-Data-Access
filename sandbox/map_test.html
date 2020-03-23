@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<link href="//code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+function createCookie(name,value,days) {
+if (days) {
+var date = new Date();
+date.setTime(date.getTime()+(days*24*60*60*1000));
+var expires = "; expires="+date.toGMTString();
+}
+else var expires = "";
+document.cookie = name+"="+value+expires+"; path=/";
+}
+function readCookie(name) {
+var nameEQ = name + "=";
+var ca = document.cookie.split(';');
+for(var i=0;i < ca.length;i++) {
+var c = ca[i];
+while (c.charAt(0)==' ') c = c.substring(1,c.length);
+if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+}
+return null;
+}
+function eraseCookie(name) {
+createCookie(name,"",-1);
+}
+function initialize() {
+var soil = new google.maps.LatLng(41.875696,-87.624207);
+var myOptions = {
+zoom: 7,
+center: new google.maps.LatLng(36.4098320, -85.2748718),
+mapTypeId: google.maps.MapTypeId.TERRAIN
+}
+var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+layerl0 = new google.maps.FusionTablesLayer({
+query: {
+select: "'col2'",
+from: '1-nKJJErStEiMLY52mxzBxhjizorvs5ZXDJXu_IA'
+},
+map: map,
+styleId: 1,
+templateId: 1
+});
+var
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=527031&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=527128&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=527489&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=527504&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=527505&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=527560&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=528148&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=529859&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2396878&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749963&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749964&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749965&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749966&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749967&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749968&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749969&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+ctaLayer = new google.maps.KmlLayer('http://casoilresource.lawr.ucdavis.edu/soil_web/export.php?format=kmz&srid=4326&mukey_query=2749970&BBOX=1,1,1,1', {preserveViewport:false});ctaLayer.setMap(map);
+}
+</script>
+</head>
+<body onload="initialize()">
+<div id="map_canvas" style="width: 600px; height: 450px;"></div>
+</body>
+</html>
