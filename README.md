@@ -19,4 +19,4 @@ Soil Data Access is the name of a suite of web services and applications whose p
  list:
    *  [Soil Organic Carbon Stocks by Map Unit](https://ncss-tech.github.io/sda-lib/chapters/Soil%20Organic%20Carbon%20Stocks.html) 
   *  [Geometry Intersect by Map Unit Acres](https://ncss-tech.github.io/sda-lib/chapters/) 
-  * [Query by Map Unit Name or Map Unit Symbol](https://jneme910.github.io/NRCS-Soil-Data-Access/chapters/State%20Soil%20Scientst%20Mapunit%20Check.) 
+  * [Query by Map Unit Name or Map Unit Symbol](https://jneme910.github.io/NRCS-Soil-Data-Access/chapters/State%20Soil%20Scientst%20Mapunit%20Check/) 
