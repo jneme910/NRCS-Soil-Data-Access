@@ -1,8 +1,11 @@
 ---
-title: "State Soil Scientist Map Unit Check"
+title: "Search by Map unit or Map Unit Symbol"
 author: "Jason nemecek"
 date: "4/8/2020"
-output: html_document
+output: 
+    html_document:
+        toc: TRUE
+        toc_float: TRUE
 ---
 
 ```{r setup, include=FALSE}
@@ -18,9 +21,13 @@ SELECT musym, muname, areasymbol, areaname
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND muname Like  '%Brems loamy sand%' AND LEFT (areasymbol,2) = 'MI'
 ```
+Description: This script queries for specifc set of map units  names using a like command in a given State. The percents (%) are wildcards to help query map units using a partial match.
+
+* Change map Unit name: replace "Brems loamy sand" with desired map unit
+* Change state: replace "MI" with desired state abbreviation 
 
 musym|muname|areasymbol|areaname
-------|-------|-----|-----------------|
+------|----------------------------|-----|-------------------------|
 37B|Brems loamy sand, 0 to 6 percent slopes|MI027|Cass County, Michigan
 BrmubB|Brems loamy sand, dense substratum, 0 to 4 percent slopes|MI099|Macomb County, Michigan
 BrmhaB|Brems loamy sand, 0 to 4 percent slopes|MI163|Wayne County, Michigan
@@ -34,11 +41,14 @@ FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey 
 AND LEFT (areasymbol,2) IN ('WI', 'MI')
 AND muname Like  '%Brems loamy sand%' 
-
 ```
 
+Description: This script queries for specifc set of map units names using a like command in more than one State. The percents (%) are wildcards to help query map units using a partial match.
+* Changing  map unit name: replace "Brems loamy sand" with desired map unit
+* Changing tate: replace 'WI', 'MI' with oher state(s) abbreviation. Note: the script will work with one state
+
 musym|muname|areasymbol|areaname
-------|-------|-----|-----------------|
+------|----------------------------|-----|-------------------------|
 37B|Brems loamy sand, 0 to 6 percent slopes|MI027|Cass County, Michigan
 BrmubB|Brems loamy sand, dense substratum, 0 to 4 percent slopes|MI099|Macomb County, Michigan
 BrA|Brems loamy sand, 0 to 3 percent slopes|WI001|Adams County, Wisconsin
@@ -50,7 +60,7 @@ BrmhaB|Brems loamy sand, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 BrmhbB|Brems loamy sand, dense substratum, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 BrmhcB|Brems loamy sand, loamy substratum, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 
-## Search map Unit symbols used in a state
+## Search map unit symbols used in a state
 	
 ```{SQL}	
 SELECT musym, muname, areasymbol, areaname 
@@ -59,11 +69,26 @@ INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND musym Like   '%Ab%'
 AND LEFT (areasymbol,2) = 'MI'
 ```
 
+Description: This script queries for specifc set of map unit symbols using a like command in a given State. The percents (%) are wildcards to help query map units using a partial match.
+
+* Change map Unit symbol: replace "Ab" with desired map unit
+* Change state: replace "MI" with another state abbreviation 
+
+
 musym|muname|areasymbol|areaname
-------|-------|-----|-----------------|
+------|----------------------------|-----|-------------------------|
 Ab|Abscota loamy sand|MI067|Ionia County, Michigan
 Ab|Abscota loamy sand|MI087|Lapeer County, Michigan
 AbB|Abscota loamy sand, 0 to 6 percent slopes|MI111|Midland County, Michigan
 Ab|Abscota sand|MI133|Osceola County, Michigan
 AbA0|Alluvial land, poorly drained loams, 0 to 2 percent slopes|MI151|Sanilac County, Michigan
 AbB0|Alluvial land, poorly drained loams, 2 to 6 percent slopes|MI151|Sanilac County, Michigan
+
+## Metadata
+
+Field Name |	Description
+----------------|----------------------------|
+areaname |	The name given to the specified geographic area.
+areasymbol |	A symbol that uniquely identifies a single occurrence of a particular type of area (e.g. Dane Co., Wisconsin is WI025).
+muname |	Correlated name of the mapunit (recommended name or field name for surveys in progress).
+musym	|The symbol used to uniquely identify the soil mapunit in the soil survey.
