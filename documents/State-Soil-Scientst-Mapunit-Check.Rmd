@@ -1,5 +1,5 @@
 ---
-title: "Search by Map unit or Map Unit Symbol"
+title: "Search by Map Unit or Map Unit Symbol"
 author: "Jason nemecek"
 date: "4/8/2020"
 output: 
