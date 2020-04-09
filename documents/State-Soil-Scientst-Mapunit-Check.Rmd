@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 1. Checking the map unit names
 ```{SQL}
-SELECT musym, muname, areasymbol, areaname
+SELECT areasymbol, areaname,  muname, musym, mukind, muacres
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND muname Like  '%Brems loamy sand%' AND LEFT (areasymbol,2) = 'MI'
 ```
@@ -36,7 +36,7 @@ BrmhcB|Brems loamy sand, loamy substratum, 0 to 4 percent slopes|MI163|Wayne Cou
 
 ## 2. Search by map unit name in multiple states
 ```{SQL}
-SELECT musym, muname, areasymbol, areaname, muacres
+SELECT areasymbol, areaname,  muname, musym, mukind, muacres
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey 
 AND LEFT (areasymbol,2) IN ('WI', 'MI')
@@ -63,7 +63,7 @@ BrmhcB|Brems loamy sand, loamy substratum, 0 to 4 percent slopes|MI163|Wayne Cou
 ## 3. Search map unit symbols used in a state
 	
 ```{SQL}	
-SELECT musym, muname, areasymbol, areaname,  muacres 
+SELECT areasymbol, areaname,  muname, musym, mukind, muacres
 FROM legend 
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND musym Like   '%Ab%'
 AND LEFT (areasymbol,2) = 'MI'
@@ -92,3 +92,6 @@ areaname |	The name given to the specified geographic area.
 areasymbol |	A symbol that uniquely identifies a single occurrence of a particular type of area (e.g. Dane Co., Wisconsin is WI025).
 muname |	Correlated name of the mapunit (recommended name or field name for surveys in progress).
 musym	|The symbol used to uniquely identify the soil mapunit in the soil survey.
+mukind |Code identifying the kind of mapunit.  Example: C - consociation.
+muacres	|The number of acres of a particular mapunit.
+

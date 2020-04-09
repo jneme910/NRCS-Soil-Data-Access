@@ -1519,7 +1519,7 @@ div.tocify {
 <p><strong>SQL queries that can be copied and pasted into the Soil Data Access Query Page. The queries can be modified for different data fields or parameters related to the Area of Interest (AOI).</strong> <a href="https://sdmdataaccess.nrcs.usda.gov/Query.aspx" class="uri">https://sdmdataaccess.nrcs.usda.gov/Query.aspx</a></p>
 <div id="checking-the-map-unit-names" class="section level2">
 <h2>1. Checking the map unit names</h2>
-<pre class="sql"><code>SELECT musym, muname, areasymbol, areaname
+<pre class="sql"><code>SELECT areasymbol, areaname,  muname, musym, mukind, muacres
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND muname Like  &#39;%Brems loamy sand%&#39; AND LEFT (areasymbol,2) = &#39;MI&#39;</code></pre>
 <p>Description: This script queries for specifc set of map units names using a like command in a given State. The percents (%) are wildcards to help query map units using a partial match.</p>
@@ -1578,7 +1578,7 @@ INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND muname Like  &#39;%Brems loam
 </div>
 <div id="search-by-map-unit-name-in-multiple-states" class="section level2">
 <h2>2. Search by map unit name in multiple states</h2>
-<pre class="sql"><code>SELECT musym, muname, areasymbol, areaname, muacres
+<pre class="sql"><code>SELECT areasymbol, areaname,  muname, musym, mukind, muacres
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey 
 AND LEFT (areasymbol,2) IN (&#39;WI&#39;, &#39;MI&#39;)
@@ -1665,7 +1665,7 @@ AND muname Like  &#39;%Brems loamy sand%&#39; </code></pre>
 </div>
 <div id="search-map-unit-symbols-used-in-a-state" class="section level2">
 <h2>3. Search map unit symbols used in a state</h2>
-<pre class="sql"><code>SELECT musym, muname, areasymbol, areaname,  muacres 
+<pre class="sql"><code>SELECT areasymbol, areaname,  muname, musym, mukind, muacres
 FROM legend 
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND musym Like   &#39;%Ab%&#39;
 AND LEFT (areasymbol,2) = &#39;MI&#39;</code></pre>
@@ -1758,6 +1758,14 @@ AND LEFT (areasymbol,2) = &#39;MI&#39;</code></pre>
 <tr class="even">
 <td>musym</td>
 <td>The symbol used to uniquely identify the soil mapunit in the soil survey.</td>
+</tr>
+<tr class="odd">
+<td>mukind</td>
+<td>Code identifying the kind of mapunit. Example: C - consociation.</td>
+</tr>
+<tr class="even">
+<td>muacres</td>
+<td>The number of acres of a particular mapunit.</td>
 </tr>
 </tbody>
 </table>
