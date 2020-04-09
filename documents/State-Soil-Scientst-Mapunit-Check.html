@@ -1518,7 +1518,7 @@ div.tocify {
 
 <p><strong>SQL queries that can be copied and pasted into the Soil Data Access Query Page. The queries can be modified for different data fields or parameters related to the Area of Interest (AOI).</strong> <a href="https://sdmdataaccess.nrcs.usda.gov/Query.aspx" class="uri">https://sdmdataaccess.nrcs.usda.gov/Query.aspx</a></p>
 <div id="checking-the-map-unit-names" class="section level2">
-<h2>Checking the map unit names</h2>
+<h2>1. Checking the map unit names</h2>
 <pre class="sql"><code>SELECT musym, muname, areasymbol, areaname
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND muname Like  &#39;%Brems loamy sand%&#39; AND LEFT (areasymbol,2) = &#39;MI&#39;</code></pre>
@@ -1577,7 +1577,7 @@ INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND muname Like  &#39;%Brems loam
 </table>
 </div>
 <div id="search-by-map-unit-name-in-multiple-states" class="section level2">
-<h2>Search by map unit name in multiple states</h2>
+<h2>2. Search by map unit name in multiple states</h2>
 <pre class="sql"><code>SELECT musym, muname, areasymbol, areaname
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey 
@@ -1664,7 +1664,7 @@ AND muname Like  &#39;%Brems loamy sand%&#39; </code></pre>
 </table>
 </div>
 <div id="search-map-unit-symbols-used-in-a-state" class="section level2">
-<h2>Search map unit symbols used in a state</h2>
+<h2>3. Search map unit symbols used in a state</h2>
 <pre class="sql"><code>SELECT musym, muname, areasymbol, areaname 
 FROM legend 
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND musym Like   &#39;%Ab%&#39;

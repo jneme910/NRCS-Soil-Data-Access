@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 **SQL queries that can be copied and pasted into the Soil Data Access Query Page. The queries can be modified for different data fields or parameters related to the Area of Interest (AOI).** https://sdmdataaccess.nrcs.usda.gov/Query.aspx
 
 
-## Checking the map unit names
+## 1. Checking the map unit names
 ```{SQL}
 SELECT musym, muname, areasymbol, areaname
 FROM legend
@@ -34,7 +34,7 @@ BrmhaB|Brems loamy sand, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 BrmhbB|Brems loamy sand, dense substratum, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 BrmhcB|Brems loamy sand, loamy substratum, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 
-## Search by map unit name in multiple states
+## 2. Search by map unit name in multiple states
 ```{SQL}
 SELECT musym, muname, areasymbol, areaname
 FROM legend
@@ -60,7 +60,7 @@ BrmhaB|Brems loamy sand, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 BrmhbB|Brems loamy sand, dense substratum, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 BrmhcB|Brems loamy sand, loamy substratum, 0 to 4 percent slopes|MI163|Wayne County, Michigan
 
-## Search map unit symbols used in a state
+## 3. Search map unit symbols used in a state
 	
 ```{SQL}	
 SELECT musym, muname, areasymbol, areaname 
