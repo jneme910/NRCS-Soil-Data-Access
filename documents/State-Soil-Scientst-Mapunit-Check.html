@@ -1578,7 +1578,7 @@ INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND muname Like  &#39;%Brems loam
 </div>
 <div id="search-by-map-unit-name-in-multiple-states" class="section level2">
 <h2>2. Search by map unit name in multiple states</h2>
-<pre class="sql"><code>SELECT musym, muname, areasymbol, areaname
+<pre class="sql"><code>SELECT musym, muname, areasymbol, areaname, muacres
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey 
 AND LEFT (areasymbol,2) IN (&#39;WI&#39;, &#39;MI&#39;)
@@ -1665,7 +1665,7 @@ AND muname Like  &#39;%Brems loamy sand%&#39; </code></pre>
 </div>
 <div id="search-map-unit-symbols-used-in-a-state" class="section level2">
 <h2>3. Search map unit symbols used in a state</h2>
-<pre class="sql"><code>SELECT musym, muname, areasymbol, areaname 
+<pre class="sql"><code>SELECT musym, muname, areasymbol, areaname,  muacres 
 FROM legend 
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND musym Like   &#39;%Ab%&#39;
 AND LEFT (areasymbol,2) = &#39;MI&#39;</code></pre>
@@ -1686,7 +1686,7 @@ AND LEFT (areasymbol,2) = &#39;MI&#39;</code></pre>
 <th>musym</th>
 <th>muname</th>
 <th>areasymbol</th>
-<th>areaname</th>
+<th>areaname, muacres</th>
 </tr>
 </thead>
 <tbody>

@@ -36,7 +36,7 @@ BrmhcB|Brems loamy sand, loamy substratum, 0 to 4 percent slopes|MI163|Wayne Cou
 
 ## 2. Search by map unit name in multiple states
 ```{SQL}
-SELECT musym, muname, areasymbol, areaname
+SELECT musym, muname, areasymbol, areaname, muacres
 FROM legend
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey 
 AND LEFT (areasymbol,2) IN ('WI', 'MI')
@@ -63,7 +63,7 @@ BrmhcB|Brems loamy sand, loamy substratum, 0 to 4 percent slopes|MI163|Wayne Cou
 ## 3. Search map unit symbols used in a state
 	
 ```{SQL}	
-SELECT musym, muname, areasymbol, areaname 
+SELECT musym, muname, areasymbol, areaname,  muacres 
 FROM legend 
 INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND musym Like   '%Ab%'
 AND LEFT (areasymbol,2) = 'MI'
@@ -75,7 +75,7 @@ Description: This script queries for specifc set of map unit symbols using a lik
 * Change state: replace "MI" with another state abbreviation 
 
 
-musym|muname|areasymbol|areaname
+musym|muname|areasymbol|areaname,  muacres
 ------|----------------------------|-----|-------------------------|
 Ab|Abscota loamy sand|MI067|Ionia County, Michigan
 Ab|Abscota loamy sand|MI087|Lapeer County, Michigan

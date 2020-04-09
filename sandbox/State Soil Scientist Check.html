@@ -208,7 +208,7 @@ getInput: function() {
 			
 			var query = 
 			
-            "SELECT musym, muname, areasymbol, areaname "
+            "SELECT areasymbol, areaname, musym, muname,  muacres "
 				+ "FROM legend "
 				+ "INNER JOIN mapunit ON mapunit.lkey=legend.lkey " 
 				+ " AND LEFT (areasymbol,2) = '" + stateId + "'"
