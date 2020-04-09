@@ -153,8 +153,9 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 <li><b>areasymbol: </b>	A symbol that uniquely identifies a single occurrence of a particular type of area (e.g. Lancaster Co., Nebraska is NE109).</li>
 <li><b>musym: </b>	The symbol used to uniquely identify the soil mapunit in the soil survey.</li>
 <li><b>muname: </b>	Correlated name of the mapunit (recommended name or field name for surveys in progress).</li>
-<li><b>mukind: </b>Identifies the current status of the map unit. As of SSURGO version 2.1, values for this attribute are no longer provided.  This attribute will be dropped from the next major SSURGO version..</li>
+<li><b>muacres: </b>The number of acres of a particular mapunit.</li>
 <li><b>mukind: </b>Code identifying the kind of mapunit.  Example: C - consociation.</li>
+
 		</ul>
 
 
@@ -207,7 +208,7 @@ getInput: function() {
 			
 			var query = 
 			
-            "SELECT areasymbol, areaname, musym, muname, mukind, muacres "
+            "SELECT areasymbol, areaname,  muname, musym, mukind, muacres "
 				+ "FROM legend "
 				+ "INNER JOIN mapunit ON mapunit.lkey=legend.lkey " 
 				+ " AND LEFT (areasymbol,2) = '" + stateId + "'"
@@ -228,18 +229,15 @@ getInput: function() {
 					                var iRow = 0;
                 while (iRow < callbackData.Table.length) {
                                 var row = callbackData.Table[iRow];
-                                tableHtml += "<tr>";
+                                tableHtml += "<tr><tbody id='filterMu'>";
                                 // for each column in each row...
                                 var iCol = 0;
                                 while (iCol < row.length) {
-                                       
                                                 if (iRow == 0) {
-                                                    tableHtml += "<th>" + row[iCol] + "</th>";
-                                                } else if (iRow == 1) {
-                                                    tableHtml += "</tr><tbody id='filterMu'>";
+                                                                tableHtml += "<th>" + row[iCol] + "</th>";
                                                 } else {
-                                                    tableHtml += "<td>" + row[iCol] + "</td>";
-                                                        }
+                                                                tableHtml += "<td>" + row[iCol] + "</td>";
+                                                }
                                                 iCol++;
                                 };
                                 tableHtml += "</tr></tbody>";                                  
