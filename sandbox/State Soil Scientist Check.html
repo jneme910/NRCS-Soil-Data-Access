@@ -15,7 +15,7 @@
     $(document).ready(function(){
       $("#inputData").on("keyup", function() {
         var value = $(this).val().toLowerCase();
-        $("#filterMu tr").filter(function() {
+        $("#filterMu").filter(function() {
           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
       });

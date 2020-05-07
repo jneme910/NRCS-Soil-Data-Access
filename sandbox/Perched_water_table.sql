@@ -1,23 +1,36 @@
+SET STATISTICS IO ON 
+
+USE sdmONLINE
+go
+
+DROP TABLE IF EXISTS #main;
+DROP TABLE IF EXISTS #perched;
+DROP TABLE IF EXISTS #last_step_a;
+DROP TABLE IF EXISTS #last_step_p;
+DROP TABLE IF EXISTS #apparent;
+
 SELECT areasymbol, LEFT((areasymbol), 2) as state, areaname, l.lkey,  musym, m.mukey, compname, comppct_r, c.cokey, drainagecl, cm.comonthkey, cs.cosoilmoistkey
-INTO #temp1
+INTO #main
 FROM legend l inner join mapunit m left outer join component c left outer join comonth cm left outer join cosoilmoist cs
 	ON cm.comonthkey = cs.comonthkey
 	ON c.cokey = cm.cokey
     	ON m.mukey = c.mukey
     	ON l.lkey = m.lkey
-WHERE  ---areasymbol ='WI003'
-  LEFT((areasymbol), 2) IN ('WI') 
-and c.majcompflag IN ('YES')
+WHERE  areasymbol ='WI003'
+  --LEFT((areasymbol), 2) IN ('WI') 
+AND c.majcompflag IN ('yes')
 
+
+--PERCHED QUERY --Perched
 select comonthkey
-  into #temp2
+  into #perched
 from COSOILMOIST as t_source
-cross apply (
+CROSS APPLY (
     select soimoiststat, soimoistdept_r 
     from COSOILMOIST
     where comonthkey = t_source.comonthkey
 ) topApply
-cross apply (
+CROSS APPLY (
     select soimoiststat, soimoistdept_r 
     from COSOILMOIST
     where comonthkey = t_source.comonthkey
@@ -27,14 +40,55 @@ where
     (topApply.soimoiststat = 'Wet' and (bottomApply.soimoiststat IN ('Moist', 'Dry') OR bottomApply.soimoiststat  IS NULL));
 
 
-SELECT  distinct #temp1.areasymbol,  #temp1.areaname, #temp1.lkey,  #temp1.musym, #temp1.mukey, #temp1.compname, #temp1.comppct_r,
- #temp1.cokey, #temp1.drainagecl, 'Perched' AS perched
-INTO #last_step
-FROM #temp1 
-inner  join  #temp2 on #temp1.comonthkey = #temp2.comonthkey ORDER BY #temp1.areasymbol,  #temp1.musym 
+--APPARENT QUERY
+select comonthkey 
+  INTO #apparent
+from COSOILMOIST as t_source
+CROSS APPLY (
+    select soimoiststat, soimoistdept_r 
+    from COSOILMOIST
+    where comonthkey = t_source.comonthkey
+) topApply
+CROSS APPLY (
+    select soimoiststat, soimoistdept_r 
+    from COSOILMOIST
+    where comonthkey = t_source.comonthkey
+) bottomApply
+where
+    bottomApply.soimoistdept_r > topApply.soimoistdept_r and
+    (topApply.soimoiststat = 'Wet' and  bottomApply.soimoiststat = 'Wet');
 
-SELECT  distinct #temp1.areasymbol,  #temp1.areaname, #temp1.lkey,  #temp1.musym, #temp1.mukey, #temp1.compname, #temp1.comppct_r,
- #temp1.cokey, #temp1.drainagecl, CASE WHEN #temp1.drainagecl IS NULL THEN NULL
- WHEN perched IS NULL THEN 'Apparent' ELSE perched END AS perched_apparent 
-FROM #temp1 
-LEFT OUTER JOIN #last_step on #temp1.cokey = #last_step.cokey ORDER BY #temp1.areasymbol,  #temp1.musym 
+--LAST STEP QUERY PERCHED
+SELECT DISTINCT #main.areasymbol,  #main.areaname, #main.lkey,  #main.musym, #main.mukey, #main.compname, #main.comppct_r,
+ #main.cokey, #main.drainagecl, 'Perched' AS perched
+INTO #last_step_p
+FROM #main 
+INNER JOIN  #perched on #main.comonthkey = #perched.comonthkey ORDER BY #main.areasymbol,  #main.musym 
+
+--LAST STEP QUERY APPARENT
+SELECT DISTINCT #main.areasymbol,  #main.areaname, #main.lkey,  #main.musym, #main.mukey, #main.compname, #main.comppct_r,
+ #main.cokey, #main.drainagecl, 'Apparent' AS apparent
+INTO #last_step_a
+FROM #main 
+INNER JOIN  #perched on #main.comonthkey = #perched.comonthkey ORDER BY #main.areasymbol,  #main.musym 
+
+
+SELECT DISTINCT  #main.areasymbol,  #main.areaname, #main.lkey,  #main.musym, #main.mukey, #main.compname, #main.comppct_r,
+ #main.cokey, #main.drainagecl, 
+ CASE WHEN #main.drainagecl IS NULL THEN NULL
+ WHEN apparent IS NOT NULL THEN apparent
+ WHEN perched IS NOT NULL THEN perched ELSE 'not rated' END AS perched_apparent 
+FROM #main 
+LEFT OUTER JOIN #last_step_p on #main.cokey = #last_step_p.cokey 
+LEFT OUTER JOIN #last_step_a on #main.cokey = #last_step_a.cokey 
+ORDER BY #main.areasymbol,  #main.musym 
+
+
+
+DROP TABLE IF EXISTS #main;
+DROP TABLE IF EXISTS #perched;
+DROP TABLE IF EXISTS #last_step_a;
+DROP TABLE IF EXISTS #last_step_p;
+DROP TABLE IF EXISTS #apparent;
+
+SET STATISTICS IO OFF
