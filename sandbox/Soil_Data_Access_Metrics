@@ -1,0 +1,35 @@
+select DISTINCT  --[id]
+      --,[query_id]
+     -- ,
+	  [query_name]
+      ,[query_frequency]
+      ,[query_month]
+      ,[query_year]
+--     ,[state]
+--     ,[seqnum]
+      ,[query_title]
+   --   ,[query_header]
+   --   ,[query_header2]
+   --   ,[count]
+	--,  DATENAME(month, [query_month]) AS [month]
+	,CASE
+          WHEN [query_month] = 1 THEN 'Jan'
+          WHEN [query_month] = 2 THEN 'Feb'
+          WHEN [query_month] = 3 THEN 'Mar'
+          WHEN [query_month] = 4 THEN 'Apr'
+          WHEN [query_month] = 5 THEN 'May'
+          WHEN [query_month] = 6 THEN 'Jun'
+          WHEN [query_month] = 7 THEN 'Jul'
+          WHEN [query_month] = 8 THEN 'Aug'
+          WHEN [query_month] = 9 THEN 'Sep'
+          WHEN [query_month] = 10 THEN 'Oct'
+          WHEN [query_month] = 11 THEN 'Nov'
+          WHEN [query_month] = 12 THEN 'Dec'
+          ELSE 'OTHER'
+       END AS [month]
+	, SUM ([count]) over(partition by  [query_year], [query_month] order by [query_year] ASC, [query_month] ASC) as monthly_sum 
+FROM wss_metric_query_results
+where STATE = 'xnational' --AND query_year IN  (2019,2020) 
+AND query_title = 'SDA Usage'
+AND [query_frequency] = 'M'
+ORDER BY query_name, query_year ASC , query_month ASC --, state 

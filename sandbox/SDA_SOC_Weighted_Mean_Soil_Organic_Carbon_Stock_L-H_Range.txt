@@ -1,25 +1,3 @@
----SOC
----Soil organic carbon stock estimate (SOC) in total soil profile (0 cm to the reported depth of the soil profile). The concentration of organic carbon present in the soil expressed in grams C per square meter for the total reported soil profile depth. NULL values are presented where data are incomplete or not available.
----Uses all components with horizon data.
----Does not calculate component SOC below the following component restrictions:
----Lithic bedrock, Paralithic bedrock, Densic bedrock, Fragipan, Duripan, Sulfuric
----soc =  ( (hzT * ( ( om / 1.724 ) * db3 )) / 100.0 ) * ((100.0 - fragvol) / 100.0) 
-DROP TABLE IF EXISTS #main
-DROP TABLE IF EXISTS #acpf
-DROP TABLE IF EXISTS #SOC4
-DROP TABLE IF EXISTS #SOC3
-DROP TABLE IF EXISTS #SOC2
-DROP TABLE IF EXISTS #SOC1
-DROP TABLE IF EXISTS #tex
-DROP TABLE IF EXISTS #muacpf
-DROP TABLE IF EXISTS #muacpf2
-DROP TABLE IF EXISTS #muacpf3
-DROP TABLE IF EXISTS  #hortopdepth 
-DROP TABLE IF EXISTS #acpfhzn
-DROP TABLE IF EXISTS #acpf2
-DROP TABLE IF EXISTS #SOC
-DROP TABLE IF EXISTS #SOC5
-
 SELECT 
  areasymbol, areaname, mapunit.mukey, mapunit.mukey AS mulink, mapunit.musym, nationalmusym, mapunit.muname, mukind, muacres
 INTO #main
@@ -89,10 +67,10 @@ WHEN texture LIKE '%PEAT%' AND (om_h) IS NULL THEN 35
 WHEN (om_h) IS NULL THEN om_h
 ELSE om_h END AS om_h , 
 
---<30% OM â€“ 0.25 g/cm3
---30 â€“ 50 OM â€“ 0.2 g/cm3
---50 â€“ 75 OM â€“ 0.15 g/cm3
--->75 OM â€“ 0.1 g/cm3
+--<30% OM – 0.25 g/cm3
+--30 – 50 OM – 0.2 g/cm3
+--50 – 75 OM – 0.15 g/cm3
+-->75 OM – 0.1 g/cm3
 
 CASE WHEN (texture LIKE '%PM%' AND (dbthirdbar_r) IS NULL AND (om_r) IS NULL) THEN 0.25
 WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_r) IS NULL AND (om_r) IS NULL) THEN 0.25
@@ -477,19 +455,3 @@ SOCSTOCK_30_60 ,
 SOCSTOCK_60_100 , 
 SOCSTOCK_100_200
 FROM #SOC5
-
-
-DROP TABLE IF EXISTS #main
-DROP TABLE IF EXISTS #acpf
-DROP TABLE IF EXISTS #SOC4
-DROP TABLE IF EXISTS #SOC3
-DROP TABLE IF EXISTS #SOC2
-DROP TABLE IF EXISTS #SOC1
-DROP TABLE IF EXISTS #tex
-DROP TABLE IF EXISTS #muacpf
-DROP TABLE IF EXISTS #muacpf2
-DROP TABLE IF EXISTS #muacpf3
-DROP TABLE IF EXISTS  #hortopdepth 
-DROP TABLE IF EXISTS #acpfhzn
-DROP TABLE IF EXISTS #acpf2
-DROP TABLE IF EXISTS #SOC

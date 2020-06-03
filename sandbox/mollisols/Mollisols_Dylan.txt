@@ -1,0 +1,41 @@
+Hi Everyone,
+ 
+Here are some summaries for all "A" horizons with bottom depths < 25cm, 'Ak' horizons removed (really, 'Ak'?), and filtered for 0% < BS < 100%. 26,572 samples. Base saturation is based on the NH4-Ac at pH 7 method, pH is 1:1 H2O.
+ 
+bs-7-vs-pH.png
+Scatterplot, color proportional to the density of points within hexagons (yellow = more points). Critical thresholds of 50% base saturation and pH 6.5 added for clarity. It's complicated. The typical assumptions about H+ and Al3+ saturation are confounded by the usual suspects: OM content and quality, clay content, and mineralogy.
+ 
+ 
+bs7-threshold-vs-pH.png
+Box-whisker plot demonstrating BS threshold of 50%. There is "good" separation, but not at pH 6.5.
+ 
+ 
+logistic-via-pH.png
+Logistic regression (BS > 50% ~ pH), pH 6.5 threshold highlighted in blue, inflection point of logistic function in red. Model fit is plausible but there is a lot of noise (approximate R^2 of 0.45).
+ 
+ 
+linear-RCS-via-pH.png
+Linear regression with restricted cubic spline basis functions, relating %BS to pH. Model fit is slightly better than the logistic regression (not surprising as we are working with continuous data), but still not very good, R^2 ~ 0.5.
+ 
+ 
+My interpretations:
+Splitting these data at a 50% BS threshold is problematic from a modeling perspective, but something we have to work with if we are going to use our current definitions. Of the 26,527 samples, 64% are > 50% BS and 36% are <= 50% BS.
+ 
+Using a pH threshold of 6.5, only 14% of the available samples would be selected as "high enough base saturation for a mollic epipedon.
+ 
+Looking at the joint proportions of samples, cut into groups by thresholding %BS (>50% = TRUE) and pH (>6.5 = TRUE):
+
+            pH_threshold
+BS_threshold FALSE TRUE
+       FALSE  0.35 0.01
+       TRUE   0.51 0.13
+ 
+That is a fairly poor classification: we are only "right" ~ 48% of the time. And, this is a fairly blunt instrument for investigating what we are actually interested in: %BS ~ pH.
+ 
+Logistic regression or linear regression with spline basis functions (accommodation for curvature) are more appropriate here, but still insufficient without additional parameterization of organic matter, clay content, and mineralogy. Might as well just measure the base saturation, right?
+ 
+So, a pH threshold of 6.5 might be reasonable from a theoretical point of view. However, it isn't even close to a substitute for BS measurements, at least from an empirical standpoint. Using a pH > 6.5 filter on our spatial data may be overly simplistic (and restrictive), especially since we have BS estimates.
+ 
+I'll think some more about this and do some reading; it could be that I have missed something obvious. Code / data attached in case you are curious.
+ 
+Dylan

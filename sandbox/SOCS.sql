@@ -4,31 +4,28 @@
 ---Does not calculate component SOC below the following component restrictions:
 ---Lithic bedrock, Paralithic bedrock, Densic bedrock, Fragipan, Duripan, Sulfuric
 ---soc =  ( (hzT * ( ( om / 1.724 ) * db3 )) / 100.0 ) * ((100.0 - fragvol) / 100.0) 
-DROP TABLE IF EXISTS #main
-DROP TABLE IF EXISTS #acpf
-DROP TABLE IF EXISTS #SOC4
-DROP TABLE IF EXISTS #SOC3
-DROP TABLE IF EXISTS #SOC2
-DROP TABLE IF EXISTS #SOC1
-DROP TABLE IF EXISTS #tex
-DROP TABLE IF EXISTS #muacpf
-DROP TABLE IF EXISTS #muacpf2
-DROP TABLE IF EXISTS #muacpf3
-DROP TABLE IF EXISTS  #hortopdepth 
-DROP TABLE IF EXISTS #acpfhzn
-DROP TABLE IF EXISTS #acpf2
-DROP TABLE IF EXISTS #SOC
-DROP TABLE IF EXISTS #SOC5
 
-SELECT 
- areasymbol, areaname, mapunit.mukey, mapunit.mukey AS mulink, mapunit.musym, nationalmusym, mapunit.muname, mukind, muacres
+DROP TABLE IF EXISTS #main;
+DROP TABLE IF EXISTS #acpf
+DROP TABLE IF EXISTS #muacpf
+DROP TABLE IF EXISTS  #muacpf2
+DROP TABLE IF EXISTS  #muacpf3
+DROP TABLE IF EXISTS #hortopdepth
+DROP TABLE IF EXISTS #acpf2
+DROP TABLE IF EXISTS  #acpfhzn
+DROP TABLE IF EXISTS #soc
+DROP TABLE IF EXISTS #soc2
+DROP TABLE IF EXISTS #soc3
+DROP TABLE IF EXISTS #soc4
+
+SELECT areasymbol, areaname, mapunit.mukey, mapunit.mukey AS mulink, mapunit.musym, nationalmusym, mapunit.muname, mukind, muacres
 INTO #main
 FROM legend
-INNER JOIN mapunit on legend.lkey=mapunit.lkey ---AND mapunit.mukey = 753534 --661781 --2809839 For Testing
+INNER JOIN mapunit on legend.lkey=mapunit.lkey ---AND mapunit.mukey = 661781 --2809839 For Testing
 INNER JOIN muaggatt AS mt1 on mapunit.mukey=mt1.mukey
-
-AND legend.areasymbol <> 'US' 
-
+AND legend.areasymbol <> 'US' -- SSURGO
+--AND legend.areasymbol = 'US' -- STATSGO
+---AND legend.areasymbol = 'WI025'
 
 
 -------------------------------------------
@@ -60,99 +57,25 @@ AND reskind IS NOT NULL ORDER BY resdept_r) AS TOPrestriction, c.cokey,
  hzname,
  hzdept_r,
  hzdepb_r,
- 
-hzdept_l,
- hzdepb_l,
-  
-  
-hzdept_h,
- hzdepb_h,
- 
- 
- CASE WHEN (hzdepb_l-hzdept_l) IS NULL THEN 0 ELSE CAST((hzdepb_l-hzdept_l) AS INT) END AS thickness_l,  
-  CASE WHEN (hzdepb_h-hzdept_h) IS NULL THEN 0 ELSE CAST((hzdepb_h-hzdept_h) AS INT) END AS thickness_h,  
 CASE WHEN (hzdepb_r-hzdept_r) IS NULL THEN 0 ELSE CAST((hzdepb_r-hzdept_r) AS INT) END AS thickness,  
-
 CASE WHEN texture LIKE '%PM%' AND (om_r) IS NULL THEN 35
 WHEN texture LIKE '%MUCK%' AND (om_r) IS NULL THEN 35
 WHEN texture LIKE '%PEAT%' AND (om_r) IS NULL THEN 35 ELSE om_r END AS om_r , 
 
-CASE WHEN texture LIKE '%PM%' AND (om_l) IS NULL THEN 35
-WHEN texture LIKE '%MUCK%' AND (om_l) IS NULL THEN 35
-WHEN texture LIKE '%PEAT%' AND (om_l) IS NULL THEN 35 
-WHEN (om_l) IS NULL THEN om_r
-ELSE om_l END AS om_l , 
-
-CASE WHEN texture LIKE '%PM%' AND (om_h) IS NULL THEN 35
-WHEN texture LIKE '%MUCK%' AND (om_h) IS NULL THEN 35
-WHEN texture LIKE '%PEAT%' AND (om_h) IS NULL THEN 35 
-WHEN (om_h) IS NULL THEN om_h
-ELSE om_h END AS om_h , 
-
---<30% OM – 0.25 g/cm3
---30 – 50 OM – 0.2 g/cm3
---50 – 75 OM – 0.15 g/cm3
--->75 OM – 0.1 g/cm3
-
-CASE WHEN (texture LIKE '%PM%' AND (dbthirdbar_r) IS NULL AND (om_r) IS NULL) THEN 0.25
-WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_r) IS NULL AND (om_r) IS NULL) THEN 0.25
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_r) IS NULL AND (om_r) IS NULL) THEN 0.25 
-
-WHEN (texture LIKE '%PM%' AND (dbthirdbar_r) IS NULL AND (om_r) <30) THEN 0.25
-WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_r) IS NULL AND ((om_r) BETWEEN 30 AND 50)) THEN 0.20
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_r) IS NULL AND ((om_r) BETWEEN 50 AND 75)) THEN 0.15 
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_r) IS NULL AND ((om_r) >= 75)) THEN 0.10
-
-WHEN (texture LIKE '%PM%' AND (dbthirdbar_r) IS NULL ) THEN 0.25
-WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_r) IS NULL ) THEN 0.25
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_r) IS NULL ) THEN 0.25 
-
-ELSE dbthirdbar_r END AS dbthirdbar_r, 
-
-CASE WHEN texture LIKE '%PM%' AND (dbthirdbar_l) IS NULL AND (om_l) IS NULL THEN 0.25
-WHEN texture LIKE '%MUCK%' AND (dbthirdbar_l) IS NULL AND (om_l) IS NULL THEN 0.25
-WHEN texture LIKE '%PEAT%' AND (dbthirdbar_l) IS NULL AND (om_l) IS NULL THEN 0.25 
-
-WHEN (texture LIKE '%PM%' AND (dbthirdbar_l) IS NULL AND (om_l) <30) THEN 0.25
-WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_l) IS NULL AND ((om_l) BETWEEN 30 AND 50)) THEN 0.20
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_l) IS NULL AND ((om_l) BETWEEN 50 AND 75)) THEN 0.15 
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_l) IS NULL AND ((om_l) >= 75)) THEN 0.10
-WHEN (dbthirdbar_l) IS NULL THEN dbthirdbar_r
-
-WHEN (texture LIKE '%PM%' AND (dbthirdbar_l) IS NULL ) THEN 0.25
-WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_l) IS NULL ) THEN 0.25
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_l) IS NULL ) THEN 0.25 
-
-ELSE dbthirdbar_l END AS dbthirdbar_l, 
-
-CASE WHEN texture LIKE '%PM%' AND (dbthirdbar_h) IS NULL AND (om_h) IS NULL THEN 0.25
-WHEN texture LIKE '%MUCK%' AND (dbthirdbar_h) IS NULL AND (om_h) IS NULL THEN 0.25
-WHEN texture LIKE '%PEAT%' AND (dbthirdbar_h) IS NULL AND (om_h) IS NULL THEN 0.25 
-WHEN (texture LIKE '%PM%' AND (dbthirdbar_h) IS NULL AND (om_l) <30) THEN 0.25
-WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_h) IS NULL AND ((om_h) BETWEEN 30 AND 50)) THEN 0.20
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_h) IS NULL AND ((om_h) BETWEEN 50 AND 75)) THEN 0.15 
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_h) IS NULL AND ((om_h) >= 75)) THEN 0.10
-
-WHEN (texture LIKE '%PM%' AND (dbthirdbar_h) IS NULL ) THEN 0.25
-WHEN (texture LIKE '%MUCK%' AND (dbthirdbar_h) IS NULL ) THEN 0.25
-WHEN (texture LIKE '%PEAT%' AND (dbthirdbar_h) IS NULL ) THEN 0.25 
-
-WHEN (dbthirdbar_h) IS NULL THEN dbthirdbar_r
-ELSE dbthirdbar_h END AS dbthirdbar_h, 
-
-
+CASE WHEN texture LIKE '%PM%' AND (dbthirdbar_r) IS NULL THEN 0.25
+WHEN texture LIKE '%MUCK%' AND (dbthirdbar_r) IS NULL THEN 0.25
+WHEN texture LIKE '%PEAT%' AND (dbthirdbar_r) IS NULL THEN 0.25 ELSE dbthirdbar_r END AS dbthirdbar_r, 
   (SELECT CASE WHEN SUM (cf.fragvol_r) IS NULL THEN 0 ELSE CAST (SUM(cf.fragvol_r) AS INT) END FROM chfrags cf WHERE cf.chkey = ch.chkey) as fragvol,
-  
-   (SELECT CASE WHEN SUM (cf.fragvol_l) IS NULL THEN 0 ELSE CAST (SUM(cf.fragvol_l) AS INT) END FROM chfrags cf WHERE cf.chkey = ch.chkey) as fragvol_l, 
-   (SELECT CASE WHEN SUM (cf.fragvol_h) IS NULL THEN 0 ELSE CAST (SUM(cf.fragvol_h) AS INT) END FROM chfrags cf WHERE cf.chkey = ch.chkey) as fragvol_h,  
 brockdepmin,
   texture,
   ch.chkey
 INTO #acpf
 FROM legend  AS l
 INNER JOIN mapunit AS mu ON mu.lkey = l.lkey 
-
-AND l.areasymbol <> 'US' 
+---AND l.areasymbol like 'WI025'
+--AND mu.mukey = 661781 --2809839 For testing
+AND l.areasymbol <> 'US' -- SSURGO
+--AND l.areasymbol = 'US' -- STATSGO
 INNER JOIN muaggatt AS  mt on mu.mukey=mt.mukey
 INNER JOIN component AS  c ON c.mukey = mu.mukey 
 LEFT OUTER JOIN  chorizon AS ch ON ch.cokey = c.cokey 
@@ -164,9 +87,9 @@ WHEN texture LIKE '%PEAT%' AND om_r IS NULL THEN 1
 WHEN texture LIKE '%PM%' AND dbthirdbar_r IS NULL THEN 1
 WHEN texture LIKE '%MUCK%' AND dbthirdbar_r IS NULL THEN 1
 WHEN texture LIKE '%PEAT%' AND dbthirdbar_r IS NULL THEN 1
---WHEN om_r IS NULL THEN 2 
+WHEN om_r IS NULL THEN 2 
 WHEN om_r = 0 THEN 2 
---WHEN dbthirdbar_r IS NULL THEN 2
+WHEN dbthirdbar_r IS NULL THEN 2
 WHEN dbthirdbar_r = 0 THEN 2
 ELSE 1 END = 1
 ORDER by l.areasymbol, mu.musym, hzdept_r 
@@ -252,10 +175,6 @@ CASE  WHEN hzdepb_r <= 5 THEN hzdepb_r WHEN hzdepb_r > 5 and hzdept_r < 5 THEN 5
 
 CASE  WHEN hzdept_r < 30 then hzdept_r ELSE 0 END AS InRangeTop_0_30, 
 CASE  WHEN hzdepb_r <= 30  THEN hzdepb_r WHEN hzdepb_r > 30  and hzdept_r < 30 THEN 30  ELSE 0 END AS InRangeBot_0_30,
-
-
-CASE  WHEN hzdept_l < 30 then hzdept_l ELSE 0 END AS InRangeTop_0_30_l, 
-CASE  WHEN hzdepb_h <= 30  THEN hzdepb_h WHEN hzdepb_h > 30  and hzdept_h < 30 THEN 30  ELSE 0 END AS InRangeBot_0_30_h,
 ---5 to 15 
 CASE    WHEN hzdepb_r < 5 THEN 0
 WHEN hzdept_r >15 THEN 0 
@@ -343,9 +262,7 @@ WHEN hzdepb_r <= 100 THEN hzdepb_r  WHEN hzdepb_r > 100 and hzdept_r < 100 THEN 
 --CASE    WHEN hzdepb_r < 50 THEN 50
 --WHEN hzdepb_r <= 100 THEN hzdepb_r  WHEN hzdepb_r > 100 and hzdept_r < 100 THEN 100 ELSE 50 END AS InRangeBot_50_100,
 
-om_r,om_l, om_h, fragvol,  fragvol_l, fragvol_h, dbthirdbar_r, dbthirdbar_l, dbthirdbar_h, cokey, mukey, 100.0 - fragvol AS frag_main, 
-100.0 - fragvol_l AS frag_main_l,
-100.0 - fragvol_h AS frag_main_h
+om_r, fragvol, dbthirdbar_r, cokey, mukey, 100.0 - fragvol AS frag_main
 INTO #SOC
 FROM #acpf
 ORDER BY cokey, hzdept_r ASC, hzdepb_r ASC, chkey
@@ -357,8 +274,6 @@ InRangeBot_0_150,
  
 InRangeTop_0_30, 
 InRangeBot_0_30, 
-InRangeTop_0_30_l, 
-InRangeBot_0_30_h, 
 
 InRangeTop_20_50, 
 InRangeBot_20_50, 
@@ -368,9 +283,6 @@ InRangeBot_50_100,
 (( ((InRangeBot_0_150 - InRangeTop_0_150) * ( ( om_r / 1.724 ) * dbthirdbar_r )) / 100.0 ) * ((100.0 - fragvol) / 100.0))  AS HZ_SOC_0_150,
 
 (( ((InRangeBot_0_30 - InRangeTop_0_30) * ( ( om_r / 1.724 ) * dbthirdbar_r )) / 100.0 ) * ((100.0 - fragvol) / 100.0))  AS HZ_SOC_0_30,
-
-(( ((InRangeBot_0_30_h - InRangeTop_0_30_l) * ( ( om_l / 1.724 ) * dbthirdbar_l )) / 100.0 ) * ((100.0 - fragvol_l) / 100.0))  AS HZ_SOC_0_30_l,
-(( ((InRangeBot_0_30_h - InRangeTop_0_30_l) * ( ( om_h / 1.724 ) * dbthirdbar_h )) / 100.0 ) * ((100.0 - fragvol_h) / 100.0))  AS HZ_SOC_0_30_h,
 ---Removed * ( comppct_r * 100 ) 
 ((((InRangeBot_20_50 - InRangeTop_20_50) * ( ( om_r / 1.724 ) * dbthirdbar_r )) / 100.0 ) * ((100.0 - fragvol) / 100.0))  AS HZ_SOC_20_50,
 ---Removed * ( comppct_r * 100 ) 
@@ -398,8 +310,6 @@ ORDER BY  mukey ,cokey, comppct_r DESC, hzdept_r ASC, hzdepb_r ASC, chkey
 SELECT DISTINCT cokey, mukey,  
 ROUND (SUM (HZ_SOC_0_150) over(PARTITION BY cokey) ,4) AS CO_SOC_0_150, 
 ROUND (SUM (HZ_SOC_0_30) over(PARTITION BY cokey) ,4) AS CO_SOC_0_30, 
-ROUND (SUM (HZ_SOC_0_30_l) over(PARTITION BY cokey) ,4) AS CO_SOC_0_30_l, 
-ROUND (SUM (HZ_SOC_0_30_h) over(PARTITION BY cokey) ,4) AS CO_SOC_0_30_h, 
 ROUND (SUM (HZ_SOC_20_50) over(PARTITION BY cokey),4) AS CO_SOC_20_50, 
 ROUND (SUM (HZ_SOC_50_100) over(PARTITION BY cokey),4)  AS CO_SOC_50_100,
 ROUND (SUM (HZ_SOC_0_5) over(PARTITION BY cokey),4) AS CO_SOC_0_5, 
@@ -413,9 +323,6 @@ FROM #SOC2
 
 SELECT DISTINCT #SOC3.cokey, #SOC3.mukey,  WEIGHTED_COMP_PCT, 
 CO_SOC_0_30, CO_SOC_0_30 * WEIGHTED_COMP_PCT AS WEIGHTED_CO_SOC_0_30,
-CO_SOC_0_30_l, CO_SOC_0_30_l * WEIGHTED_COMP_PCT AS WEIGHTED_CO_SOC_0_30_l,
-CO_SOC_0_30_h, CO_SOC_0_30_h * WEIGHTED_COMP_PCT AS WEIGHTED_CO_SOC_0_30_h,
-
 CO_SOC_20_50, CO_SOC_20_50 * WEIGHTED_COMP_PCT AS WEIGHTED_CO_SOC_20_50,
 CO_SOC_50_100, CO_SOC_50_100 * WEIGHTED_COMP_PCT AS WEIGHTED_CO_SOC_50_100,
 CO_SOC_0_150, CO_SOC_0_150 * WEIGHTED_COMP_PCT AS WEIGHTED_CO_SOC_0_150,
@@ -430,11 +337,9 @@ FROM #SOC3
 INNER JOIN #muacpf3 ON #muacpf3.cokey=#SOC3.cokey
 
 --Unit Conversion *100
-SELECT DISTINCT #main.mukey, ROUND (SUM (WEIGHTED_CO_SOC_0_30) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_0_30 , 
+SELECT DISTINCT areasymbol, areaname,  musym, nationalmusym, muname, mukind, 
 
-ROUND (SUM (WEIGHTED_CO_SOC_0_30_l) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_0_30_l , 
-ROUND (SUM (WEIGHTED_CO_SOC_0_30_h) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_0_30_h , 
-
+#main.mukey, ROUND (SUM (WEIGHTED_CO_SOC_0_30) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_0_30 , 
 ROUND (SUM (WEIGHTED_CO_SOC_20_50) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_20_50 , 
 ROUND (SUM (WEIGHTED_CO_SOC_50_100) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_50_100,
 
@@ -450,46 +355,6 @@ ROUND (SUM (WEIGHTED_CO_SOC_30_60) over(PARTITION BY #SOC4.mukey) ,4) *100  AS S
 ROUND (SUM (WEIGHTED_CO_SOC_60_100) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_60_100 , 
 
 ROUND (SUM (WEIGHTED_CO_SOC_100_200) over(PARTITION BY #SOC4.mukey) ,4) *100  AS SOCSTOCK_100_200
-INTO #SOC5
 FROM #SOC4
 RIGHT OUTER JOIN #main ON #main.mukey=#SOC4.mukey
 
-SELECT DISTINCT
-mukey,
---CASE WHEN SOCSTOCK_0_30_l = 0 THEN SOCSTOCK_0_30  
---WHEN SOCSTOCK_0_30_l IS NULL AND SOCSTOCK_0_30 IS NOT NULL THEN SOCSTOCK_0_30 
---WHEN SOCSTOCK_0_30_l> SOCSTOCK_0_30 THEN SOCSTOCK_0_30
---ELSE SOCSTOCK_0_30_l END AS SOCSTOCK_0_30_low,
-SOCSTOCK_0_30_l  SOCSTOCK_0_30_low,
-SOCSTOCK_0_30 ,
---CASE WHEN SOCSTOCK_0_30_h = 0 THEN SOCSTOCK_0_30 
---WHEN SOCSTOCK_0_30_h IS NULL AND SOCSTOCK_0_30 IS NOT NULL THEN SOCSTOCK_0_30 
---WHEN SOCSTOCK_0_30_h < SOCSTOCK_0_30  THEN SOCSTOCK_0_30 
---ELSE SOCSTOCK_0_30_h END AS SOCSTOCK_0_30_high,
-SOCSTOCK_0_30_h  SOCSTOCK_0_30_high,
-SOCSTOCK_20_50,
-SOCSTOCK_50_100,
-SOCSTOCK_0_5,
-SOCSTOCK_0_150,
-SOCSTOCK_5_15 , 
-SOCSTOCK_15_30 ,
-SOCSTOCK_30_60 ,
-SOCSTOCK_60_100 , 
-SOCSTOCK_100_200
-FROM #SOC5
-
-
-DROP TABLE IF EXISTS #main
-DROP TABLE IF EXISTS #acpf
-DROP TABLE IF EXISTS #SOC4
-DROP TABLE IF EXISTS #SOC3
-DROP TABLE IF EXISTS #SOC2
-DROP TABLE IF EXISTS #SOC1
-DROP TABLE IF EXISTS #tex
-DROP TABLE IF EXISTS #muacpf
-DROP TABLE IF EXISTS #muacpf2
-DROP TABLE IF EXISTS #muacpf3
-DROP TABLE IF EXISTS  #hortopdepth 
-DROP TABLE IF EXISTS #acpfhzn
-DROP TABLE IF EXISTS #acpf2
-DROP TABLE IF EXISTS #SOC
