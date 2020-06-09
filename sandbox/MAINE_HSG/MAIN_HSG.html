@@ -1,0 +1,538 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<title>Calculated Hydrologic Soil Group (HSG)</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script> function demoFromHTML() {
+    var pdf = new jsPDF('p', 'pt', 'letter');
+    // source can be HTML-formatted string, or a reference
+    // to an actual DOM element from which the text will be scraped.
+    source = $('#customers')[0];
+
+    // we support special element handlers. Register them with jQuery-style 
+    // ID selector for either ID or node name. ("#iAmID", "div", "span" etc.)
+    // There is no support for any other type of selectors 
+    // (class, of compound) at this time.
+    specialElementHandlers = {
+        // element with id of "bypass" - jQuery style selector
+        '#bypassme': function (element, renderer) {
+            // true = "handled elsewhere, bypass text extraction"
+            return true
+        }
+    };
+    margins = {
+        top: 80,
+        bottom: 60,
+        left: 10,
+        width: 700
+    };
+    // all coords and widths are in jsPDF instance's declared units
+    // 'inches' in this case
+    pdf.fromHTML(
+    source, // HTML string or DOM elem ref.
+    margins.left, // x coord
+    margins.top, { // y coord
+        'width': margins.width, // max width of content on PDF
+        'elementHandlers': specialElementHandlers
+    },
+
+    function (dispose) {
+        // dispose: object with X, Y of the last line add to the PDF 
+        //          this allow the insertion of new lines after html
+        pdf.save('Test.pdf');
+    }, margins);
+}
+</script>
+</head>
+
+
+
+
+	<style type="text/css">
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+       
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #d9e0f9;
+        }
+    </style>
+
+
+<body>
+<!--<img src="https://websoilsurvey.sc.egov.usda.gov/App/Resources/HomePage/images/WSSMasthead4.png" alt="WSS Logo" style="width:650px;height:150px;"> -->
+
+<hr style="border: none; border-bottom: 4px solid grey;">
+<font color="blue">
+		<h2>Calculated Hydrologic Soil Group (HSG)</h2>
+		</font>
+	
+
+
+	<p>An SDA-populated select list is used to pick a state and SSA which enables creation of a "Calculated Hydrologic Soil Group (HSG)" based upon those selections. The data is not static; it hits Soil Data Access Live. Once a survey is selected and table appears, if a new survey is selected it will append to the table at the bottom. </p>
+	<p>This report generates a list of components and any associated HSG. 	</p>
+		<a href='#reportref'> For more information about the table, </a>
+	</p>
+	<a name='top'>
+
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<select id="selectId2" onchange="ChangeSelectedSSA(event)">
+		<option value='' style="display: none" id="remove">(select a soil survey area)</option>
+	</select>
+	
+	<div id="selectedSSAId"><p>(no SSA selected)</p></div>
+	
+	<div class="container" id="id1"></div>
+	<br></br>
+
+<b>
+		<font color='red'>
+			<a name='reportref'>Report Metadata:</a>
+		</font>
+	</b>
+	</h3>
+	<php>
+		<a href='#top'>Back to top</a>
+	</php>
+	
+	<ul>
+	<li><b>Mapunit Symbol: </b> The symbol used to uniquely identify the soil mapunit in the soil survey.</li>
+	<li><b>Mapunit Name: </b> Correlated name of the mapunit (recommended name or field name for surveys in progress).</li>
+	<li><b>Component: </b> Component name - Name assigned to a component based on its range of properties. Local Phase - Phase criterion to be used at a local level, in conjunction with "component name" to help identify a soil component.</li>
+	<li><b>Component Percct</b> The percentage of the component of the mapunit.</li>
+
+
+	
+	</ul>
+
+
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "select statename, stateid from state order by statename;",
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch SSA names and symbols
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			query =
+				"SELECT distinct c.areaname, c.areasymbol "
+				+ "FROM [dbo].[sastatusmap] c, [dbo].[saspatialver] s "
+				+ "WHERE s.areasymbol = c.areasymbol "
+				+ "AND c.areasymbol IN ("
+				+ "SELECT DISTINCT l.areasymbol "
+				+ "FROM [dbo].[legend] l, [dbo].[laoverlap] o "
+				+ "WHERE o.lkey = l.lkey "
+				+ "AND o.areatypename = 'State or Territory' "
+				+ "AND o.areasymbol = '" + stateId + "' ) "
+				+ "order by c.areaname, c.areasymbol;";
+
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId2", callbackData.Table, 1, 0, "select an SSA");
+				}, 
+				"json");
+		}
+		
+		function ChangeSelectedSSA(event) {
+			// Update the selected SSA text area and then fetch and display report 2 results
+			var ssaId = event.target.value;
+			var notification = $("#selectedSSAId");
+			notification[0].innerHTML = "<p>selected SSA areasymbol = " + ssaId + "</p>";
+			
+		query = 
+ "SELECT m.mukey, c.cokey, areasymbol, areaname, muname, compname, comppct_r, hydgrp, "
+ +" (SELECT  MIN(ksat_r) FROM chorizon "
+ +" INNER join component ON chorizon.cokey=component.cokey "
+ +" AND c.cokey=component.cokey "
+ +" and hzdept_r <= 50) as min_ks, "
+
+
+ +" (SELECT  MIN(ksat_r) FROM chorizon "
+ +" INNER join component ON chorizon.cokey=component.cokey "
+ +" AND c.cokey=component.cokey "
+ +" and hzdept_r <= 100) as min_ks2, "
+
+
+ +" (SELECT MIN(ksat_r)FROM chorizon "
+ +" INNER join component ON chorizon.cokey=component.cokey "
+ +" AND c.cokey=component.cokey "
+ +" and hzdept_r <= 60) as min_ks60, "
+
+
+ +" (SELECT count(month) FROM comonth   "
+ +" INNER join component ON comonth.cokey=component.cokey "
+ +" INNER join cosoilmoist ON comonth.comonthkey=cosoilmoist.comonthkey "
+ +" AND c.cokey=component.cokey "
+ +" and soimoiststat = 'wet' and soimoistdept_r <= 100) as month1, "
+
+ +" (SELECT count(month) FROM comonth "
+ +" INNER join component ON comonth.cokey=component.cokey "
+ +" INNER join cosoilmoist ON comonth.comonthkey=cosoilmoist.comonthkey "
+ +" AND c.cokey=component.cokey "
+ +" and soimoiststat = 'wet' and soimoistdept_r < 60) as mnth, "
+
+
+ +" (SELECT MIN(resdept_r) FROM corestrictions "
+ +" INNER join component ON corestrictions.cokey=component.cokey"
+ +" AND c.cokey=component.cokey "
+ +" and reskind in ('fragipan', 'duripan', 'petrocalcic', 'ortstein', 'petrogypsic', 'cemented horizon', 'densic material', 'placic', 'bedrock, paralithic', 'bedrock, lithic', 'bedrock, densic', 'permafrost')) as resdept_r, "
+
+
+ +" (SELECT MIN(hzdept_r) FROM chorizon "
+ +"  INNER join component ON chorizon.cokey=component.cokey "
+ +"  AND c.cokey=component.cokey "
+ +" and ksat_r < 0.01) as hzdpt "
+
+ +" INTO #HSG "
+
+ +" FROM legend l "
+ +" INNER JOIN mapunit m on l.lkey=m.lkey and areasymbol = '"  + ssaId + "'"
+ +" INNER JOIN component c on m.mukey=c.mukey "
+ +" and c.cokey = (SELECT TOP 1 component.cokey FROM component WHERE component.mukey=m.mukey ORDER BY component.comppct_r DESC) "
+ +"  ORDER by mukey, comppct_r desc "
+
+ +" CREATE TABLE #HSG_2nd_calc "
+ +"  ( areasymbol VARCHAR (20), areaname VARCHAR (255), mukey INT, cokey INT, muname VARCHAR (250), compname VARCHAR (250), comppct_r SMALLINT, hydgrp VARCHAR (20), "
+ +"  min_ks SMALLINT, min_ks2 SMALLINT, min_ks60 SMALLINT, water_restrc INT, water_table_depth INT) "
+
+ +" INSERT INTO #HSG_2nd_calc (areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, water_restrc, water_table_depth) "
+
+ +"  SELECT areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, "
+ +"  CASE when resdept_r is null THEN hzdpt "
+ +"  when hzdpt is null THEN resdept_r "
+ +"  when resdept_r <= hzdpt THEN resdept_r "
+ +"  ELSE hzdpt END as water_restrc, "
+ +"  CASE when mnth is null or mnth is not null then 999 end as water_table_depth "
+
+ +"  FROM #HSG "
+
+ +" INSERT INTO #HSG_2nd_calc (areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, water_restrc, water_table_depth)  "
+ +" VALUES (' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', "
+ +" 12,  "
+ +" 12, " 
+ +" 12, " 
+ +" 200,  "
+ +" 200  " 
+ +" ) "
+
+ +" SELECT "
+ +"  CASE when water_table_depth = 999 then '-' "
+ +" when (water_table_depth < 60 and water_table_depth is not null) OR (water_restrc is not null AND water_restrc < 50) THEN 'D' "
+ +" when ((water_table_depth <= 100 and water_table_depth is not null) OR (water_restrc is not null AND water_restrc <= 100)) AND (min_ks <= 1.0 AND min_ks is not null) THEN 'D' "
+ +" when ((water_table_depth <= 100 and water_table_depth is not null) OR (water_restrc is not null AND water_restrc <= 100)) AND (min_ks <= 10 AND min_ks is not null) THEN 'C' "
+ +" when ((water_table_depth <= 100 and water_table_depth is not null) OR (water_restrc is not null AND water_restrc <= 100)) AND (min_ks <= 40 AND min_ks is not null) THEN 'B' "
+ +" when ((water_table_depth <= 100 and water_table_depth is not null) OR (water_restrc is not null AND water_restrc <= 100)) AND (min_ks > 40 AND min_ks is not null) THEN 'A' "
+		
+ +" when (min_ks2 <= 0.4 AND min_ks2 is not null AND (water_restrc > 100 OR water_restrc is null) AND water_table_depth > 100) THEN 'D' "
+ +" when water_table_depth > 100 AND ((water_restrc is not null AND water_restrc > 100) OR water_restrc is null) AND (min_ks2 <= 4.0 AND min_ks2 is not null) THEN 'C' "
+ +" when water_table_depth > 100 AND ((water_restrc is not null AND water_restrc > 100) OR water_restrc is null) AND (min_ks2 <= 10.0 AND min_ks2 is not null) THEN 'B' "
+ +" when water_table_depth > 100 AND ((water_restrc is not null AND water_restrc > 100) OR water_restrc is null) AND (min_ks2 > 10 AND min_ks2 is not null) THEN 'A' "
+ +" ELSE null END as HSG_calculated, "
+
+ +" CASE when water_table_depth = 999 then '-' "
+ +" when water_table_depth < 60 and water_table_depth is not null AND water_restrc is not null AND water_restrc <= 100 AND min_ks60 > 40 AND min_ks60 is not null THEN 'A/D' "
+ +" when water_table_depth < 60 and water_table_depth is not null AND water_restrc is not null AND water_restrc <= 100 AND min_ks60 > 10.0 AND min_ks60 is not null THEN 'B/D' "
+ +" when water_table_depth < 60 and water_table_depth is not null AND water_restrc is not null AND water_restrc <= 100 AND min_ks60 > 1.0 AND min_ks60 is not null THEN 'C/D' "
+
+ +" when water_table_depth < 60 and water_table_depth is not null AND ((water_restrc is not null AND water_restrc > 100) OR water_restrc is null) AND min_ks2 > 10 AND min_ks2 is not null THEN 'A/D' "
+ +" when water_table_depth < 60 and water_table_depth is not null AND ((water_restrc is not null AND water_restrc > 100) OR water_restrc is null) AND min_ks2 > 4.0 AND min_ks2 is not null THEN 'B/D' "
+ +" when water_table_depth < 60 and water_table_depth is not null AND ((water_restrc is not null AND water_restrc > 100) OR water_restrc is null) AND min_ks2 > 0.4 AND min_ks2 is not null THEN 'C/D' "
+ +" ELSE '-' END as HSG_dual "
+ +" INTO #HSG_calc "
+ +" FROM #HSG_2nd_calc "
+
+ +" SELECT distinct areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp as HSG, HSG_calculated, HSG_dual "
+ +" FROM #HSG, #HSG_calc "
+ +" Where HSG_calculated not like '-' "
+ +" ORDER by areasymbol, areaname, mukey, cokey, muname, compname, comppct_r "
+;
+			
+					var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1">';
+					// for each row...
+		                var iRow = 0;
+                while (iRow < callbackData.Table.length) {
+                                var row = callbackData.Table[iRow];
+                                tableHtml += "<tr>";
+                                // for each column in each row...
+                                var iCol = 0;
+                                while (iCol < row.length) {
+                                                if (iRow == 0) {
+                                                                tableHtml += "<th>" + row[iCol] + "</th>";
+                                                } else {
+                                                                tableHtml += "<td>" + row[iCol] + "</td>";
+                                                }
+                                                iCol++;
+                                };
+                                tableHtml += "</tr>";                                  
+                                iRow++;
+                };
+
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+	</script>
+	
+<script>
+$(function(){
+	$('table').each(function() {
+		if($(this).find('thead').length > 0 && $(this).find('th').length > 0) {
+			// Clone <thead>
+			var $w	   = $(window),
+				$t	   = $(this),
+				$thead = $t.find('thead').clone(),
+				$col   = $t.find('thead, tbody').clone();
+
+			// Add class, remove margins, reset width and wrap table
+			$t
+			.addClass('sticky-enabled')
+			.css({
+				margin: 0,
+				width: '100%'
+			}).wrap('<div class="sticky-wrap" />');
+
+			if($t.hasClass('overflow-y')) $t.removeClass('overflow-y').parent().addClass('overflow-y');
+
+			// Create new sticky table head (basic)
+			$t.after('<table class="sticky-thead" />');
+
+			// If <tbody> contains <th>, then we create sticky column and intersect (advanced)
+			if($t.find('tbody th').length > 0) {
+				$t.after('<table class="sticky-col" /><table class="sticky-intersect" />');
+			}
+
+			// Create shorthand for things
+			var $stickyHead  = $(this).siblings('.sticky-thead'),
+				$stickyCol   = $(this).siblings('.sticky-col'),
+				$stickyInsct = $(this).siblings('.sticky-intersect'),
+				$stickyWrap  = $(this).parent('.sticky-wrap');
+
+			$stickyHead.append($thead);
+
+			$stickyCol
+			.append($col)
+				.find('thead th:gt(0)').remove()
+				.end()
+				.find('tbody td').remove();
+
+			$stickyInsct.html('<thead><tr><th>'+$t.find('thead th:first-child').html()+'</th></tr></thead>');
+			
+			// Set widths
+			var setWidths = function () {
+					$t
+					.find('thead th').each(function (i) {
+						$stickyHead.find('th').eq(i).width($(this).width());
+					})
+					.end()
+					.find('tr').each(function (i) {
+						$stickyCol.find('tr').eq(i).height($(this).height());
+					});
+
+					// Set width of sticky table head
+					$stickyHead.width($t.width());
+
+					// Set width of sticky table col
+					$stickyCol.find('th').add($stickyInsct.find('th')).width($t.find('thead th').width())
+				},
+				repositionStickyHead = function () {
+					// Return value of calculated allowance
+					var allowance = calcAllowance();
+				
+					// Check if wrapper parent is overflowing along the y-axis
+					if($t.height() > $stickyWrap.height()) {
+						// If it is overflowing (advanced layout)
+						// Position sticky header based on wrapper scrollTop()
+						if($stickyWrap.scrollTop() > 0) {
+							// When top of wrapping parent is out of view
+							$stickyHead.add($stickyInsct).css({
+								opacity: 1,
+								top: $stickyWrap.scrollTop()
+							});
+						} else {
+							// When top of wrapping parent is in view
+							$stickyHead.add($stickyInsct).css({
+								opacity: 0,
+								top: 0
+							});
+						}
+					} else {
+						// If it is not overflowing (basic layout)
+						// Position sticky header based on viewport scrollTop
+						if($w.scrollTop() > $t.offset().top && $w.scrollTop() < $t.offset().top + $t.outerHeight() - allowance) {
+							// When top of viewport is in the table itself
+							$stickyHead.add($stickyInsct).css({
+								opacity: 1,
+								top: $w.scrollTop() - $t.offset().top
+							});
+						} else {
+							// When top of viewport is above or below table
+							$stickyHead.add($stickyInsct).css({
+								opacity: 0,
+								top: 0
+							});
+						}
+					}
+				},
+				repositionStickyCol = function () {
+					if($stickyWrap.scrollLeft() > 0) {
+						// When left of wrapping parent is out of view
+						$stickyCol.add($stickyInsct).css({
+							opacity: 1,
+							left: $stickyWrap.scrollLeft()
+						});
+					} else {
+						// When left of wrapping parent is in view
+						$stickyCol
+						.css({ opacity: 0 })
+						.add($stickyInsct).css({ left: 0 });
+					}
+				},
+				calcAllowance = function () {
+					var a = 0;
+					// Calculate allowance
+					$t.find('tbody tr:lt(3)').each(function () {
+						a += $(this).height();
+					});
+					
+					// Set fail safe limit (last three row might be too tall)
+					// Set arbitrary limit at 0.25 of viewport height, or you can use an arbitrary pixel value
+					if(a > $w.height()*0.25) {
+						a = $w.height()*0.25;
+					}
+					
+					// Add the height of sticky header
+					a += $stickyHead.height();
+					return a;
+				};
+
+			setWidths();
+
+			$t.parent('.sticky-wrap').scroll($.throttle(250, function() {
+				repositionStickyHead();
+				repositionStickyCol();
+			}));
+
+			$w
+			.load(setWidths)
+			.resize($.debounce(250, function () {
+				setWidths();
+				repositionStickyHead();
+				repositionStickyCol();
+			}))
+			.scroll($.throttle(250, repositionStickyHead));
+		}
+	});
+});
+</script>
+
+  
+</body>
+</html>

@@ -125,7 +125,7 @@ CREATE TABLE #map3
 INSERT INTO #map3 (areaname, areasymbol, musym, mukey, muname, compname, comppct_r, cokey, major_mu_pct_sum, adj_comp_pct, WI_CCPI_rating, WI_CCPI_class, NCCPI_rating, NCCPI_class, cropname, sum_crop, datestamp )
 SELECT areaname, areasymbol, musym, mukey, muname, compname, comppct_r, #map2.cokey, major_mu_pct_sum, adj_comp_pct, WI_CCPI_rating, WI_CCPI_class, NCCPI_rating, NCCPI_class,    cropname ,  ROUND (SUM(nonirryield_r * adj_comp_pct) over(partition by mukey, #map2.cokey, cropname),2) sum_crop, datestamp
 FROM #map2
- INNER JOIN cocropyld AS crop ON crop.cokey=#map2.cokey
+LEFT OUTER JOIN cocropyld AS crop ON crop.cokey=#map2.cokey
 
  SELECT * FROM 
  (

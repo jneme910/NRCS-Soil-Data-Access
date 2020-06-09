@@ -1,99 +1,49 @@
-SET STATISTICS IO ON 
-
-USE sdmONLINE
-go
-
-DROP TABLE IF EXISTS #HSG;
-DROP TABLE IF EXISTS #HSG_2nd_calc;
-DROP TABLE IF EXISTS #HSG_calc;
-
-DECLARE @area VARCHAR(20);
-DECLARE @area_type INT ;
-DECLARE @comp VARCHAR(254);
-DECLARE @min_ks SMALLINT;
-DECLARE @min_ks2 SMALLINT;
-DECLARE @min_ks60 SMALLINT;
-DECLARE @water_restrc SMALLINT;
-DECLARE @water_table_depth SMALLINT;
-
--- Soil Data Access
-~DeclareChar(@area,20)~  -- Used for Soil Data Access
-~DeclareINT(@area_type)~ 
-~DeclareChar(@comp,254)~  -
-~DeclareSmallint(@min_ks)~ 
-~DeclareSmallint(@min_ks2)~ 
-~DeclareSmallint(@min_ks60)~ 
-~DeclareSmallint(@water_restrc)~ 
-~DeclareSmallint(@water_table_depth)~ 
-
--- Enter parameter soil data access
-SELECT @area = 'ME617'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
-SELECT @comp = 'Abram'; --Enter Component Name
-SELECT @min_ks = 12;
-SELECT  @min_ks2 = 12;
-SELECT  @min_ks60 = 12;
-SELECT  @water_restrc = 200;
-SELECT @water_table_depth = 200;
---END
-
-
-
-SELECT @area_type = LEN (@area); --determines number of characters of area 2-State, 5- Soil Survey Area
---creates the temp table for map unit and legend
-
 -- Hydrologic Soil Group (HSG) is calculated from user inputs.
 SELECT m.mukey, c.cokey, areasymbol, areaname, muname, compname, comppct_r, hydgrp,
 
 -- gets ksat of least transmissive layer that is within a depth of 50 cm.
 (SELECT  MIN(ksat_r) FROM chorizon
 INNER join component ON chorizon.cokey=component.cokey 
-AND c.cokey=component.cokey
 and hzdept_r <= 50) as min_ks,
 
 -- gets ksat of least transmissive layer that is within a depth of 100 cm.
 (SELECT  MIN(ksat_r) FROM chorizon
 INNER join component ON chorizon.cokey=component.cokey 
-AND c.cokey=component.cokey
 and hzdept_r <= 100) as min_ks2,
 
 -- gets ksat of least transmissive layer that is within a depth of 60 cm; used in dual HSG group assignment.
 (SELECT MIN(ksat_r)FROM chorizon
 INNER join component ON chorizon.cokey=component.cokey
-AND c.cokey=component.cokey
 and hzdept_r <= 60) as min_ks60,
 
 -- gets months when soil moisture is "wet" above 100 cm.
 (SELECT count(month) FROM comonth  
 INNER join component ON comonth.cokey=component.cokey
 INNER join cosoilmoist ON comonth.comonthkey=cosoilmoist.comonthkey 
-AND c.cokey=component.cokey
 and soimoiststat = 'wet' and soimoistdept_r <= 100) as month1,
 
 -- gets months when soil moisture is "wet" above 60 cm. 
 (SELECT count(month) FROM comonth
 INNER join component ON comonth.cokey=component.cokey
 INNER join cosoilmoist ON comonth.comonthkey=cosoilmoist.comonthkey
-AND c.cokey=component.cokey
 and soimoiststat = 'wet' and soimoistdept_r < 60) as mnth,
 
 -- gets depth to component restriction
 (SELECT MIN(resdept_r) FROM corestrictions
 INNER join component ON corestrictions.cokey=component.cokey
-AND c.cokey=component.cokey
 and reskind in ('fragipan', 'duripan', 'petrocalcic', 'ortstein', 'petrogypsic', 'cemented horizon', 'densic material', 'placic', 'bedrock, paralithic', 'bedrock, lithic', 'bedrock, densic', 'permafrost')) as resdept_r,
 
 -- gets depth to water impermeable layer (ksat < 0.01 micrometers/s)
 (SELECT MIN(hzdept_r) FROM chorizon
 INNER join component ON chorizon.cokey=component.cokey
-AND c.cokey=component.cokey
 and ksat_r < 0.01) as hzdpt
 
 INTO #HSG
 
 FROM legend l
-INNER JOIN mapunit m on l.lkey=m.lkey AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
-INNER JOIN component c on m.mukey=c.mukey and compname like '%' + @comp + '%' 
-and c.cokey = (SELECT TOP 1 component.cokey FROM component WHERE component.mukey=m.mukey ORDER BY CASE WHEN LEFT (compname, 3) = LEFT (muname, 3) THEN 1 ELSE 2 END ASC, component.comppct_r DESC, component.cokey) 
+INNER JOIN mapunit m on l.lkey=m.lkey and areasymbol like 'ME617'  --Enter Soil Survey Area
+INNER JOIN component c on m.mukey=c.mukey and compname like 'Abram'   --Enter Component Name
+and c.cokey = (SELECT TOP 1 component.cokey FROM component WHERE component.mukey=m.mukey ORDER BY component.comppct_r DESC) 
 ORDER by mukey, comppct_r desc
 
 -- 2nd Query Calc
@@ -108,13 +58,12 @@ FROM #HSG
 
 INSERT INTO #HSG_2nd_calc (areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, water_restrc, water_table_depth) 
 VALUES (' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-@min_ks,  --Enter ksat of least transmissive layer that is within a depth of 50 cm (mircrometers/s)
-@min_ks2,  --Enter ksat of least transmissive layer that is within a depth of 100 cm (mircrometers/s)
-@min_ks60 ,  --Entr ksat of least transmissive layer that is within a depth of 60 cm (mircrometers/s), used in duel HSG group assignment
-@water_restrc,  --Enter depth to restriction (cm); if no restriction is present enter 200
-@water_table_depth  --Enter depth to water table (cm); if no water table is present enter 200
+12,  --Enter ksat of least transmissive layer that is within a depth of 50 cm (mircrometers/s)
+12,  --Enter ksat of least transmissive layer that is within a depth of 100 cm (mircrometers/s)
+12,  --Entr ksat of least transmissive layer that is within a depth of 60 cm (mircrometers/s), used in duel HSG group assignment
+200,  --Enter depth to restriction (cm); if no restriction is present enter 200
+200   --Enter depth to water table (cm); if no water table is present enter 200
 )
-
 
 -- 3rd Query
 SELECT
@@ -148,9 +97,3 @@ SELECT distinct areasymbol, areaname, mukey, cokey, muname, compname, comppct_r,
 FROM #HSG, #HSG_calc
 Where HSG_calculated not like '-'
 ORDER by areasymbol, areaname, mukey, cokey, muname, compname, comppct_r
-
-SET STATISTICS IO ON 
-
-DROP TABLE IF EXISTS #HSG;
-DROP TABLE IF EXISTS #HSG_2nd_calc;
-DROP TABLE IF EXISTS #HSG_calc;
