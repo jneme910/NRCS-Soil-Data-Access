@@ -1,0 +1,67 @@
+SELECT 
+cnn.[pedon_key]
+      ,cnn.[site_key]
+      ,p.[pedlabsampnum]
+      ,[project_key]
+ 
+ 
+      ,[layer_field_label_1]
+      ,[hzn_top]
+      ,[hzn_bot]
+         , CASE  WHEN [hzn_top] < 15 then [hzn_top] ELSE 0 END AS InRangeTop_0_15 
+         ,CASE  WHEN [hzn_bot] <= 15 THEN [hzn_bot] WHEN [hzn_bot] > 15 and [hzn_top] < 15 THEN 15 ELSE 0 END AS InRangeBot_0_15
+      ,[hzn_desgn]
+
+      ,[pedoniid]
+      ,[upedonid]
+      ,CASE WHEN [corr_name] IS NULL THEN [samp_name] ELSE [corr_name] END AS soil_name
+      ,CASE WHEN [corr_class_type] IS NULL THEN [samp_class_type] ELSE [corr_class_type] END AS class_type
+
+      ,CASE WHEN [corr_classification_name] IS NULL THEN [samp_classification_name] ELSE [corr_classification_name]  END AS [classification_name] 
+  
+      ,[siteiid]
+      ,[usiteid]
+      ,[site_obsdate]
+      ,[latitude_decimal_degrees]
+      ,[longitude_decimal_degrees]
+      ,country_code
+         ,country_name
+       , state_code
+       , state_name
+         , county_code
+       , county_name
+       , mlra_code
+       , mlra_name
+       , ssa_code
+       , ssa_name
+        ,[note]
+       ,[pedobjupdate]
+      ,[siteobjupdate]
+ ,[result_source_key]
+      ,[l].[layer_key]
+      ,[theta_r]
+      ,[theta_s]
+      ,[alpha]
+      ,[npar]
+      ,[usedmodel]
+      ,[wlupdated]
+      ,[Ks]
+      ,[Ko]
+      ,[Lpar]
+     
+FROM [lab_combine_nasis_ncss] AS cnn
+INNER JOIN [lab_pedon] AS p ON p.pedon_key=cnn.pedon_key --AND [upedonid] LIKE '%WI%'
+INNER JOIN [lab_layer] AS l ON l.pedon_key=p.pedon_key AND ([hzn_top] <= 15 AND [hzn_desgn] NOT LIKE '%O%')
+LEFT OUTER JOIN [lab_rosetta_Key] AS r ON r.[layer_key]=l.[layer_key]
+INNER JOIN (SELECT [area_code] AS country_code,[area_name] AS country_name, area_key FROM lab_area -- Country
+) AS c ON cnn.[country_key]=c.area_key
+INNER JOIN  (SELECT [area_code] AS state_code,[area_name] AS state_name, area_key FROM lab_area --State
+WHERE [area_code] = 'WI') AS s ON cnn.[state_key]=s.area_key 
+ 
+INNER JOIN (SELECT [area_code] AS county_code,[area_name] AS county_name, area_key FROM lab_area --County
+) AS ct ON cnn.[county_key]=ct.area_key
+ 
+INNER JOIN (SELECT [area_code] AS mlra_code,[area_name] AS mlra_name, area_key FROM lab_area --MLRA
+) AS m ON cnn.[mlra_key]=m.area_key
+INNER JOIN (SELECT [area_code] AS ssa_code,[area_name] AS ssa_name, area_key FROM lab_area --SSA
+) AS ss ON cnn.[ssa_key]=ss.area_key

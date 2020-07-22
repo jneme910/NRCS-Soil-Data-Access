@@ -15,7 +15,9 @@ CAST (chorizon.sandtotal_r AS DECIMAL (8,3)) AS totalSand ,		-- total sand, silt
 CAST (chorizon.silttotal_r AS DECIMAL (8,3)) AS totalSilt,
 CAST (chorizon.claytotal_r AS DECIMAL (8,3)) AS totalClay,
 CAST (chorizon.sandvf_r	AS DECIMAL (8,3)) AS VFSand,		        -- sand sub-fractions 
-CAST (chorizon.dbthirdbar_r AS DECIMAL (8,3)) AS DBthirdbar	
+CAST (chorizon.dbthirdbar_r AS DECIMAL (8,3)) AS DBthirdbar	,
+(SELECT TOP 1 unifiedcl FROM chorizon AS ch INNER JOIN chunified AS u ON ch.chkey=u.chkey AND rvindicator = 'Yes' 
+AND chorizon.chkey=ch.chkey) AS unifiedcl_surf
 FROM sacatalog 
 INNER JOIN legend ON legend.areasymbol = sacatalog.areasymbol AND LEFT (sacatalog.areasymbol,2) = 'WI' 
 INNER JOIN mapunit ON mapunit.lkey = legend.lkey 
@@ -27,5 +29,3 @@ LEFT JOIN (chorizon LEFT JOIN chtexturegrp ON chorizon.chkey = chtexturegrp.chke
 AND (((chorizon.hzdept_r)=(SELECT Min(chorizon.hzdept_r) AS MIN_hor_depth_r
 FROM chorizon LEFT JOIN chtexturegrp ON chorizon.chkey = chtexturegrp.chkey 
 WHERE chtexturegrp.texture Not In ('SPM','HPM', 'MPM') AND chtexturegrp.rvindicator='yes' AND component.cokey = chorizon.cokey ))AND ((chtexturegrp.rvindicator)='yes'))
-
-

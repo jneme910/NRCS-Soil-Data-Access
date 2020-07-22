@@ -131,7 +131,20 @@
 		<a href='#reportref'> For more information about the table, </a>
 	</p>
 	<a name='top'>
+	
+		<p> </p>Component Name&nbsp;&nbsp;
+		<br>
+		<input type="text" name="ComponentName" id="comp" size="20">
+		<p/>
 
+		<p> </p>ksat 50 &nbsp;&nbsp;
+		<br>
+		<input type="number" name="kSat50" id="kSat50" size="20">
+		Enter ksat of least transmissive layer that is within a depth of 50 cm (mircrometers/s)
+		
+		<p/>
+
+		<br>
 	<!-- The following "div" tag will be updated with the retrieved data
 		After the first selection the "(select a state)" will disappear -->
 	<select id="selectId1" onchange="ChangeSelectedState(event)">
@@ -165,8 +178,6 @@
 	<li><b>Component: </b> Component name - Name assigned to a component based on its range of properties. Local Phase - Phase criterion to be used at a local level, in conjunction with "component name" to help identify a soil component.</li>
 	<li><b>Component Percct</b> The percentage of the component of the mapunit.</li>
 
-
-	
 	</ul>
 
 
@@ -304,7 +315,7 @@
 
  +" INSERT INTO #HSG_2nd_calc (areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, water_restrc, water_table_depth)  "
  +" VALUES (' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', "
- +" 12,  "
+ ksat50 + ","
  +" 12, " 
  +" 12, " 
  +" 200,  "

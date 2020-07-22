@@ -17,8 +17,9 @@ INNER JOIN component AS CCO ON CCO.mukey = MM2.mukey AND mapunit.mukey = MM2.muk
 ) AS  major_mu_pct_sum, component.cokey
 INTO #range6
 
-FROM (legend INNER JOIN (mapunit INNER JOIN component ON mapunit.mukey = component.mukey) ON legend.lkey = mapunit.lkey) INNER JOIN coecoclass ON component.cokey = coecoclass.cokey
-AND legend.areasymbol LIKE'KS%' AND component.majcompflag='yes'
+FROM (legend INNER JOIN (mapunit INNER JOIN component ON mapunit.mukey = component.mukey) ON legend.lkey = mapunit.lkey) INNER JOIN coecoclass ON component.cokey = coecoclass.cokey and coecoclass.ecoclassref like 'Ecological Site Description Database'
+	 
+AND legend.areasymbol LIKE'WI%' AND component.majcompflag='yes'
 ORDER BY legend.areasymbol, mapunit.musym, component.comppct_r;
 ---END FIRST QUERY
 
@@ -54,6 +55,10 @@ FROM #range7
 SELECT DISTINCT areasym, areaname, muname,  musym,weighted_rsprod_l, weighted_rsprod_r, weighted_rsprod_h, dominant_condition_ecoclassid, dominant_condition_ecoclassname, mukey
 FROM #range9
 --END LAST QUERY
+
+
+
+
 
 
 

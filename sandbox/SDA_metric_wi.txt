@@ -1,0 +1,13 @@
+SELECT  [id]
+      ,[query_id]
+      ,[query_name]
+      ,[query_frequency]
+      ,[query_month]
+      ,[query_year]
+      ,[state]
+      ,[seqnum]
+      ,[query_title]
+      ,[query_header]
+      ,[query_header2]
+      ,[count]
+  FROM [wss_metric_query_results] WHERE [state] = 'WI' AND query_year = 2019

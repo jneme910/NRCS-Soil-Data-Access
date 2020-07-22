@@ -17,14 +17,14 @@ DECLARE @water_restrc SMALLINT;
 DECLARE @water_table_depth SMALLINT;
 
 -- Soil Data Access
-~DeclareChar(@area,20)~  -- Used for Soil Data Access
-~DeclareINT(@area_type)~ 
-~DeclareChar(@comp,254)~  -
-~DeclareSmallint(@min_ks)~ 
-~DeclareSmallint(@min_ks2)~ 
-~DeclareSmallint(@min_ks60)~ 
-~DeclareSmallint(@water_restrc)~ 
-~DeclareSmallint(@water_table_depth)~ 
+--~DeclareChar(@area,20)~  
+--~DeclareINT(@area_type)~ 
+--~DeclareChar(@comp,254)~  
+--~DeclareSmallint(@min_ks)~ 
+--~DeclareSmallint(@min_ks2)~ 
+--~DeclareSmallint(@min_ks60)~ 
+--~DeclareSmallint(@water_restrc)~ 
+--~DeclareSmallint(@water_table_depth)~ 
 
 -- Enter parameter soil data access
 SELECT @area = 'ME617'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
@@ -92,20 +92,27 @@ INTO #HSG
 
 FROM legend l
 INNER JOIN mapunit m on l.lkey=m.lkey AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
-INNER JOIN component c on m.mukey=c.mukey and compname like '%' + @comp + '%' 
+INNER JOIN component c on m.mukey=c.mukey --and --compname like '%' + @comp + '%' 
 and c.cokey = (SELECT TOP 1 component.cokey FROM component WHERE component.mukey=m.mukey ORDER BY CASE WHEN LEFT (compname, 3) = LEFT (muname, 3) THEN 1 ELSE 2 END ASC, component.comppct_r DESC, component.cokey) 
 ORDER by mukey, comppct_r desc
 
 -- 2nd Query Calc
+CREATE TABLE #HSG_2nd_calc 
+   ( areasymbol VARCHAR (20), areaname VARCHAR (255), mukey INT, cokey INT, muname VARCHAR (250), compname VARCHAR (250), comppct_r SMALLINT, hydgrp VARCHAR (20), 
+   min_ks SMALLINT, min_ks2 SMALLINT, min_ks60 SMALLINT, water_restrc INT, water_table_depth INT)
+
+INSERT INTO #HSG_2nd_calc (areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, water_restrc, water_table_depth) 
+
 SELECT areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, 
 CASE when resdept_r is null THEN hzdpt
 when hzdpt is null THEN resdept_r
 when resdept_r <= hzdpt THEN resdept_r
 ELSE hzdpt END as water_restrc,
 CASE when mnth is null or mnth is not null then 999 end as water_table_depth
-INTO #HSG_2nd_calc
+--INTO #HSG_2nd_calc
 FROM #HSG
 
+/*
 INSERT INTO #HSG_2nd_calc (areasymbol, areaname, mukey, cokey, muname, compname, comppct_r, hydgrp, min_ks, min_ks2, min_ks60, water_restrc, water_table_depth) 
 VALUES (' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
 @min_ks,  --Enter ksat of least transmissive layer that is within a depth of 50 cm (mircrometers/s)
@@ -114,7 +121,7 @@ VALUES (' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
 @water_restrc,  --Enter depth to restriction (cm); if no restriction is present enter 200
 @water_table_depth  --Enter depth to water table (cm); if no water table is present enter 200
 )
-
+*/
 
 -- 3rd Query
 SELECT
