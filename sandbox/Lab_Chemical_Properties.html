@@ -4,7 +4,7 @@
 <html>
 <head>
  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
-	<title>Potential Baseball Infield Soil Source</title>
+	<title>lab Chemical properties</title>
 <!-- Start Map -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- End Map -->
@@ -102,14 +102,12 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 <body>
 <b>
 		<font color='red'>
-<h3>Potential Baseball Baseball Infield Soil Source</h3>
+<h3>Lab Chemical Properties</h3>
 		</font>
 	</b>
 <h4> State Soil Data Access (SDA) Report </h4>
 	<p>
-	An SDA-populated select list is used to pick a state and SSA which enables creation of a "Potential Baseball Infield Soil Source" based upon those selections. Baseball infields have been historically constructed with optimum drainage and particle size in mind.  Baseball infield areas have a specified range of characteristics which this interpretation uses to identify soil map units with the highest potential for these materials.
-	This table gives information about the soils as potential sources of soil material suitable for baseball field. Normal compaction, minor processing, and other standard construction practices are assumed. Criteria for this report is sand content between 60 and 65 percent and silt to clay ratio is between 0.75 to 1. Ideally, medium sand to total sand ratio should be greater than 0.5  
-	Baseball infields have been historically constructed with optimum drainage and particle size in mind.  Baseball infield areas have a specified range of characteristics which this interpretation uses to identify soil map units with the highest potential for these materials.  
+	An SDA-populated select list is used to pick a state and SSA which enables creation of a "lab Chemical properties" based upon those selections. The National Cooperative Soil Survey (NCSS) Soil Characterization Database contains the analytical results from the Kellogg Soil Survey Laboratory (KSSL) at the National Soil Survey Center (NSSC) in Lincoln, Nebraska, as well as the results from numerous cooperating State university laboratories in the United States. Properties measured in the laboratory serve as the basis for interpretations related to soil use and management.  
 	<br>
 	<a href='#reportref'> For more information about the table, </a>
 	</p>
@@ -125,7 +123,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 	
 	<div id="id1"></div>
 		<br></br>
-	<b>
+	<!--<b>
 		<font color='red'>
 			<a name='reportref'>Report Metadata:</a>
 		</font>
@@ -169,7 +167,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 <p>Information in this table is intended for land use planning, for evaluating land use alternatives, and for planning site investigations prior to design and construction. The information, however, has limitations. For example, estimates and other data generally apply only to that part of the soil between the surface and a depth of 5 to 7 feet. Because of the map scale, small areas of different soils may be included within the mapped areas of a specific soil.</p>
 <p>The information is not site specific and does not eliminate the need for onsite investigation of the soils or for testing and analysis by personnel experienced in the design and construction of engineering works. </p>	
 
-<!-- Start Sub table -->
+
 <b>
 		<font color='red'>
 			<a name='reportref'>What are ideal conditions for Baseball Field Soil Sources?</a>
@@ -215,8 +213,8 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
     <td class="tg-0lax">Silty Clay</td>
   </tr>
 </table></div>
+-->
 
-<!-- End Sub table -->
 
 
 	<script>
@@ -226,7 +224,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 		$(document).ready(function(){
 			// Start by retrieving a state list
 			var data = {
-				query: "select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
+				query: "select statename, stateid from state order by statename;",
 				format: "json"
 			}
 			$.post(url, data, function( callbackData ) {
@@ -257,21 +255,18 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 			
 			var query = 
 			
-"	SELECT  LEFT (areasymbol,2) AS state_sym,  areaname, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,'http://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx?aoissa=', areasymbol, 'zz>', areasymbol,'</a>'), 'zz', '''') AS areasymbol, muname, musym, mu.mukey, compname, c.cokey,  comppct_r, hzname, hzdept_r, hzdepb_r,  sandtotal_r, silttotal_r, sandmed_r, claytotal_r,"
-+ " REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,'https://casoilresource.lawr.ucdavis.edu/soil_web/ssurgo.php?action=explain_mapunit&mukey=', mu.mukey, 'zz>Click Here</a>'), 'zz', '''') AS [soil_web_link] ,"
-+ " CASE WHEN compkind = 'series' THEN REPLACE (CONCAT ('<a target=zzzzz_blankzzzzz href=zzzzz' ,'https://casoilresource.lawr.ucdavis.edu/see/#', compname, 'zzzzz>Click Here</a>'), 'zzzzz', '''') ELSE '' END AS [soil_series_extent], "
-+ " CASE WHEN compkind = 'series' THEN REPLACE (CONCAT ('<a target=zzzzz_blankzzzzz href=zzzzz' ,'https://casoilresource.lawr.ucdavis.edu/sde/?series=', compname, 'zzzzz>Click Here</a>'), 'zzzzz', '''') ELSE '' END AS [soil_data_explorer], "
-+ " LEFT (ROUND (CASE WHEN  silttotal_r = 0 THEN 0 WHEN claytotal_r = 0 THEN 0 ELSE [silttotal_r]/[claytotal_r] END,2),4) AS silt_clay_ratio, "
-+ " LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) AS med_sand_ratio, chkey "
-
-+ " FROM legend  AS l "
-+ " INNER JOIN mapunit AS mu ON mu.lkey=l.lkey AND LEFT(l.areasymbol,2)  = '" + stateId + "'"
-+ " INNER JOIN  component AS c ON c.mukey = mu.mukey  AND majcompflag = 'Yes' "
-+ " INNER JOIN  chorizon AS ch ON c.cokey = ch.cokey AND ([sandtotal_r] BETWEEN 60 AND 65 AND [claytotal_r] IS NOT NULL AND [silttotal_r] IS NOT NULL AND [sandmed_r] IS NOT NULL "
-+ "  AND CASE WHEN  silttotal_r = 0 THEN 0 WHEN claytotal_r = 0 THEN 0 ELSE [silttotal_r]/[claytotal_r] END BETWEEN 0.75 AND 1 )"
-//AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .0
-+ " GROUP BY areaname, areasymbol, muname,  mu.mukey, musym,compname, c.cokey,  comppct_r, hzname, hzdept_r, hzdepb_r,  sandtotal_r, silttotal_r, sandmed_r, claytotal_r, chkey, compkind "
-+ " ORDER BY areasymbol ASC,areaname,  musym ASC,muname, mu.mukey, comppct_r DESC, c.cokey, hzdept_r ASC, chkey	"	
+	 "SELECT * "
++ "FROM [lab_combine_nasis_ncss] AS cnn "
++ "INNER JOIN [lab_pedon] AS p ON p.pedon_key=cnn.pedon_key "
++ "INNER JOIN [lab_layer] AS l ON l.pedon_key=p.pedon_key  "
++ "INNER JOIN [lab_chemical_properties] AS lcp ON lcp.labsampnum=l.labsampnum  "
++ "INNER JOIN (SELECT [area_code] AS country_code,[area_name] AS country_name, area_key FROM lab_area) AS c ON cnn.[country_key]=c.area_key "
++ "INNER JOIN (SELECT [area_code] AS state_code,[area_name] AS state_name, area_key FROM lab_area "
++ "WHERE [area_code]  = '" + stateId + "'"
++ ")AS s ON cnn.[state_key]=s.area_key "
++ "INNER JOIN (SELECT [area_code] AS county_code,[area_name] AS county_name, area_key FROM lab_area) AS ct ON cnn.[county_key]=ct.area_key "
++ "INNER JOIN (SELECT [area_code] AS mlra_code,[area_name] AS mlra_name, area_key FROM lab_area) AS m ON cnn.[mlra_key]=m.area_key "
++ "INNER JOIN (SELECT [area_code] AS ssa_code,[area_name] AS ssa_name, area_key FROM lab_area) AS ss ON cnn.[ssa_key]=ss.area_key "
 
 ;
 					
