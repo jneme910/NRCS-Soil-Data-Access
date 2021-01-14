@@ -1,0 +1,109 @@
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT  [wmiid]
+      ,[Series]
+      ,lab_webmap.[User_pedon_ID]
+      ,lab_webmap.[pedon_Key]
+      ,[peiid]
+      ,[Soil_Classification]
+      ,[Primary_Lab_Report]
+      ,[Taxonomy_Report]
+      ,[Supplementary_Lab_Report]
+      ,[Water_Retention_Report]
+      ,[Correlation_Report]
+      ,[pedon_Description_Report]
+      ,[Soil_Profile]
+      ,[Soil_web]
+      ,[lat]
+      ,[long]
+      ,[latlong]
+  FROM [lab_combine_nasis_ncss] AS cnn
+  INNER JOIN [lab_pedon] AS p ON p.pedon_key=cnn.pedon_key  AND CASE WHEN [corr_name] IS NULL THEN [samp_name] ELSE [corr_name] END IN ('ABERDEEN',
+'ABSHER',
+'ABSTED',
+'ALCESTER',
+'AMOR',
+'ANSELMO',
+'ARNEGARD',
+'ARVADA',
+'ARVILLA',
+'ASCALON',
+'BACA',
+'BARNES',
+'BEARDEN',
+'BETTS',
+'BLACKHALL',
+'BON',
+'BRIDGEPORT',
+'CITADEL',
+'CLARNO',
+'COLBY',
+'COLO',
+'COLY',
+'CROFTON',
+'DUDLEY',
+'DUNDAY',
+'EGAN',
+'EKALAKA',
+'ELS',
+'ETHAN',
+'FORDVILLE',
+'GARDENA',
+'GLENBERG',
+'GLENDIVE',
+'GYSTRUM',
+'HAMERLY',
+'HAVERSON',
+'HAVRE',
+'HAYNIE',
+'HECLA',
+'HIGHMORE',
+'HOUDEK',
+'JANSEN',
+'JAYEM',
+'KADOKA',
+'KEITH',
+'KENNEBEC',
+'KEOTA',
+'KRANZBURG',
+'KYLE',
+'LANGHEI',
+'MILLBORO',
+'MITCHELL',
+'MOODY',
+'NUNN',
+'ONITA',
+'OPAL',
+'PACTOLA',
+'PARCHIN',
+'PEEVER',
+'PIERRE',
+'POINSETT',
+'PROMISE',
+'RHOADES',
+'RICHFIELD',
+'ROSEBUD',
+'ROXBURY',
+'SANSARC',
+'SHINGLE',
+'SIOUX',
+'SVEA',
+'TASSEL',
+'TETONKA',
+'THURMAN',
+'TILFORD',
+'TONKA',
+'TRYON',
+'TWILIGHT',
+'ULEN',
+'ULY',
+'ULYSSES',
+'VALENT',
+'VALENTINE',
+'VALLERS',
+'VEBAR',
+'WILLIAMS',
+'ZAHL')
+  INNER JOIN [lab_webmap] ON [lab_webmap].[pedon_Key]=cnn.[pedon_key] 
+  INNER JOIN  (SELECT [area_code] AS state_code,[area_name] AS state_name, area_key FROM lab_area --State
+WHERE [area_code] = 'SD') AS s ON cnn.[state_key]=s.area_key 
+  ORDER BY [Series] ASC
