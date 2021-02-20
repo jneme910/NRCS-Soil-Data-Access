@@ -1,5 +1,5 @@
  DROP TABLE IF EXISTS #AoiTablePoint
- DROP TABLE IF EXISTS #AoiSoilsPoint
+ 
  
  DECLARE @aoiGeom Geometry;
  DECLARE @aoiGeomFixed Geometry;
@@ -10,25 +10,25 @@ CREATE TABLE #AoiTablePoint
     pedlabsampnum CHAR(20),
     aoigeom GEOMETRY )
 
-	-- #AoiSoils table contains intersected soil polygon table with geometry
-CREATE TABLE #AoiSoilsPoint
-    ( polyid INT IDENTITY (1,1),
-    aoiid INT,
-    landunit CHAR(20),
-    mukey INT,
-    soilgeom GEOMETRY )
 
-SELECT @aoiGeom = geometry::STGeomFromText('MULTIPOINT((-91.5366669 45.3494453))', 4326);  
+
+SELECT @aoiGeom = geometry::STGeomFromText('POINT (-91.5366669 45.3494453)', 4326);  
 SELECT @aoiGeomFixed = @aoiGeom.MakeValid().STUnion(@aoiGeom.STStartPoint()); 
 INSERT INTO #AoiTablePoint ( pedlabsampnum, aoigeom ) 
 VALUES ('92P0439', @aoiGeomFixed);
 
+SELECT @aoiGeom = geometry::STGeomFromText('POINT (-92.0802765 45.6877785)', 4326);  
+SELECT @aoiGeomFixed = @aoiGeom.MakeValid().STUnion(@aoiGeom.STStartPoint()); 
+INSERT INTO #AoiTablePoint ( pedlabsampnum, aoigeom ) 
+VALUES ('90P0546', @aoiGeomFixed);
+
+
 
 -- Populate #AoiSoils table with intersected soil polygon geometry
 --INSERT INTO #AoiSoils (aoiid, landunit, mukey, soilgeom)
-    SELECT A.aoiid, A.landunit, M.mukey, M.mupolygongeo.STIntersection(A.soilgeom ) AS soilgeom
-    FROM mupolygon M, #AoiSoilsPoint A
-    WHERE mupolygongeo.STIntersects(A.soilgeom) = 1
+    SELECT A.aoiid, A.pedlabsampnum, M.mukey, M.mupolygongeo.STIntersection(A.aoigeom ) AS aoigeom
+    FROM mupolygon M, #AoiTablePoint A
+    WHERE mupolygongeo.STIntersects(A.aoigeom ) = 1
 /*
 Soil suborder groups:
  
@@ -53,7 +53,7 @@ Texture Groups:
 	• Class T4 sandy clay, clay loam, silty clay loam, silty clay, clay (<60%)
 	• Class T5 clay (>60%)
 */
-
+/*
 SELECT MU.mukey, MU.musym, MU.nationalmusym, MU.muname 
 FROM SDA_Get_Mupolygonkey_from_intersection_with_WktWgs84('POINT(-91.5366669 45.3494453)') as S 
 INNER JOIN mupolygon MUP on MUP.mupolygonkey= S.mupolygonkey 
@@ -72,3 +72,5 @@ AND (((chorizon.hzdept_r)=(SELECT Min(chorizon.hzdept_r) AS MinOfhzdept_r
 FROM chorizon INNER JOIN chtexturegrp ON chorizon.chkey = chtexturegrp.chkey
 AND chtexturegrp.texture Not In ('SPM','HPM', 'MPM') AND chtexturegrp.rvindicator='Yes' AND c.cokey = chorizon.cokey ))AND ((chtexturegrp.rvindicator)='Yes'))
 ORDER BY areasymbol, musym, muname, mu.mukey, comppct_r DESC, cokey,  hzdept_r, hzdepb_r
+
+*/

@@ -1,5 +1,5 @@
 
-
+/*
 DROP TABLE IF EXISTS #NoDuffK1
 DROP TABLE IF EXISTS #NoDuffK2
 DROP TABLE IF EXISTS #NoDuffK3
@@ -12,14 +12,14 @@ DROP TABLE IF EXISTS #TfactDom2
 DROP TABLE IF EXISTS #NoDuffk
 DROP TABLE IF EXISTS #Tfact
 DROP TABLE IF EXISTS #FirstofTfact
-
+*/
 
 SELECT mapunit.mukey, component.comppct_r, chorizon.hzdept_r, component.cokey, chorizon.chkey, component.majcompflag, chorizon.kffact
 INTO #NoDuffK1
 FROM (legend INNER JOIN (mapunit LEFT JOIN component ON mapunit.mukey = component.mukey) ON legend.lkey = mapunit.lkey) LEFT JOIN chorizon ON component.cokey = chorizon.cokey
 WHERE (((chorizon.hzdept_r)=(SELECT Min(chorizon.hzdept_r) AS MinOfhzdept_r
 FROM chorizon LEFT JOIN chtexturegrp ON chorizon.chkey = chtexturegrp.chkey
-Where chtexturegrp.texture Not In ('SPM','HPM', 'MPM') AND chtexturegrp.rvindicator='Yes' AND component.cokey = chorizon.cokey )) AND ((legend.areasymbol) Like 'TX%') AND ((component.majcompflag)='Yes'))
+Where chtexturegrp.texture Not In ('SPM','HPM', 'MPM') AND chtexturegrp.rvindicator='Yes' AND component.cokey = chorizon.cokey )) AND ((legend.areasymbol) Like 'CT%') AND ((component.majcompflag)='Yes'))
 ORDER BY legend.areasymbol, mapunit.musym, chorizon.hzdept_r
 
 SELECT #NoDuffK1.mukey, Sum(#NoDuffK1.comppct_r) AS SumOfcomppct_r, #NoDuffK1.kffact
@@ -50,14 +50,14 @@ GROUP BY #NoDuffK1.mukey
 SELECT Min(component.tfact) AS MinTfact, component.mukey
 INTO #Tfact
 FROM legend
-INNER JOIN mapunit ON legend.lkey = mapunit.lkey AND legend.areasymbol Like 'TX%'
+INNER JOIN mapunit ON legend.lkey = mapunit.lkey AND legend.areasymbol Like 'CT%'
 INNER JOIN component ON mapunit.mukey = component.mukey AND component.majcompflag='yes'
 GROUP BY component.mukey
 
 SELECT component.mukey, Sum(component.comppct_r) AS SumOfcomppct_r, component.tfact
 INTO #TfactDom1
 FROM legend
-INNER JOIN mapunit ON legend.lkey = mapunit.lkey AND legend.areasymbol Like 'TX%'
+INNER JOIN mapunit ON legend.lkey = mapunit.lkey AND legend.areasymbol Like 'CT%'
 INNER JOIN component ON mapunit.mukey = component.mukey AND component.majcompflag='yes'
 GROUP BY component.mukey, component.tfact
 

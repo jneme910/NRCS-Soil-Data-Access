@@ -18,7 +18,7 @@ CREATE TABLE #M2
 INSERT INTO #M2
 SELECT 1 AS aoiid, areasymbol AS  landunit, mukey, muacres AS mapunit_acres
 FROM legend
-INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND areasymbol <> 'US'
+INNER JOIN mapunit ON mapunit.lkey=legend.lkey AND LEFT (areasymbol,2) = 'WI'
  ;
 
 -- Component level data with cokey, comppct_r and mapunit sum-of-comppct_r (major components only)
