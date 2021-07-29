@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- local file D:\notes\2020\07\from_Jason_Nemecek\dynamic_array_display\lcp_02.html IE11 compatible
+    v02: use array "reduce" to display header row
+    v01: remove everything except for simulated data table with display using original table display approach
+    v00: prettified original saved from url=(0085)https://jneme910.github.io/NRCS-Soil-Data-Access/sandbox/Lab_Chemical_Properties.html 
+    On AFPWYLAR5000001 visible as http://localhost/jason/dynamic_array_display/lcp_02.html or similar
+-->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>LCP</title>
+  </head>
+  <body>
+    <div id="id1"></div>
+
+    <script>
+      // Dummy data with some dispersed null fields
+      var callbackData = { Table: [] };
+      callbackData.Table = [
+        ["row#", "col1", "col2", "col3", "col4"],
+        ["1", "r1c1", "r1c2", null, null],
+        ["2", "r2c1", null, null, "r2c4"],
+        ["3", "r3c1", "r3c2", null, "r3c4"],
+        ["4", "r4c1", null, null, "r4c4"],
+      ];
+
+      // Display rows using an array method to build text
+      var tableHtml = "<p>Header row only</p><table>";
+
+      // Append the heading row
+      var headTextAccumulator = "";
+      tableHtml +=
+        "<tr>" +
+        callbackData.Table[0].reduce(
+          function (headTextAccumulator, currentCell) {
+            return headTextAccumulator + "<th>" + currentCell + "</th>";
+          },
+          "",
+          0
+        ) +
+        "</tr>";
+
+      // Close the table
+      tableHtml += "</table>";
+
+      // Push into document
+      document.getElementById("id1").innerHTML = tableHtml;
+    </script>
+  </body>
+</html>

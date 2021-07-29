@@ -1,0 +1,47 @@
+USE sdmOFFLINE; --939 rows
+--USE sdm; --321,154 rows
+SELECT
+		mapunit.musym as musym,
+		mapunit.muname,
+		mapunit.mukey,
+		null AS mustatus,
+        muaggatt.slopegraddcp,
+        muaggatt.slopegradwta,
+        muaggatt.brockdepmin,
+        muaggatt.wtdepannmin,
+        muaggatt.wtdepaprjunmin,
+        muaggatt.flodfreqdcd,
+        muaggatt.flodfreqmax,
+        muaggatt.pondfreqprs,
+        muaggatt.aws025wta,
+        muaggatt.aws050wta,
+        muaggatt.aws0100wta,
+        muaggatt.aws0150wta,
+        muaggatt.drclassdcd,
+        muaggatt.drclasswettest,
+        muaggatt.hydgrpdcd,
+        muaggatt.iccdcd,
+        muaggatt.iccdcdpct,
+        muaggatt.niccdcd,
+        muaggatt.niccdcdpct,
+        muaggatt.engdwobdcd,
+        muaggatt.engdwbdcd,
+        muaggatt.engdwbll,
+        muaggatt.engdwbml,
+        muaggatt.engstafdcd,
+        muaggatt.engstafll,
+        muaggatt.engstafml,
+        muaggatt.engsldcd,
+        muaggatt.engsldcp,
+        muaggatt.englrsdcd,
+        muaggatt.engcmssdcd,
+        muaggatt.engcmssmp,
+        muaggatt.urbrecptdcd,
+        muaggatt.urbrecptwta,
+        muaggatt.forpehrtdcp,
+        muaggatt.hydclprs,
+        muaggatt.awmmfpwwta
+    FROM
+		mapunit temp_mapunit WITH(nolock)
+	    INNER JOIN mapunit ON temp_mapunit.mukey = mapunit.mukey
+		LEFT JOIN muaggatt ON muaggatt.mukey is null

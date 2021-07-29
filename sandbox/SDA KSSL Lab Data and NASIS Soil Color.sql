@@ -1,4 +1,4 @@
-SELECT 
+SELECT TOP 1000
 
  l.[labsampnum]
       ,lpp.[result_source_key]

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<!-- local file D:\notes\2020\07\from_Jason_Nemecek\dynamic_array_display\lcp_05.html IE11 compatible
+    v05: remove all-null columns and display final desired table
+    v04: employ a function to create table HTNML, transpose matrix for null "column" detection
+    v03: show complete data matrix
+    v02: use array "reduce" to display header row
+    v01: remove everything except for simulated data table with display using original table display approach
+    v00: prettified original saved from url=(0085)https://jneme910.github.io/NRCS-Soil-Data-Access/sandbox/Lab_Chemical_Properties.html 
+    On AFPWYLAR5000001 visible as http://localhost/jason/dynamic_array_display/lcp_05.html or similar
+-->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>LCP</title>
+  </head>
+  <body>
+    <p>Original Matrix</p>
+    <div id="idOriginalMatrix"></div>
+
+    <p>Transposed Matrix</p>
+    <div id="idTransposedMatrix"></div>
+
+    <p>Dropped Null Data Rows</p>
+    <div id="idDroppedNullDataRows"></div>
+
+    <p>The Desired Display</p>
+    <div id="idTheDesiredDisplay"></div>
+
+    <script>
+      function DropNullDataRows(transposedMatrix) {
+        // Filter out all rows that have all-null data
+        var filteredMatrix = transposedMatrix.filter(function (row) {
+          // skip the 0th cell in the row when testing for non-null data
+          var dataPortion = row.slice(1);
+          var accumulator;
+          var isRowHasData = dataPortion.reduce(function (accumulator, cell) {
+            return accumulator || cell != null;
+          }, false);
+          return isRowHasData;
+        });
+        return filteredMatrix;
+      }
+
+      function transpose(matrix) {
+        // From https://gist.github.com/femto113/1784503
+        // Assumes a non-empty 2-d array
+        return matrix[0].map(function (_, c) {
+          return matrix.map(function (r) {
+            return r[c];
+          });
+        });
+      }
+
+      function CreateTableHtml(matrix, formatHeaderCells) {
+        // Given a table matrix, return the table HTML with a first "header" row
+        var tableHtml = "<table>";
+        var rowAccumulator = "";
+
+        // If formatting header cells then set a "th" datum type
+        var datumMarker = formatHeaderCells ? "th" : "td";
+
+        // Reduce all rows
+        tableHtml += matrix.reduce(
+          function (rowAccumulator, currentRow) {
+            // Reduce all cells (column values) within the current row
+            var cellAccumulator = "";
+            var rowText =
+              rowAccumulator +
+              "<tr>" +
+              currentRow.reduce(
+                function (cellAccumulator, currentCell) {
+                  return (
+                    cellAccumulator +
+                    "<" +
+                    datumMarker +
+                    ">" +
+                    currentCell +
+                    "</" +
+                    datumMarker +
+                    ">"
+                  );
+                },
+                "",
+                0
+              ) +
+              "</tr>";
+            datumMarker = "td"; // Succeeding rows will have data cells
+            return rowText;
+          },
+          "",
+          0
+        );
+
+        // Close the HTML for the table
+        tableHtml += "</table>";
+        return tableHtml;
+      }
+
+      // Dummy data with some dispersed null fields
+      var callbackData = { Table: [] };
+      callbackData.Table = [
+        ["col0", "col1", "col2", "col3", "col4"],
+        ["r1c0", "r1c1", "r1c2", null, null],
+        ["r2c0", "r2c1", null, null, "r2c4"],
+        ["r3c0", "r3c1", "r3c2", null, "r3c4"],
+        ["r4c0", "r4c1", null, null, "r4c4"],
+      ];
+
+      // Display original data matrix with a header row
+      document.getElementById("idOriginalMatrix").innerHTML = CreateTableHtml(
+        callbackData.Table,
+        true
+      );
+
+      // Create a new transposed matrix and display it as well.
+      // By converting the former columns to rows we can more-easily use an array "reduce" to check for all-null value sets
+      // The "column name" will be set to null for these all-null data value columns
+      var transposedMatrix = transpose(callbackData.Table);
+
+      // Display transposed matrix
+      document.getElementById("idTransposedMatrix").innerHTML = CreateTableHtml(
+        transposedMatrix,
+        false
+      );
+
+      // Drop null data rows from transposed matrix
+      var droppedNullDataRows = DropNullDataRows(transposedMatrix);
+      var droppedNullDataRowsText = CreateTableHtml(droppedNullDataRows, false);
+      document.getElementById(
+        "idDroppedNullDataRows"
+      ).innerHTML = droppedNullDataRowsText;
+
+      // The desired dispay
+      // Undo the transposition to resore original orientation
+      var untransposedMatrix = transpose(droppedNullDataRows);
+      var untransposedMatrixText = CreateTableHtml(untransposedMatrix, true);
+      document.getElementById(
+        "idTheDesiredDisplay"
+      ).innerHTML = untransposedMatrixText;
+    </script>
+  </body>
+</html>

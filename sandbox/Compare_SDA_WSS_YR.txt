@@ -1,0 +1,91 @@
+SELECT DISTINCT
+     [query_name]
+      ,[query_frequency]
+      ,[query_month]
+      ,[query_year]
+      ,[STATE]
+        ,[query_title]
+
+    
+         ,CASE
+          WHEN [query_month] = 1 THEN 'Jan'
+          WHEN [query_month] = 2 THEN 'Feb'
+          WHEN [query_month] = 3 THEN 'Mar'
+          WHEN [query_month] = 4 THEN 'Apr'
+          WHEN [query_month] = 5 THEN 'May'
+          WHEN [query_month] = 6 THEN 'Jun'
+          WHEN [query_month] = 7 THEN 'Jul'
+          WHEN [query_month] = 8 THEN 'Aug'
+          WHEN [query_month] = 9 THEN 'Sep'
+          WHEN [query_month] = 10 THEN 'Oct'
+          WHEN [query_month] = 11 THEN 'Nov'
+          WHEN [query_month] = 12 THEN 'Dec'
+          ELSE 'OTHER'
+       END AS [month_abrv]
+          ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name
+
+, CONCAT ([query_month], [query_year]) AS sdam_yr
+ , SUM([COUNT]) over(partition by [query_month], [query_year]) as sum_count
+  INTO #sda3
+  FROM [wss_metric_query_results]   WHERE --[query_year] = 2015 
+   [query_frequency] = 'M'
+  AND [STATE] LIKE '%NAT%'
+  AND CASE WHEN [query_name] LIKE  'SDA_Usage' THEN 1 
+  --WHEN [query_name] LIKE 'wss_ActivityCounts' AND [query_header]= 'SESSION_START' THEN 1 
+  ELSE 2 END = 1
+  GROUP BY [query_name]
+      ,[query_frequency]
+      ,[query_month]
+      ,[query_year]
+      ,[STATE]
+ 
+      ,[query_title]
+   
+      ,[COUNT]
+
+  SELECT [id]
+      ,[query_id]
+      ,[query_name]
+      ,[query_frequency]
+	  
+	        ,[query_month]
+         ,CASE
+          WHEN [query_month] = 1 THEN 'Jan'
+          WHEN [query_month] = 2 THEN 'Feb'
+          WHEN [query_month] = 3 THEN 'Mar'
+          WHEN [query_month] = 4 THEN 'Apr'
+          WHEN [query_month] = 5 THEN 'May'
+          WHEN [query_month] = 6 THEN 'Jun'
+          WHEN [query_month] = 7 THEN 'Jul'
+          WHEN [query_month] = 8 THEN 'Aug'
+          WHEN [query_month] = 9 THEN 'Sep'
+          WHEN [query_month] = 10 THEN 'Oct'
+          WHEN [query_month] = 11 THEN 'Nov'
+          WHEN [query_month] = 12 THEN 'Dec'
+          ELSE 'OTHER'
+       END AS [month_abrv]
+          ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name
+      ,[query_year]
+      ,[STATE]
+      ,[seqnum]
+      ,[query_title]
+      ,[query_header]
+	  , CONCAT ([query_month], [query_year]) AS wssm_yr
+      ,[COUNT]
+, CONCAT ([query_month], [query_year]) AS m_yr
+	 -- AVG(slope_r) over(partition by compname) as avg_slope
+  INTO #wss3
+  FROM [wss_metric_query_results]  WHERE --[query_year] = 2015 
+[query_frequency] = 'M'
+  AND [STATE] LIKE '%NAT%'
+  AND CASE --WHEN [query_name] LIKE  'SDA_Usage' THEN 1 
+  WHEN [query_name] LIKE 'wss_ActivityCounts' AND [query_header]= 'SESSION_START' THEN 1 
+  ELSE 2 END = 1
+
+
+SELECT DISTINCT #wss3.[query_year], 
+FORMAT(SUM (#wss3.[COUNT]) over(partition by #wss3.[query_year]),'#,0.') as [Web Soil Survey],
+FORMAT(SUM (sum_count) over(partition by #wss3.[query_year]),'#,0.') as [Soil Data Access]
+FROM #wss3
+INNER JOIN #sda3 ON #sda3.sdam_yr =#wss3.wssm_yr
+GROUP BY  #wss3.[query_year], #wss3.[COUNT], sum_count

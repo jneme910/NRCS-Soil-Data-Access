@@ -6,13 +6,35 @@
 ---soc =  ( (hzT * ( ( om / 1.724 ) * db3 )) / 100.0 ) * ((100.0 - fragvol) / 100.0) 
 
 
+--Define the area
+/*
+DECLARE @area VARCHAR(20);
+DECLARE @area_type INT ;
+DECLARE @domc INT ;
+
+DECLARE @major INT ;
+DECLARE @operator VARCHAR(5);
+-- Soil Data Access
+*/
+
+~DeclareChar(@area,20)~  -- Used for Soil Data Access
+-~DeclareINT(@area_type)~ 
+~DeclareINT(@domc)~ 
+~DeclareINT(@major)~ 
+~DeclareChar(@operator,20)~ 
+
+-- End soil data access
+SELECT @area= 'WI025'; --Enter State Abbreviation or Soil Survey Area i.e. WI or  WI025,  US 
+SELECT @domc = 1; -- Enter 0 for dominant component, enter 1 for all components
+SELECT @major = 1; -- Enter 0 for major component, enter 1 for all components
 
 SELECT areasymbol, areaname, mapunit.mukey, mapunit.mukey AS mulink, mapunit.musym, nationalmusym, mapunit.muname, mukind, muacres
 INTO #main
 FROM legend
 INNER JOIN mapunit on legend.lkey=mapunit.lkey ---AND mapunit.mukey = 661781 --2809839 For Testing
 INNER JOIN muaggatt AS mt1 on mapunit.mukey=mt1.mukey
-AND legend.areasymbol <> 'US' -- SSURGO
+--AND legend.areasymbol <> 'US' -- SSURGO
+AND  (CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2)  ELSE areasymbol END = @area)
 --AND legend.areasymbol = 'US' -- STATSGO
 ---AND legend.areasymbol = 'WI025'
 
@@ -63,7 +85,8 @@ FROM legend  AS l
 INNER JOIN mapunit AS mu ON mu.lkey = l.lkey 
 ---AND l.areasymbol like 'WI025'
 --AND mu.mukey = 661781 --2809839 For testing
-AND l.areasymbol <> 'US' -- SSURGO
+--AND l.areasymbol <> 'US' -- SSURGO
+AND  (CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2)  ELSE areasymbol END = @area)
 --AND l.areasymbol = 'US' -- STATSGO
 INNER JOIN muaggatt AS  mt on mu.mukey=mt.mukey
 INNER JOIN component AS  c ON c.mukey = mu.mukey 
