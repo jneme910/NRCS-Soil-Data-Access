@@ -1,12 +1,12 @@
 SELECT TOP 1000
 
- l.[labsampnum]
-      ,lpp.[result_source_key]
-      ,lpp.[prep_code]
+ l,[labsampnum]
+      ,lpp,[result_source_key]
+      ,lpp,[prep_code]
 
-	  ,cnn.[pedon_key]
-      ,cnn.[site_key]
-      ,p.[pedlabsampnum]
+	  ,cnn,[pedon_key]
+      ,cnn,[site_key]
+      ,p,[pedlabsampnum]
       ,[project_key]
  
  
@@ -58,11 +58,11 @@ SELECT TOP 1000
      ,[caco3_lt_2_mm]
       ,[caco3_lt_2_mm_method]
      ,[estimated_organic_carbon]
-     ,CASE WHEN [estimated_organic_carbon] IS NOT NULL THEN LEFT (ROUND ([estimated_organic_carbon]* 1.724, 2),4)
-       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NOT NULL THEN LEFT (ROUND (([total_carbon_ncs]- ([caco3_lt_2_mm]*0.12))* 1.724, 2),4)
-       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NULL THEN LEFT (ROUND ([total_carbon_ncs]* 1.724,2),4) END AS [estimated_organic_matter]
+     ,CASE WHEN [estimated_organic_carbon] IS NOT NULL THEN LEFT (ROUND ([estimated_organic_carbon]* 1,724, 2),4)
+       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NOT NULL THEN LEFT (ROUND (([total_carbon_ncs]- ([caco3_lt_2_mm]*0,12))* 1,724, 2),4)
+       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NULL THEN LEFT (ROUND ([total_carbon_ncs]* 1,724,2),4) END AS [estimated_organic_matter]
 , (SELECT TOP 1 [texture_lab]
-FROM [sdmONLINE].[dbo].[lab_physical_properties] AS lpp2 WHERE lpp2.labsampnum=l.labsampnum AND [texture_lab] IS NOT NULL) AS [lab_texture]
+FROM [sdmONLINE],[dbo],[lab_physical_properties] AS lpp2 WHERE lpp2,labsampnum=l,labsampnum AND [texture_lab] IS NOT NULL) AS [lab_texture]
         ,[organic_carbon_walkley_black]
       ,[oc_walkley_black_method]
  
@@ -75,25 +75,25 @@ FROM [sdmONLINE].[dbo].[lab_physical_properties] AS lpp2 WHERE lpp2.labsampnum=l
 --	  ,  dry_colorpct 
         
   --    , dry_colorhue
- ,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis].[dbo].phcolor AS phc2, [nasis].[dbo].MetadataDomainMaster dm, [nasis].[dbo].MetadataDomainDetail dd where phc2.phiidref= phorizon.phiid AND colorhue  = ChoiceValue and DomainName = 'color_hue' and 
+ ,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis],[dbo],phcolor AS phc2, [nasis],[dbo],MetadataDomainMaster dm, [nasis],[dbo],MetadataDomainDetail dd where phc2,phiidref= phorizon,phiid AND colorhue  = ChoiceValue and DomainName = 'color_hue' and 
  colormoistst = 1 AND
-dm.DomainID = dd.DomainID order by colorpct desc) AS varchar) AS dry_colorhue
-,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis].[dbo].phcolor AS phc2, [nasis].[dbo].MetadataDomainMaster dm, [nasis].[dbo].MetadataDomainDetail dd where phc2.phiidref= phorizon.phiid AND colorhue  = ChoiceValue and DomainName = 'color_value' and 
+dm,DomainID = dd,DomainID order by colorpct desc) AS varchar) AS dry_colorhue
+,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis],[dbo],phcolor AS phc2, [nasis],[dbo],MetadataDomainMaster dm, [nasis],[dbo],MetadataDomainDetail dd where phc2,phiidref= phorizon,phiid AND colorhue  = ChoiceValue and DomainName = 'color_value' and 
  colormoistst = 1 AND
-dm.DomainID = dd.DomainID order by colorpct desc) AS varchar) AS dry_colorvalue
-,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis].[dbo].phcolor AS phc2, [nasis].[dbo].MetadataDomainMaster dm, [nasis].[dbo].MetadataDomainDetail dd where phc2.phiidref= phorizon.phiid AND colorhue  = ChoiceValue and DomainName = 'color_chroma' and 
+dm,DomainID = dd,DomainID order by colorpct desc) AS varchar) AS dry_colorvalue
+,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis],[dbo],phcolor AS phc2, [nasis],[dbo],MetadataDomainMaster dm, [nasis],[dbo],MetadataDomainDetail dd where phc2,phiidref= phorizon,phiid AND colorhue  = ChoiceValue and DomainName = 'color_chroma' and 
  colormoistst = 1 AND
-dm.DomainID = dd.DomainID order by colorpct desc) AS varchar) AS dry_colorchroma
+dm,DomainID = dd,DomainID order by colorpct desc) AS varchar) AS dry_colorchroma
 
- ,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis].[dbo].phcolor AS phc2, [nasis].[dbo].MetadataDomainMaster dm, [nasis].[dbo].MetadataDomainDetail dd where phc2.phiidref= phorizon.phiid AND colorhue  = ChoiceValue and DomainName = 'color_hue' and 
+ ,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis],[dbo],phcolor AS phc2, [nasis],[dbo],MetadataDomainMaster dm, [nasis],[dbo],MetadataDomainDetail dd where phc2,phiidref= phorizon,phiid AND colorhue  = ChoiceValue and DomainName = 'color_hue' and 
  colormoistst = 2 AND
-dm.DomainID = dd.DomainID order by colorpct desc) AS varchar) AS moist_colorhue
-,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis].[dbo].phcolor AS phc2, [nasis].[dbo].MetadataDomainMaster dm, [nasis].[dbo].MetadataDomainDetail dd where phc2.phiidref= phorizon.phiid AND colorhue  = ChoiceValue and DomainName = 'color_value' and 
+dm,DomainID = dd,DomainID order by colorpct desc) AS varchar) AS moist_colorhue
+,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis],[dbo],phcolor AS phc2, [nasis],[dbo],MetadataDomainMaster dm, [nasis],[dbo],MetadataDomainDetail dd where phc2,phiidref= phorizon,phiid AND colorhue  = ChoiceValue and DomainName = 'color_value' and 
  colormoistst = 2 AND
-dm.DomainID = dd.DomainID order by colorpct desc) AS varchar) AS moist_colorvalue
-,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis].[dbo].phcolor AS phc2, [nasis].[dbo].MetadataDomainMaster dm, [nasis].[dbo].MetadataDomainDetail dd where phc2.phiidref= phorizon.phiid AND colorhue  = ChoiceValue and DomainName = 'color_chroma' and 
+dm,DomainID = dd,DomainID order by colorpct desc) AS varchar) AS moist_colorvalue
+,CAST ((select top 1  CAST ([ChoiceName] AS varchar ) from [nasis],[dbo],phcolor AS phc2, [nasis],[dbo],MetadataDomainMaster dm, [nasis],[dbo],MetadataDomainDetail dd where phc2,phiidref= phorizon,phiid AND colorhue  = ChoiceValue and DomainName = 'color_chroma' and 
  colormoistst = 2 AND
-dm.DomainID = dd.DomainID order by colorpct desc) AS varchar) AS moist_colorchroma
+dm,DomainID = dd,DomainID order by colorpct desc) AS varchar) AS moist_colorchroma
 
   /*    , dry_colorvalue
       , dry_colorchroma
@@ -108,26 +108,26 @@ dm.DomainID = dd.DomainID order by colorpct desc) AS varchar) AS moist_colorchro
       , moist_colormoistst
 
 	  */
-FROM [sdmONLINE].[dbo].[lab_combine_nasis_ncss] AS cnn
-INNER JOIN [sdmONLINE].[dbo].[lab_pedon] AS p ON p.pedon_key=cnn.pedon_key --AND [upedonid] LIKE '%WI%'
-INNER JOIN [sdmONLINE].[dbo].[lab_layer] AS l ON l.pedon_key=p.pedon_key 
-INNER JOIN [sdmONLINE].[dbo].[lab_chemical_properties] AS lcp ON lcp.labsampnum=l.labsampnum 
-INNER JOIN [sdmONLINE].[dbo].[lab_physical_properties] AS lpp  ON lpp.labsampnum=l.labsampnum 
-INNER JOIN  [nasis].[dbo].[phsample] AS phs  ON  phs.labsampnum COLLATE SQL_Latin1_General_CP1_CI_AS = l.labsampnum COLLATE SQL_Latin1_General_CP1_CI_AS
-INNER JOIN (SELECT [area_code] AS country_code,[area_name] AS country_name, area_key FROM [sdmONLINE].[dbo].lab_area -- Country
-) AS c ON cnn.[country_key]=c.area_key
-INNER JOIN  (SELECT [area_code] AS state_code,[area_name] AS state_name, area_key FROM [sdmONLINE].[dbo].lab_area --State
-WHERE [area_code] = 'NE') AS s ON cnn.[state_key]=s.area_key 
+FROM [sdmONLINE],[dbo],[lab_combine_nasis_ncss] AS cnn
+INNER JOIN [sdmONLINE],[dbo],[lab_pedon] AS p ON p,pedon_key=cnn,pedon_key --AND [upedonid] LIKE '%WI%'
+INNER JOIN [sdmONLINE],[dbo],[lab_layer] AS l ON l,pedon_key=p,pedon_key 
+INNER JOIN [sdmONLINE],[dbo],[lab_chemical_properties] AS lcp ON lcp,labsampnum=l,labsampnum 
+INNER JOIN [sdmONLINE],[dbo],[lab_physical_properties] AS lpp  ON lpp,labsampnum=l,labsampnum 
+INNER JOIN  [nasis],[dbo],[phsample] AS phs  ON  phs,labsampnum COLLATE SQL_Latin1_General_CP1_CI_AS = l,labsampnum COLLATE SQL_Latin1_General_CP1_CI_AS
+INNER JOIN (SELECT [area_code] AS country_code,[area_name] AS country_name, area_key FROM [sdmONLINE],[dbo],lab_area -- Country
+) AS c ON cnn,[country_key]=c,area_key
+INNER JOIN  (SELECT [area_code] AS state_code,[area_name] AS state_name, area_key FROM [sdmONLINE],[dbo],lab_area --State
+WHERE [area_code] = 'NE') AS s ON cnn,[state_key]=s,area_key 
  
-INNER JOIN (SELECT [area_code] AS county_code,[area_name] AS county_name, area_key FROM [sdmONLINE].[dbo].lab_area --County
-) AS ct ON cnn.[county_key]=ct.area_key
+INNER JOIN (SELECT [area_code] AS county_code,[area_name] AS county_name, area_key FROM [sdmONLINE],[dbo],lab_area --County
+) AS ct ON cnn,[county_key]=ct,area_key
  
-INNER JOIN (SELECT [area_code] AS mlra_code,[area_name] AS mlra_name, area_key FROM [sdmONLINE].[dbo].lab_area --MLRA
-) AS m ON cnn.[mlra_key]=m.area_key
-INNER JOIN (SELECT [area_code] AS ssa_code,[area_name] AS ssa_name, area_key FROM [sdmONLINE].[dbo].lab_area --SSA
-) AS ss ON cnn.[ssa_key]=ss.area_key
+INNER JOIN (SELECT [area_code] AS mlra_code,[area_name] AS mlra_name, area_key FROM [sdmONLINE],[dbo],lab_area --MLRA
+) AS m ON cnn,[mlra_key]=m,area_key
+INNER JOIN (SELECT [area_code] AS ssa_code,[area_name] AS ssa_name, area_key FROM [sdmONLINE],[dbo],lab_area --SSA
+) AS ss ON cnn,[ssa_key]=ss,area_key
 
-INNER JOIN  [nasis].[dbo].phorizon ON phorizon.phiid=phs.phiidref 
+INNER JOIN  [nasis],[dbo],phorizon ON phorizon,phiid=phs,phiidref 
 /*LEFT OUTER JOIN (SELECT   [colorpct] AS dry_colorpct 
 , [colorhue] AS moist_colorhue
 
@@ -136,7 +136,7 @@ INNER JOIN  [nasis].[dbo].phorizon ON phorizon.phiid=phs.phiidref
       ,[colorphysst] AS dry_colorphysst
       ,[colormoistst] AS dry_colormoistst
 	  ,phiidref AS dry_phiidref
-FROM	[nasis].[dbo].phcolor WHERE [colormoistst]= 1) AS phcd ON phcd.dry_phiidref= phorizon.phiid
+FROM	[nasis],[dbo],phcolor WHERE [colormoistst]= 1) AS phcd ON phcd,dry_phiidref= phorizon,phiid
 
 --LEFT OUTER JOIN (SELECT    [colorpct] AS moist_colorpct 
 , [colorhue] AS moist_colorhue
@@ -147,10 +147,10 @@ FROM	[nasis].[dbo].phcolor WHERE [colormoistst]= 1) AS phcd ON phcd.dry_phiidref
 	  ,phiidref AS moist_phiidref
 
 	  
-FROM	[nasis].[dbo].phcolor WHERE [colormoistst]= 2) AS phcm ON phcm.moist_phiidref= phorizon.phiid
+FROM	[nasis],[dbo],phcolor WHERE [colormoistst]= 2) AS phcm ON phcm,moist_phiidref= phorizon,phiid
 */
--- INNER JOIN [nasis].[dbo].[phorizon] ON 
+-- INNER JOIN [nasis],[dbo],[phorizon] ON 
 
--- ORDER BY l.[labsampnum] ASC,[hzn_top]ASC ,[hzn_bot]
+-- ORDER BY l,[labsampnum] ASC,[hzn_top]ASC ,[hzn_bot]
 
 
