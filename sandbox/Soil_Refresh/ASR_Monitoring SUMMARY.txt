@@ -1,0 +1,136 @@
+
+DECLARE @newtable_spatial TABLE (statesym_spatial VARCHAR (max), nasisssatotal FLOAT, sdwssatotal_spatial FLOAT)
+
+INSERT INTO @newtable_spatial (statesym_spatial, nasisssatotal, sdwssatotal_spatial)
+
+SELECT DISTINCT
+		LEFT (nasis.dbo.area.areasymbol, 2) AS statesym_spatial,
+		count (nasis.dbo.area.areasymbol) over (partition by (LEFT (nasis.dbo.area.areasymbol, 2))) as nasisssatotal,
+	
+		count  (sdw.dbo.saspatialver.areasymbol) over (partition by (LEFT (sdw.dbo.saspatialver.areasymbol, 2))) as sdwssatotal_spatial
+		FROM nasis.dbo.areatype WITH (NOLOCK)
+JOIN nasis.dbo.area WITH (NOLOCK) ON nasis.dbo.area.areatypeiidref = nasis.dbo.areatype.areatypeiid
+	AND nasis.dbo.areatype.areatypename = 'Non-MLRA Soil Survey Area'
+	AND nasis.dbo.area.obterm = 0
+
+LEFT OUTER JOIN  sdw.dbo.saspatialver  WITH (NOLOCK) ON nasis.dbo.area.areasymbol = sdw.dbo.saspatialver.areasymbol COLLATE SQL_Latin1_General_Pref_CP1_CI_AS
+
+	and sdw.dbo.saspatialver.spatialverest > '7/30/2021'
+AND nasis.dbo.area.areasymbol  !='US'
+GROUP BY nasis.dbo.area.areasymbol, sdw.dbo.saspatialver.areasymbol
+
+
+DECLARE @newtable2_spatial TABLE (statesym_spatial VARCHAR (max),  nasisssatotal FLOAT, sdwssatotal_spatial FLOAT, percents int)
+
+INSERT INTO @newtable2_spatial (statesym_spatial,  nasisssatotal, sdwssatotal_spatial, percents)
+
+SELECT  statesym_spatial , nasisssatotal as 'Total Number of Survey Areas For State or Territories', sdwssatotal_spatial as 'Number of Survey Area Tabualar Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020',
+--SELECT  statesym_spatial as 'State or Territory', nasisssatotal as 'Total Number of Survey Areas For State or Territories', sdwssatotal_spatial as 'Number of Survey Area Tabualar Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020',
+
+round ((sdwssatotal_spatial /nasisssatotal *100) ,0) as percents
+FROM @newtable_spatial
+--WHERE (SELECT *  FROM @newtable_spatial GROUP BY statesym_spatial HAVING count (satatysm) >0) --OR ((SELECT COUNT (statesym_spatial) FROM @newtable_spatial GROUP BY statesym_spatial) > 1 AND sdwssatotal_spatial !=0)
+
+DECLARE @newtable3_spatial TABLE (statesym2 VARCHAR (max), statesym_count int)
+
+INSERT INTO @newtable3_spatial (statesym2, statesym_count)
+
+Select statesym_spatial AS statesym2, COUNT (statesym_spatial) as statesym_count FROM @newtable2_spatial GROUP BY statesym_spatial 
+
+
+DECLARE @newtable4_spatial TABLE (statesym_spatial VARCHAR (max),  nasisssatotal FLOAT, sdwssatotal_spatial FLOAT, percents int, statesym2 VARCHAR (max), statesym_count int)
+
+INSERT INTO @newtable4_spatial (statesym_spatial,  nasisssatotal, sdwssatotal_spatial, percents, statesym2, statesym_count)
+
+SElect * from @newtable2_spatial newtable2_spatial
+JOIN @newtable3_spatial newtable3_spatial ON newtable2_spatial.statesym_spatial = newtable3_spatial.statesym2
+
+
+--Select statesym_spatial as 'State or Territory', nasisssatotal as 'Total Number of Survey Areas for State or Territories', sdwssatotal_spatial as 'Number of Survey Area Spatial Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020', 
+--percents as 'Percent of Spatial Survey Areas Posted to Soil Data Warehouse'
+-- FROM @newtable4_spatial
+--WHERE statesym_count = 1 OR (statesym_count >1 and sdwssatotal_spatial !=0)
+
+DECLARE @newtable5_spatial TABLE (statesym_spatial VARCHAR (max),  nasisssatotal FLOAT, sdwssatotal_spatial FLOAT, percents int)
+
+INSERT INTO @newtable5_spatial (statesym_spatial , nasisssatotal, sdwssatotal_spatial, percents)
+
+Select statesym_spatial , nasisssatotal, sdwssatotal_spatial, 
+percents
+ FROM @newtable4_spatial
+WHERE statesym_count = 1 OR (statesym_count >1 and sdwssatotal_spatial !=0)
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE @newtable TABLE (statesym VARCHAR (max), nasisssatotal FLOAT, sdwssatotal FLOAT)
+
+INSERT INTO @newtable (statesym, nasisssatotal, sdwssatotal)
+
+SELECT DISTINCT
+		LEFT (nasis.dbo.area.areasymbol, 2) AS statesym,
+		count (nasis.dbo.area.areasymbol) over (partition by (LEFT (nasis.dbo.area.areasymbol, 2))) as nasisssatotal,
+		count  (sdw.dbo.satabularver.areasymbol) over (partition by (LEFT (sdw.dbo.satabularver.areasymbol, 2))) as sdwssatotal
+		FROM nasis.dbo.areatype WITH (NOLOCK)
+JOIN nasis.dbo.area WITH (NOLOCK) ON nasis.dbo.area.areatypeiidref = nasis.dbo.areatype.areatypeiid
+	AND nasis.dbo.areatype.areatypename = 'Non-MLRA Soil Survey Area'
+	AND nasis.dbo.area.obterm = 0
+LEFT OUTER JOIN  sdw.dbo.satabularver  WITH (NOLOCK) ON nasis.dbo.area.areasymbol = sdw.dbo.satabularver.areasymbol COLLATE SQL_Latin1_General_Pref_CP1_CI_AS
+	and sdw.dbo.satabularver.tabularverest > '7/30/2021'
+AND nasis.dbo.area.areasymbol  !='US'
+GROUP BY nasis.dbo.area.areasymbol, sdw.dbo.satabularver.areasymbol 
+
+
+DECLARE @newtable2 TABLE (statesym VARCHAR (max),  nasisssatotal FLOAT, sdwssatotal FLOAT, percents int)
+
+INSERT INTO @newtable2 (statesym,  nasisssatotal, sdwssatotal, percents)
+
+SELECT  statesym , nasisssatotal as 'Total Number of Survey Areas For State or Territories', sdwssatotal as 'Number of Survey Area Tabualar Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020',
+--SELECT  statesym as 'State or Territory', nasisssatotal as 'Total Number of Survey Areas For State or Territories', sdwssatotal as 'Number of Survey Area Tabualar Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020',
+
+round ((sdwssatotaL /nasisssatotal *100) ,0) as percents
+FROM @newtable
+--WHERE (SELECT *  FROM @newtable GROUP BY Statesym HAVING count (satatysm) >0) --OR ((SELECT COUNT (statesym) FROM @newtable GROUP BY Statesym) > 1 AND sdwssatotal !=0)
+
+DECLARE @newtable3 TABLE (statesym2 VARCHAR (max), statesym_count int)
+
+INSERT INTO @newtable3 (statesym2, statesym_count)
+
+Select statesym AS statesym2, COUNT (STATESYM) as statesym_count FROM @newtable2 GROUP BY STATESYM 
+
+
+DECLARE @newtable4 TABLE (statesym VARCHAR (max),  nasisssatotal FLOAT, sdwssatotal FLOAT, percents int, statesym2 VARCHAR (max), statesym_count int)
+
+INSERT INTO @newtable4 (statesym,  nasisssatotal, sdwssatotal, percents, statesym2, statesym_count)
+
+SElect * from @newtable2 newtable2
+JOIN @newtable3 newtable3 ON newtable2.statesym = newtable3.statesym2
+
+--Select statesym as 'State or Territory', nasisssatotal as 'Total Number of Survey Areas for State or Territories', sdwssatotal as 'Number of Survey Area Tabular Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020', 
+--percents as 'Percent of Tabular Survey Areas Posted to Soil Data Warehouse'
+-- FROM @newtable4
+--WHERE statesym_count = 1 OR (statesym_count >1 and Sdwssatotal !=0)
+
+DECLARE @newtable5 TABLE (statesym VARCHAR (max),  nasisssatotal FLOAT, sdwssatotal FLOAT, percents int)
+
+INSERT INTO @newtable5 (statesym , nasisssatotal, sdwssatotal, percents)
+
+Select statesym , nasisssatotal, sdwssatotal, 
+percents
+ FROM @newtable4
+WHERE statesym_count = 1 OR (statesym_count >1 and sdwssatotal !=0)
+
+------------------------------------------------------------------------------------------
+
+
+SELECT 
+statesym as 'State or Territory', 
+tabular_table.nasisssatotal as 'Total Number of Survey Areas for State or Territories', 
+sdwssatotal as 'Number of Survey Area Tabular Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020', 
+tabular_table.percents as 'Percent of Tabular Survey Areas Posted to Soil Data Warehouse',
+--statesym_spatial as 'State or Territory', 
+--spatial_table.nasisssatotal as 'Total Number of Survey Areas for State or Territories', 
+sdwssatotal_spatial as 'Number of Survey Area Spatial Data Sets For State or Territory Posted to Soil Data Warehouse After May 01 2020', 
+spatial_table.percents as 'Percent of Spatial Survey Areas Posted to Soil Data Warehouse' 
+FROM @newtable5 tabular_table
+JOIN  @newtable5_spatial spatial_table ON tabular_table.statesym = spatial_table.statesym_spatial 

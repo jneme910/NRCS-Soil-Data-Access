@@ -1,0 +1,111 @@
+-----This query is designed to monitor the annual SSURGO refresh. It pulls data from the nasis, SDW, SDWstagning, and SDMOnline databases for all official soil survey areas.   
+------------------
+-----------------------------IMPORTANT---------------------------------------------
+---Change the dates on lines 17 and 48 to set the period of time being monitored.--
+-------------------------------------------------------------------------------------
+--Creates new table that combines data from distribution metadata and distribution legend metadata.  Only includes official soil survey area symbols and records that were successfully exported to the Staging Server
+
+	DECLARE @distmd_new TABLE (areasymbol VARCHAR (max), distgendate DATEtime, exporttarget INT, distmdiid  INT)
+	INSERT INTO @distmd_new (nasis.dbo.distlegendmd.areasymbol,nasis.dbo.distmd.distgendate, nasis.dbo.distmd.exporttarget, nasis.dbo.distmd.distmdiid )
+
+	SELECT nasis.dbo.distlegendmd.areasymbol,nasis.dbo.distmd.distgendate, nasis.dbo.distmd.exporttarget,nasis.dbo.distmd.distmdiid 
+	FROM nasis.dbo.distmd
+	INNER JOIN nasis.dbo.distlegendmd  ON nasis.dbo.distmd.distmdiid = nasis.dbo.distlegendmd.distmdiidref
+	--AND areasymbol LIKE 'OR618'
+	and exporttarget = 2 --2 is the code for staging server
+	AND distgendate > '7/29/2021'
+	and diststatus = 3 --3 is the code for sucessfull 
+	and areasymbol IN (SELECT areasymbol 
+						FROM nasis.dbo.areatype WITH (NOLOCK)
+						JOIN nasis.dbo.area WITH (NOLOCK) ON nasis.dbo.area.areatypeiidref = nasis.dbo.areatype.areatypeiid
+							AND nasis.dbo.areatype.areatypename = 'Non-MLRA Soil Survey Area'
+							AND nasis.dbo.area.obterm = 0)
+
+
+--Creates new table that finds most recent distribution metadata record for each soil survey area
+	DECLARE @distmd_new2 TABLE (areasymbol VARCHAR (max), distgendate DATEtime, exporttarget INT, distmdiid  INT)
+	INSERT INTO @distmd_new2 (areasymbol,distgendate, exporttarget, distmdiid )
+
+	SELECT distmd_new.areasymbol, distmd_new.distgendate, distmd_new.exporttarget, distmd_new.distmdiid--, distmd1.username
+	FROM @distmd_new AS distmd_new
+	INNER JOIN (SELECT  distmd_new2.areasymbol, MAX (distmd_new2.distgendate)  AS distgendate
+				FROM @distmd_new distmd_new2
+				GROUP BY distmd_new2.areasymbol) subquery1
+	 ON subquery1.areasymbol = distmd_new.areasymbol AND subquery1.distgendate = distmd_new.distgendate 
+		ORDER BY distmd_new.areasymbol
+
+--Creates final table
+	SELECT
+		LEFT (nasis.dbo.area.areasymbol, 2) AS 'State',
+		count (nasis.dbo.area.areasymbol) over (partition by (LEFT (nasis.dbo.area.areasymbol, 2))) as 'State SSA Total', 
+		count (sdwstaging.dbo.satabularver.areasymbol) over (partition by (LEFT (sdwstaging.dbo.satabularver.areasymbol, 2))) as 'SS Tab to SS State SSA Total', 
+		nasis.dbo.area.areasymbol AS Areasymbol,
+		nasis.dbo.area.areaname AS Areaname,
+		distgendate as 'Date Survey Exported From NASIS', 
+		CASE WHEN distmdiid IS NULL THEN 'Tabular Not Exported From NASIS' ELSE 'Tabular Data Successfully Exported From NASIS' END AS 'NASIS Distribution Metadata Status',
+		CASE WHEN nasis.dbo.area.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS IN (SELECT sdw.dbo.satabularver.areasymbol FROM sdw.dbo.satabularver WITH (NOLOCK)  
+			WHERE tabularverest > '7/29/2021')
+			THEN 'COMPLETED - Committed to Soil Data Warehouse' 
+			WHEN sdwstaging.dbo.sastage.tabulardatastat = 2 
+			AND (sdwstaging.dbo.sastage.spatialdatastat != 2 OR sdwstaging.dbo.sastage.spatialdatastat IS NULL)
+			THEN 'Tabular Only On Staging Server' 
+			WHEN (sdwstaging.dbo.sastage.tabulardatastat != 2 OR sdwstaging.dbo.sastage.tabulardatastat IS NULL)
+			AND sdwstaging.dbo.sastage.spatialdatastat = 2
+			THEN 'Spatial Only On Staging Server' 
+			WHEN (sdwstaging.dbo.sastage.tabulardatastat = 2 OR sdwstaging.dbo.sastage.tabulardatastat IS NULL)
+			AND sdwstaging.dbo.sastage.spatialdatastat = 2
+			THEN 'Spatial and Tabular On Staging Server' 
+			WHEN(sdwstaging.dbo.sastage.tabulardatastat != 2 OR sdwstaging.dbo.sastage.tabulardatastat IS NULL)
+			AND (sdwstaging.dbo.sastage.spatialdatastat != 2 OR sdwstaging.dbo.sastage.spatialdatastat IS NULL)
+			THEN 'No Data On Staging Server' ELSE
+			'' END AS 'Survey Status',
+		CASE WHEN sdwstaging.dbo.sastage.tabulardatastat IS NULL THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 1 THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 2 THEN CAST ('Imported' AS VARCHAR)
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 3 THEN CAST ('Recalled' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 4 THEN CAST ('Importing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 5 THEN CAST ('Recalling' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 6 THEN CAST ('Committing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 7 THEN CAST ('Deleting' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 8 THEN CAST ('Interp Changes' AS VARCHAR)  
+   			 ELSE CAST (sdwstaging.dbo.sastage.tabulardatastat AS VARCHAR)
+			 END AS 'Tabular Data Status On Staging Server',
+		CAST (sdwstaging.dbo.satabularver.tabnasisexportdate AS DATE) AS 'Date Tabular Loaded To SS',
+		sdwstaging.dbo.satabularver.tdatasubmitter as 'Person Who Tabular Loaded To SS', 
+		CASE WHEN sdwstaging.dbo.sastage.spatialdatastat IS NULL THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 1 THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 2 THEN CAST ('Imported' AS VARCHAR)
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 3 THEN CAST ('Recalled' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 4 THEN CAST ('Importing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 5 THEN CAST ('Recalling' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 6 THEN CAST ('Committing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 7 THEN CAST ('Deleting' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 8 THEN CAST ('Status Map' AS VARCHAR)  
+   			 ELSE CAST (sdwstaging.dbo.sastage.spatialdatastat AS VARCHAR)
+			 END AS  'Spatial Data Status On Staging Server',
+		CAST (SDWStaging.Dbo.saspatialver.sdatasubmitdate AS DATE) AS  'Date Spatial Loaded To SS',
+		SDWStaging.Dbo.saspatialver.sdatasubmitter AS 'Person Who Loaded Spatial To SS',
+			CASE WHEN sdwstaging.dbo.sastage.joinstatus IS NULL THEN CAST ('Not Verified' AS VARCHAR)  
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 1 THEN CAST ('Not Verified' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 2 THEN CAST ('Verified' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 3 THEN CAST ('Completed' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 4 THEN CAST ('Error' AS VARCHAR) 
+   			 ELSE CAST (sdwstaging.dbo.sastage.joinstatus AS VARCHAR)
+			 END AS  'Verification Status On Staging Server',
+		CASE WHEN nasis.dbo.area.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS IN 
+			(Select sdmonline.dbo.legend.areasymbol
+				FROM sdmonline.dbo.legend
+				JOIN sdmonline.dbo.mapunit ON sdmonline.dbo.mapunit.lkey = sdmonline.dbo.legend.lkey
+				GROUP by sdmonline.dbo.legend.areasymbol 
+				HAVING COUNT (sdmonline.dbo.mapunit.mukey)  =1) 
+				THEN 'yes' ELSE '' END AS 'NOTCOM Survey Area In Published SDM?'
+FROM nasis.dbo.areatype WITH (NOLOCK)
+JOIN nasis.dbo.area WITH (NOLOCK) ON nasis.dbo.area.areatypeiidref = nasis.dbo.areatype.areatypeiid
+	AND nasis.dbo.areatype.areatypename = 'Non-MLRA Soil Survey Area'
+	AND nasis.dbo.area.obterm = 0
+LEFT OUTER JOIN @distmd_new2 distmd_temp ON nasis.dbo.area.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS = distmd_temp.areasymbol
+LEFT OUTER JOIN  sdwstaging.dbo.sastage WITH (NOLOCK)  ON nasis.dbo.area.areasymbol = sdwstaging.dbo.sastage.areasymbol
+LEFT OUTER JOIN  sdwstaging.dbo.satabularver WITH (NOLOCK) ON nasis.dbo.area.areasymbol  = sdwstaging.dbo.satabularver.areasymbol
+LEFT OUTER JOIN  sdwstaging.dbo.saspatialver WITH (NOLOCK) ON nasis.dbo.area.areasymbol  = sdwstaging.dbo.saspatialver.areasymbol
+AND nasis.dbo.area.areasymbol  !='US'
+ORDER BY STATE, Areasymbol

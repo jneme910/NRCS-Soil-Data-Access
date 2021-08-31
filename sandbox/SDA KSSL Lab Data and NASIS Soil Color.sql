@@ -55,23 +55,7 @@ SELECT TOP 1000
       ,[sand_coarse]
     ,[total_carbon_ncs]
       ,[total_carbon_ncs_method]
-     ,[caco3_lt_2_mm]
-      ,[caco3_lt_2_mm_method]
-     ,[estimated_organic_carbon]
-     ,CASE WHEN [estimated_organic_carbon] IS NOT NULL THEN LEFT (ROUND ([estimated_organic_carbon]* 1,724, 2),4)
-       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NOT NULL THEN LEFT (ROUND (([total_carbon_ncs]- ([caco3_lt_2_mm]*0,12))* 1,724, 2),4)
-       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NULL THEN LEFT (ROUND ([total_carbon_ncs]* 1,724,2),4) END AS [estimated_organic_matter]
-, (SELECT TOP 1 [texture_lab]
-FROM [sdmONLINE],[dbo],[lab_physical_properties] AS lpp2 WHERE lpp2,labsampnum=l,labsampnum AND [texture_lab] IS NOT NULL) AS [lab_texture]
-        ,[organic_carbon_walkley_black]
-      ,[oc_walkley_black_method]
- 
-      ,[caco3_lt_2_mm]
-      ,[caco3_lt_2_mm_method]
-      ,[corrected_gypsum_lt_2_mm]
-       ,[caco3_lt_20_mm]
-      ,[gypsum_lt_20_mm]
-      ,[ca_to_mg_ratio]
+  
 --	  ,  dry_colorpct 
         
   --    , dry_colorhue
