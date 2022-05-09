@@ -13,8 +13,8 @@ SELECT
       ,[layer_field_label_1]
       ,[hzn_top]
       ,[hzn_bot]
-         , CASE  WHEN [hzn_top] < 15 then [hzn_top] ELSE 0 END AS InRangeTop_0_15 
-         ,CASE  WHEN [hzn_bot] <= 15 THEN [hzn_bot] WHEN [hzn_bot] > 15 and [hzn_top] < 15 THEN 15 ELSE 0 END AS InRangeBot_0_15
+         , CASE  WHEN [hzn_top] < 100 then [hzn_top] ELSE 0 END AS InRangeTop_0_100 
+         ,CASE  WHEN [hzn_bot] <= 100 THEN [hzn_bot] WHEN [hzn_bot] > 100 and [hzn_top] < 100 THEN 100 ELSE 0 END AS InRangeBot_0_100
 
       ,[hzn_desgn]
 
@@ -261,8 +261,10 @@ FROM [lab_physical_properties] AS lpp WHERE lpp.labsampnum=l.labsampnum AND [tex
       ,[sodium_absorption_ratio]
       ,[phosphorus_anion_resin_capacit]
 FROM  [lab_pedon] AS p 
-LEFT OUTER JOIN [lab_combine_nasis_ncss] AS cnn ON p.pedon_key=cnn.pedon_key AND [upedonid] LIKE '%WI%'
-INNER JOIN [lab_layer] AS l ON l.pedon_key=p.pedon_key 
+INNER JOIN  [lab_combine_nasis_ncss] AS cnn ON p.pedon_key=cnn.pedon_key AND CASE WHEN [corr_name] IS NULL THEN [samp_name] ELSE [corr_name] END IN ('Wahee', 'Bayboro', 'Bethera', 'Bonneau', 'Caroline', 'Craven', 'Duplin', 'Goldsboro', 'Lenoir',
+'Leon', 'Lynchburg', 'Meggett', 'Norfolk', 'Ocilla', 'Pantego', 'Rains', 'Water')
+
+INNER JOIN [lab_layer] AS l ON l.pedon_key=p.pedon_key  AND [hzn_top] < 100
 INNER JOIN [lab_chemical_properties] AS lcp ON lcp.labsampnum=l.labsampnum 
 INNER JOIN (SELECT [area_code] AS country_code,[area_name] AS country_name, area_key FROM lab_area -- Country
 ) AS c ON cnn.[country_key]=c.area_key

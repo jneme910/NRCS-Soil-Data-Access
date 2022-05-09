@@ -1,0 +1,83 @@
+	SELECT 
+		LEFT (sdmonline.dbo.legend.areasymbol, 2) AS 'State',
+		count (sdmonline.dbo.legend.areasymbol) over (partition by (LEFT (sdmonline.dbo.legend.areasymbol, 2))) as 'State SSA Total', 
+		count (sdwstaging.dbo.satabularver.areasymbol) over (partition by (LEFT (sdwstaging.dbo.satabularver.areasymbol, 2))) as 'SS Tab to SS State SSA Total', 
+	--	(count (sdmonline.dbo.legend.areasymbol) over (partition by (LEFT (sdmonline.dbo.legend.areasymbol, 2))) as SDM_State_SSA_Total/count (sdwstaging.dbo.satabularver.areasymbol) over (partition by (LEFT (sdwstaging.dbo.satabularver.areasymbol, 2)))) as percent, 
+		sdmonline.dbo.legend.areasymbol AS Areasymbol,
+		sdmonline.dbo.legend.areaname AS Areaname,
+		--sdwstaging.dbo.satabularver.areasymbol AS SS_Areasymbol, 
+		--LEFT (sdwstaging.dbo.satabularver.areasymbol, 2) AS SS_State,
+
+		CASE 	WHEN 
+			sdmonline.dbo.legend.areasymbol IN (SELECT sdw.dbo.satabularver.areasymbol FROM sdw.dbo.satabularver WITH (NOLOCK)  
+			--LEFT OUTER JOIN sdmonline.dbo.legend 	 WITH (NOLOCK)  ON sdmonline.dbo.legend.areasymbol = sdw.dbo.satabularver.areasymbol
+		
+			WHERE tabularverest > '11/01/2019')
+			THEN 'COMPLETED - Committed to Soil Data Warehouse' 
+			
+			WHEN --sdmonline.dbo.legend.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS = sdwstaging.dbo.satabularver.areasymbol AND 
+			sdwstaging.dbo.sastage.tabulardatastat = 2 
+			AND (sdwstaging.dbo.sastage.spatialdatastat != 2 OR sdwstaging.dbo.sastage.spatialdatastat IS NULL)
+			THEN 'Tabular Only On Staging Server' 
+
+			WHEN --sdmonline.dbo.legend.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS = sdwstaging.dbo.satabularver.areasymbol AND
+			(sdwstaging.dbo.sastage.tabulardatastat != 2 OR sdwstaging.dbo.sastage.tabulardatastat IS NULL)
+			AND sdwstaging.dbo.sastage.spatialdatastat = 2
+			THEN 'Spatial Only On Staging Server' 
+				WHEN --sdmonline.dbo.legend.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS = sdwstaging.dbo.satabularver.areasymbol AND
+			(sdwstaging.dbo.sastage.tabulardatastat = 2 OR sdwstaging.dbo.sastage.tabulardatastat IS NULL)
+			AND sdwstaging.dbo.sastage.spatialdatastat = 2
+			THEN 'Spatial and Tabular On Staging Server' 
+			
+	-----------------		----
+		
+
+--------------------
+
+			WHEN --sdmonline.dbo.legend.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS = sdwstaging.dbo.satabularver.areasymbol AND
+		    (sdwstaging.dbo.sastage.tabulardatastat != 2 OR sdwstaging.dbo.sastage.tabulardatastat IS NULL)
+			AND (sdwstaging.dbo.sastage.spatialdatastat != 2 OR sdwstaging.dbo.sastage.spatialdatastat IS NULL)
+			THEN 'No Data On Staging Server' ELSE
+			'' END AS 'Survey Status',
+
+	
+		CASE WHEN sdwstaging.dbo.sastage.tabulardatastat IS NULL THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 1 THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 2 THEN CAST ('Imported' AS VARCHAR)
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 3 THEN CAST ('Recalled' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 4 THEN CAST ('Importing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 5 THEN CAST ('Recalling' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 6 THEN CAST ('Committing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 7 THEN CAST ('Deleting' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.tabulardatastat = 8 THEN CAST ('Interp Changes' AS VARCHAR)  
+   			 ELSE CAST (sdwstaging.dbo.sastage.tabulardatastat AS VARCHAR)
+			 END AS 'Tabular Data Status On Staging Server',
+			 	sdwstaging.dbo.satabularver.tdatasubmitter as 'Person Who Exported Tabular From NASIS', 
+		CAST (sdwstaging.dbo.satabularver.tabnasisexportdate AS DATE) AS 'Date Tabular Data Exported From NASIS',
+			 CASE WHEN sdwstaging.dbo.sastage.spatialdatastat IS NULL THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 1 THEN CAST ('Not Imported' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 2 THEN CAST ('Imported' AS VARCHAR)
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 3 THEN CAST ('Recalled' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 4 THEN CAST ('Importing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 5 THEN CAST ('Recalling' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 6 THEN CAST ('Committing' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 7 THEN CAST ('Deleting' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.spatialdatastat = 8 THEN CAST ('Status Map' AS VARCHAR)  
+   			 ELSE CAST (sdwstaging.dbo.sastage.spatialdatastat AS VARCHAR)
+			 END AS  'Spatial Data Status On Staging Server',
+
+			 CASE WHEN sdwstaging.dbo.sastage.joinstatus IS NULL THEN CAST ('Not Verified' AS VARCHAR)  
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 1 THEN CAST ('Not Verified' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 2 THEN CAST ('Verified' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 3 THEN CAST ('Completed' AS VARCHAR) 
+			 WHEN sdwstaging.dbo.sastage.joinstatus = 4 THEN CAST ('Error' AS VARCHAR) 
+   			 ELSE CAST (sdwstaging.dbo.sastage.joinstatus AS VARCHAR)
+			 END AS  'Verification Status On Staging Server'
+
+
+
+FROM sdmonline.dbo.legend WITH (NOLOCK)
+LEFT OUTER JOIN  sdwstaging.dbo.sastage WITH (NOLOCK)  ON sdmonline.dbo.legend.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS = sdwstaging.dbo.sastage.areasymbol
+LEFT OUTER JOIN  sdwstaging.dbo.satabularver WITH (NOLOCK) ON sdmonline.dbo.legend.areasymbol COLLATE SQL_Latin1_General_CP1_CI_AS = sdwstaging.dbo.satabularver.areasymbol
+AND sdmonline.dbo.legend.areasymbol  !='US'
+ORDER BY STATE, Areasymbol

@@ -1,0 +1,130 @@
+
+~DeclareChar(@area,20)~;
+~DeclareINT(@area_type)~;
+~DeclareINT(@textflag)~;
+
+
+--Note: Specifiy area and surface texture preference (Include Duff organic layer or first mineral horizon)
+SELECT @area= 'WI001'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
+SELECT @textflag = 1; --Enter 1 for first mineral horizon else 2 duff layer
+
+
+SELECT mapunit.mukey
+     , component.cokey
+     , component.comppct_r
+     , hzname
+     , [hzdept_r]
+     , [hzdepb_r]
+     , chtexturegrp.texture as texture
+     , chtexturegrp.texdesc as text_desc
+	 ,	text_list = (SELECT STRING_AGG( chtexture.texcl, '; ')
+                 WITHIN GROUP (ORDER BY chtexture.texcl) FROM chtexturegrp AS cht INNER JOIN  chtexture ON cht.chtgkey=chtexture.chtgkey AND cht.rvindicator='yes' AND cht.chtgkey=chtexturegrp.chtgkey)
+
+	,	text_modifier_list = (SELECT STRING_AGG( texmod, '; ')
+                 WITHIN GROUP (ORDER BY texmod) FROM chtexturegrp AS cht INNER JOIN  chtexture ON cht.chtgkey=chtexture.chtgkey AND cht.rvindicator='yes'
+				 INNER JOIN chtexturemod ON chtexturemod.chtkey=chtexture.chtkey
+				 AND cht.chtgkey=chtexturegrp.chtgkey)
+
+
+FROM sacatalog
+    INNER JOIN legend
+        ON legend.areasymbol = sacatalog.areasymbol
+           AND CASE
+                   WHEN @area_type = 2 THEN
+                       LEFT(sacatalog.areasymbol, 2)
+                   ELSE
+                       sacatalog.areasymbol
+               END = @area
+    INNER JOIN mapunit
+        ON mapunit.lkey = legend.lkey
+    INNER JOIN component
+        ON component.mukey = mapunit.mukey
+           AND majcompflag = 'Yes'
+
+    --Dominant Component
+           AND component.cokey =
+           (
+               SELECT TOP 1
+                   c1.cokey
+               FROM component         AS c1
+                   INNER JOIN mapunit AS c
+                       ON c1.mukey = c.mukey
+                          AND c.mukey = mapunit.mukey
+               ORDER BY c1.comppct_r DESC
+                      , CASE
+                            WHEN LEFT(muname, 2) = LEFT(compname, 2) THEN
+                                1
+                            ELSE
+                                2
+                        END ASC
+                      , c1.cokey
+           )
+    LEFT JOIN(chorizon
+    LEFT JOIN chtexturegrp
+        ON chorizon.chkey = chtexturegrp.chkey)
+        ON component.cokey = chorizon.cokey
+           --Selects the first mineral horizon or keeps the duff organic layer
+           AND (
+                   ((chorizon.hzdept_r) =
+                   (
+                       SELECT MIN(chorizon.hzdept_r) AS MIN_hor_depth_r
+                       FROM chorizon
+                           LEFT JOIN chtexturegrp
+                               ON chorizon.chkey = chtexturegrp.chkey
+                       WHERE CASE
+                                 WHEN chtexturegrp.texture Not In ( 'SPM', 'HPM', 'MPM' )
+                                      AND chtexturegrp.rvindicator = 'Yes' THEN
+                                     1
+                                 ELSE
+                                     2
+                             END = @textflag
+                             AND component.cokey = chorizon.cokey
+                   )
+                   )
+                   AND ((chtexturegrp.rvindicator) = 'Yes')
+               )
+           AND component.cokey = chorizon.cokey
+
+---Metadata
+
+SELECT DISTINCT
+    [BaseColumnPhysicalName]
+  , [ColumnPhysicalName]
+  , [ColumnLogicalName]
+  , [ColumnGroupLabel]
+  , [ColumnLabel]
+  , [PhysicalDataType]
+  , [LogicalDataType]
+  , [DomainID]
+  , [ColumnDescription]
+  , [FieldSize]
+  , [DecimalPrecision]
+  , [DatetimePrecision]
+  , [Minimum]
+  , [Maximum]
+  , [DisplaySize]
+  , [UnitsOfMeasureUnabbreviated]
+  , [UnitsOfMeasureAbbreviated]
+  , [NotNull]
+FROM [MetadataTableColumn]
+WHERE [BaseColumnPhysicalName] IN ( 'mukey', 'cokey', 'comppct_r', 'hzname', 'hzdept_r', 'hzdepb_r', 'texture'
+                                  , 'texdesc', 'texcl', 'texmod'
+                                  )
+GROUP BY [BaseColumnPhysicalName]
+       , [ColumnPhysicalName]
+       , [ColumnLogicalName]
+       , [ColumnGroupLabel]
+       , [ColumnLabel]
+       , [PhysicalDataType]
+       , [LogicalDataType]
+       , [DomainID]
+       , [ColumnDescription]
+       , [FieldSize]
+       , [DecimalPrecision]
+       , [DatetimePrecision]
+       , [Minimum]
+       , [Maximum]
+       , [DisplaySize]
+       , [UnitsOfMeasureUnabbreviated]
+       , [UnitsOfMeasureAbbreviated]
+       , [NotNull]

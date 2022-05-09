@@ -9,7 +9,7 @@ DECLARE @domc INT ;
 --~DeclareINT(@area_type)~ 
 --~DeclareINT(@area_type)~ 
 -- End soil data access
-SELECT @area= 'WI'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
+SELECT @area= 'WI025'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
 
 
 SELECT @area_type = LEN (@area); --determines number of characters of area 2-State, 5- Soil Survey Area
@@ -19,12 +19,12 @@ SELECT @area_type = LEN (@area); --determines number of characters of area 2-Sta
  ISNULL((SELECT TOP 1 ROUND (AVG(interphr) over(partition by interphrc),2)
  FROM mapunit
  INNER JOIN component ON component.mukey=mapunit.mukey
- INNER JOIN cointerp ON component.cokey = cointerp.cokey AND mapunit.mukey = mu.mukey AND ruledepth = 0 AND mrulename LIKE 'DHS - Catastrophic Event, Large Animal Mortality, Burial' GROUP BY interphrc, interphr
+ INNER JOIN cointerp ON component.cokey = cointerp.cokey AND mapunit.mukey = mu.mukey AND ruledepth = 0 AND mrulename LIKE 'SOH - Limitations for Aerobic Soil Organisms' GROUP BY interphrc, interphr
  ORDER BY SUM (comppct_r) DESC), 9999 )as ce_lam_b_rating,
  (SELECT TOP 1 interphrc
  FROM mapunit
  INNER JOIN component ON component.mukey=mapunit.mukey
- INNER JOIN cointerp ON component.cokey = cointerp.cokey AND mapunit.mukey = mu.mukey AND ruledepth = 0 AND mrulename LIKE 'DHS - Catastrophic Event, Large Animal Mortality, Burial'
+ INNER JOIN cointerp ON component.cokey = cointerp.cokey AND mapunit.mukey = mu.mukey AND ruledepth = 0 AND mrulename LIKE 'SOH - Limitations for Aerobic Soil Organisms'
  GROUP BY interphrc, comppct_r ORDER BY SUM(comppct_r) over(partition by interphrc) DESC) as ce_lam_b_class,
  
   (SELECT DISTINCT SUBSTRING(  (  SELECT ( '; ' + interphrc)
