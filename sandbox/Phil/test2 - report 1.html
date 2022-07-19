@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test2 - report 1</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	<p>Soil Data Access (SDA) Test2 - report 1</P
+	<p>
+	An SDA-populated select list is used to pick a state which enables creation
+	of "report 1" based upon that state.
+	</p>
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<div id="id1"></div>
+	
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "select statename, stateid from state order by statename;",
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch and display report 1 results
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			var query = 		
+				"SELECT DISTINCT Compname FROM (legend INNER JOIN (mapunit LEFT JOIN "
+				+ " component ON mapunit.mukey = component.mukey AND hydricrating = 'yes' )"
+				+ " ON legend.lkey = mapunit.lkey AND LEFT(legend.areasymbol,2) LIKE '" + stateId + "')"
+				+ " WHERE  Compname IS NOT NULL GROUP BY Compname  ORDER BY Compname";			
+
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					drawTable("id1", callbackData.Table);;
+				}, 
+				"json");
+		}
+		
+		function drawTable(id, table) {
+			var tableHtml = '<table border="1">';
+			// for each row...
+			var iRow = 0;
+			while (iRow < table.length) {
+				var row = table[iRow];
+				tableHtml += "<tr>";
+				// for each column in each row...
+				var iCol = 0;
+				while (iCol < row.length) {
+					tableHtml += "<td>" + row[iCol] + "</td>";
+					iCol++;
+				};
+				tableHtml += "</tr>";				                                                                                   
+				iRow++;
+			};
+			tableHtml += '</table>'
+			$("#" + id).append(tableHtml);		
+		}
+	</script>
+</body>
+</html>

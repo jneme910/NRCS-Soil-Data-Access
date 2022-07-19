@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+    <!-- 
+        D:\EsriWebApi4\TestAoiInventory_05.html file://D:/EsriWebApi4/TestAoiInventory_05.html
+        Evolve demo showing AOI Inventory for an AOI.
+        https://clm.cert.sc.egov.usda.gov/ccm/web/projects/CD-MPT#action=com.ibm.team.workitem.viewWorkItem&id=34857
+        https://clm.cert.sc.egov.usda.gov/rm/web#action=com.ibm.rdm.web.pages.showArtifact&artifactURI=https%3A%2F%2Fclm.cert.sc.egov.usda.gov%2Frm%2Fresources%2F_Yv3ewTa3EeiP5aRGCPi9Vg&vvc.configuration=https%3A%2F%2Fclm.cert.sc.egov.usda.gov%2Frm%2Fcm%2Fstream%2F_4AsygFqmEeaZrIx-1PD4WA&componentURI=https%3A%2F%2Fclm.cert.sc.egov.usda.gov%2Frm%2Frm-projects%2F_98VzoJmbEeONkakGA20ghA%2Fcomponents%2F_31ExUFqmEeaZrIx-1PD4WA
+
+        Note: Only works in Firefox and Edge due ArcGIS API 4.11 WebGL and HTML5 constraints in other browsers.
+
+        Versions:
+        v00: copy of SoilsWithSLD_05.html, no functional modifications
+        v01: add page region for specifying AOI coordinates, display default 75% AOI
+        v02: ArcGIS API ver 4.11; define aoi from specified AOI
+             (acceptable formats: GeoJSON, WKT, or WSS single-polygon abbreviated syntax)
+             (change to node.value in place of innerText for Firefox compatibility)
+        v03: add SDA query execution for AOI extent retrieval
+        v04: clean up SQL input display, switch to national mapunit symbols, add prototype inventory SQL
+        v05: add aoilabeled layer, clean up SQL result display
+    -->
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+        <title>Aoi Inventory</title>
+
+        <style>
+          html,
+          body,
+          #viewDiv {
+            font-family: sans-serif;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+          }
+      
+          .container {
+            padding: 1em;
+          }
+      
+          input {
+            width: 75%;
+          }
+        </style>
+      
+        <link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/css/main.css">
+        <script src="https://js.arcgis.com/4.11/"></script>
+
+        <script>
+            var constants = DefineConstants();
+            var applicationState = DefineInitialApplicationState();
+
+            // Define the Aoi that will hold the registered SLDs.
+            // This will also trigger loading of ESRI content after completion of 
+            // the registration..
+            StartSldInitialization();
+
+            function AddLogText(message) {
+                var elapsedMs = (new Date()).getTime() - constants.timeOrigin;
+                if (applicationState.logText) {
+                    applicationState.logText += ';\n ' + elapsedMs + 'ms ' + message;
+                } else {
+                    applicationState.logText = ' ' + elapsedMs + 'ms ' + message;
+                }
+            }
+
+            function DefineConstants() {                    
+                // Soil Data Access-related constants
+                // Assumptions: 
+                // 1. Only accessing mapunitpoly layer
+                // 2. Only modifying mapunt polygon boundary color, no other attributes
+                // 3. Color list is predefined.
+                return {
+                    timeOrigin: (new Date()).getTime(),         
+                    sdaFqdn: 'sdmdataaccess.sc.egov.usda.gov',
+                    // sdaFqdn: 'sdmdataaccess-dev.dev.sc.egov.usda.gov',
+                    boundaryColorParameter: '{Boundary Color}',
+                    sldTemplate: [
+                        '<StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" ',
+                        ' xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" ',
+                        ' xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ',
+                        ' xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd">',
+                        '<NamedLayer> <Name>mapunitpoly</Name> <UserStyle> <FeatureTypeStyle>',
+                        '<Rule> <MinScaleDenominator>0.010000</MinScaleDenominator> <MaxScaleDenominator>250000.000000</MaxScaleDenominator>',
+                        '<PolygonSymbolizer> <Stroke>',
+                        '<CssParameter name="stroke">{Boundary Color}</CssParameter>',
+                        '<CssParameter name="stroke-width">0.75</CssParameter>',
+                        '</Stroke> </PolygonSymbolizer>',
+                        '<TextSymbolizer> <Label>nationalmusym</Label>',
+                        '<Font> <CssParameter name="font-family">arial</CssParameter>',
+                        '<CssParameter name="font-weight">bold</CssParameter>',
+                        '<CssParameter name="font-size">7.00</CssParameter> </Font>',
+                        '<LabelPlacement> <PointPlacement>',
+                        '<AnchorPoint> <AnchorPointX>0.5</AnchorPointX> <AnchorPointY>0.5</AnchorPointY> </AnchorPoint> </PointPlacement> </LabelPlacement>',
+                        '<Fill> <CssParameter name="fill">#ff8000</CssParameter> </Fill> ',
+                        '<Halo><Fill> <CssParameter name="fill">#000000</CssParameter> </Fill> </Halo>',
+                        '</TextSymbolizer> </Rule>',
+                        '</FeatureTypeStyle> </UserStyle> </NamedLayer> </StyledLayerDescriptor>'].join(''),
+                        // first color is SDA default (#ff8000)
+                        // others defined for demo purposes
+                    boundaryColors: ['#ff8000', '#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026', '#ff0000', '#00ff00', '#00ffff', '#000000'],
+                    //boundaryColors: ['#ff0000', '#00ff00', '#0000ff'],
+                    sldAoiCreationQuery: [
+                        '~DeclareIntTable(@mukeyList)~',
+                        'insert into @mukeyList select top 1 mukey from mapunit;',
+                        '~CreateAoiFromMukeyList(@mukeyList,@aoiid,@message)~',
+                        'select @aoiid [aoiid];'
+                    ].join('\n'),
+                    bingKey: 'AmmH5JF22z1SVTlmW5RBL9Qs24jux_Rn2C6MSGoRHohVCySTPQBcsOf4VEqIvtye',
+                    brotherSisterSample: [
+                    "{",
+                    "  'type': 'FeatureCollection',",
+                    "  'features': [",
+                    "    {",
+                    "      'type': 'Feature',",
+                    "      'geometry': {",
+                    "        'type': 'Polygon',",
+                    "        'coordinates': [[[-100.0,40.0],[-100.1,40.0],[-100.1,40.1],[-100.0,40.1],[-100.0,40.0]]]",
+                    "      },",
+                    "      'properties': {'partName': 'Sister' }",
+                    "    },",
+                    "    {",
+                    "      'type': 'Feature',",
+                    "      'geometry': {",
+                    "         'type': 'Polygon',",
+                    "         'coordinates': [[[-100.2,39.8],[-100.3,39.8],[-100.3,39.9],[-100.2,39.9],[-100.2,39.8]]]",
+                    "       },",
+                    "      'properties': {'partName': 'Brother' }",
+                    "    }",
+                    "  ]",
+                    "}"  
+                    ].join('\n'),
+                    aoiInventorySqlSample: [
+                        "-- WSS ordering in SDA: show national symbols",
+                        "~DeclareInt(@pAoiId)~",
+                        "select @pAoiId = {AoiID};",
+                        "~DeclareFloat(@totalAcreage)~",
+                        "select @totalAcreage = sum(AoiPartAcreage) from SDA_Get_AoiPart_By_AoiId(@pAoiId);",
+                        "select ",
+                        "  AP.AoiPartName,",
+                        "  MUP.NationalMapUnitSymbol [Map Unit Symbol],",
+                        "  MUP.MapUnitName [Map Unit Name],",
+                        "  FORMAT(sum(MUP.AreaAcres) , '#,###,##0.0') [Acres in AOI, rounded],",
+                        "  FORMAT(100.0 * sum(MUP.AreaAcres) / @totalAcreage, '##0.0') [Percent of AOI, rounded],",
+                        "  sum(MUP.AreaAcres) [Acres in AOI, not rounded],",
+                        "  100.0 * sum(MUP.AreaAcres) / @totalAcreage [Percent of AOI, not rounded],",
+                        "  @totalAcreage [totalAcreage], ",
+                        "  AP.AoiPartID, AP.AoiPartAcreage,",
+                        "  (100.0 * sum(MUP.AreaAcres) / AP.AoiPartAcreage) [Percentage of Part Acreage], ",
+                        "  MUP.MapUnitKey",
+                        "from legend L, mapunit M, SDA_Get_AoiPart_By_AoiId(@pAoiId) AP",
+                        "left join SDA_Get_AoiSoilMapunitPolygon_By_AoiId(@pAoiId) MUP",
+                        "  on AP.AoiID = MUP.AoiID and AP.AoiPartID = MUP.AoiPartID",
+                        "where  MUP.MapUnitKey = M.mukey",
+                        "and M.lkey = L.lkey",
+                        "group by ",
+                        "  AP.AoiPartID,L.areaname,MUP.AreaSymbol,AP.AoiPartName,AP.AoiPartAcreage",
+                        "  ,MUP.MapUnitKey,MUP.NationalMapUnitSymbol,MUP.MapUnitName,MUP.AreaSymbol",
+                        "order by AP.AoiPartName, MUP.AreaSymbol, MUP.NationalMapUnitSymbol;"
+                    ].join('\n')
+                };
+            }                
+            
+            function DefineInitialApplicationState() {
+                return {
+                    // The log text for display
+                    logText: false,
+                    // The SDA post.rest service URL
+                    postRestUrl: 'https://' + constants.sdaFqdn + '/tabular/post.rest',
+                    // The SDA post.rest service URL
+                    sdmWmsUrl: 'https://' + constants.sdaFqdn + '/spatial/SDM.wms',
+                    // Assigned ID for the SLD AOI
+                    sldAoiId: false,
+                    // The color:sldId associative dictionary
+                    // Will contain color, id associations
+                    boundaryColorDictionary: {},
+                    // Is the SLD data ready?
+                    isSldDataReady: false,
+                    // Have we started loading ESRI content?
+                    esriContentLoadingStarted: false,
+                    // ID of soil map AOI
+                    aoiId: false,
+                    // Did user specify AOI boundary?
+                    isUserAoi: false
+                };
+            }
+
+            function DisplayLogText() {
+                if (document.getElementById("logtext")) {
+                    document.getElementById("logtext").value = applicationState.logText;
+                }
+            }
+
+            function ExecutionCallbackForGenericSQL(response, errText) {
+                var message;
+                if (response) {
+                    var ro = JSON.parse(response);
+                    message = JSON.stringify(ro, null, 4);
+                } else {
+                    message = errText;
+                }
+
+                document.getElementById("executeSqlResultText").innerHTML = '<pre>' + message + '</pre>';
+            }
+
+            function ExecuteSdaQuery(query, format, callback) {
+                // Execute an SDA query, invoke callback(response, errText) with response
+                // The string "{AoiID}" is replaced with the current aoiID value
+                /*
+                    [ SERVICE = query ]	post.rest service specification, optional.
+                    [ REQUEST = query ]	post.rest query request specification, optional.
+                    { QUERY = the query } a SQL script that includes one or more Select statements
+                    [ FORMAT = XML | JSON | JSON+COLUMNNAME | JSON+COLUMNNAME+METADATA | ~ ]                
+                */
+                query = query.replace('{AoiID}', applicationState.aoiId);
+                makeRequest({
+                    method: 'POST',
+                    url: applicationState.postRestUrl,
+                    params: {
+                        service: 'query',
+                        request: 'query',
+                        query: query,
+                        format: format
+                    }
+                })
+                    .then(function(response) {
+                        callback(response, null);
+                })
+                    .catch(function(err) {
+                        callback(null, err.statusText)
+                });  
+            }
+
+            function makeRequest(opts) {
+                // https://stackoverflow.com/questions/30008114/how-do-i-promisify-native-xhr/30008115
+                // Opts object:
+                //  {
+                //  method: String,
+                //  url: String,
+                //  params: String | Object,
+                //  headers: Object
+                // }
+                
+                return new Promise(function(resolve, reject) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open(opts.method, opts.url);
+                    xhr.onload = function() {
+                        if (this.status >= 200 && this.status < 300) {
+                            resolve(xhr.response);
+                        } else {
+                            reject({
+                                status: this.Status,
+                                statusText: xhr.statusText
+                            });
+                        }
+                    };
+                    xhr.onerror = function() {
+                        reject({
+                                status: thisStatus,
+                                statusText: xhr.statusText
+                        });                        
+                    };
+                    if (opts.headers) {
+                        Object.keys(opts.headers).forEach(function(key) {
+                            xhr.setRequestHeader(key, opts.headers[key]);
+                        });
+                    }
+                    var params = opts.params;
+                    if (params && typeof params === 'object') {
+                        params = Object.keys(params).map(function(key) {
+                            return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+                        }).join('&');
+                    }
+                    xhr.send(params);
+                });
+            };
+
+            function RegisterSLDs() {
+                // Register each SLD
+                // Then load ESRI bits after the last color is loaded.
+                constants.boundaryColors.forEach(function (boundaryColor, colorIndex) {
+                    AddLogText("registering color: " + boundaryColor);
+                    makeRequest({
+                        method: 'POST',
+                        url: applicationState.postRestUrl,
+                        params: {
+                            service: 'aoi',
+                            request: 'registersld',
+                            aoiid: applicationState.sldAoiId,
+                            sld: constants.sldTemplate.replace(constants.boundaryColorParameter, boundaryColor),
+                            boundaryColor: boundaryColor
+                        }
+                    })
+                    .then(function(response) {
+                        var responseObject = JSON.parse(response);
+                        var ro = JSON.parse(response);
+                        var sld_id = ro["sld_id"];
+                        var boundaryColor = constants.boundaryColors[colorIndex];
+                        applicationState.boundaryColorDictionary[boundaryColor] = sld_id;
+                        AddLogText('boundaryColorDictionary[' + boundaryColor + ']=' + applicationState.boundaryColorDictionary[boundaryColor]);
+                        DisplayLogText();
+                        if (constants.boundaryColors.length == Object.keys(applicationState.boundaryColorDictionary).length) {
+                            // The last color has been registered. show colors and Start ESRI bits loading
+                            applicationState.isSldDataReady = true;
+                            ShowColorSamples();
+                            StartEsriContent();
+                        }
+                    })
+                    .catch(function(err) {
+                        alert('sld registration error: ' + err.statusText);
+                        AddLogText('sld registration error: ' + err.statusText);
+                        DisplayLogText();             
+                    });                    
+                });
+            }   
+
+            function ResizeViewForAoi() {
+                // Resize the map view for the current Aoi's extent
+                var query = [
+                    '~DeclareInt(@pAoiID)~',
+                    'select @pAoiId = ' + applicationState.aoiId + ';',
+                    '~DeclareGeometry(@envelope)~',
+                    'select @envelope = AoiGeo.STEnvelope() from SDA_Get_Aoi_By_AoiId(@pAoiId);',
+                    'select @envelope.STPointN(1).STX x1, @envelope.STPointN(1).STY y1, @envelope.STPointN(3).STX x3, @envelope.STPointN(3).STY y3'
+                ].join('\n');
+
+                ExecuteSdaQuery(query, 'JSON', applicationState.ResizeCallback);
+            }
+
+            function ShowColorSamples() {
+                // Paint swatches of the boundary colors
+                // 'colorSamples'
+                var cellHtml = '<td>Colors (in order): <br/><br/></td>';
+                constants.boundaryColors.forEach(function(color) {
+                    cellHtml += '<td style="width:5px; background-color:' + color + '"><br/></td>';
+                }) ;
+                document.getElementById("colorSamples").innerHTML = cellHtml;
+            }
+
+            function StartEsriContent() {
+                if (!applicationState.esriContentLoadingStarted) {
+                    applicationState.esriContentLoadingStarted = true;
+                }
+                require([
+                    "esri/Map",
+                    "esri/views/MapView",
+                    "esri/layers/BingMapsLayer",
+                    "esri/layers/GroupLayer",
+                    "esri/layers/MapImageLayer",
+                    "esri/layers/WMSLayer",
+                    "esri/widgets/LayerList",
+                    "esri/geometry/Extent",
+                    "esri/geometry/support/webMercatorUtils",
+                    "esri/geometry/Polygon",
+                    "esri/geometry/support/jsonUtils",
+                    "esri/geometry/Geometry"
+                ], function(
+                    Map, MapView, BingMapsLayer, GroupLayer, MapImageLayer, WMSLayer, LayerList, Extent, webMercatorUtils, Polygon, jsonUtils, Geometry
+                ) {
+                    AddLogText("starting ESRI content loading");
+                    DisplayLogText();
+
+                    var layerSoilWithSLD = new WMSLayer({
+                        url: applicationState.sdmWmsUrl,
+                        sublayers: [{
+                            name: "mapunitpoly"
+                        }],
+                        opacity: 1.0,
+                        customLayerParameters: {
+                            sld_id: applicationState.boundaryColorDictionary[constants.boundaryColors[0]]
+                        },
+                        boundaryColorIndex: 0,
+                        maxScale: 50,
+                        minScale: 500000,
+                        title: "Soils with SLD"                       
+                    });
+
+                    var layerSoilWithoutSLD = new WMSLayer({
+                        url: applicationState.sdmWmsUrl,
+                        sublayers: [{
+                            name: "mapunitpoly"
+                        }],
+                        opacity: 1.0,
+                        maxScale: 50,
+                        minScale: 500000,
+                        title: "Soils without SLD",
+                        visible: false
+                    });
+
+                    var layerAoiLabeled = new WMSLayer({
+                        url: applicationState.sdmWmsUrl,
+                        sublayers: [{
+                            name: "aoilabeled"
+                        }],
+                        customLayerParameters: {
+                            aoiid: 0
+                        },
+                        opacity: 1.0,
+                        maxScale: 50,
+                        minscale: 10000000,
+                        title: "Labeled AOI",
+                        visible: false
+                    });
+                    
+                    // Create GroupLayer with the two MapImageLayers created above
+                    // as child layers
+                    var soilsLayers = new GroupLayer({
+                        title: "National Soils",
+                        visible: true,
+                        visibilityMode: "exclusive",    // only one layer visible at a time
+                        layers: [layerSoilWithoutSLD, layerSoilWithSLD],
+                        opacity: 0.75
+                    });
+
+                    // Define a Bing basemap
+                    var bing = new BingMapsLayer({
+                        style: "hybrid",    // options: road, aerial or hybrid
+                        key: constants.bingKey
+                    });
+
+                    // Create a map and add the soils layer to it
+                    var map = new Map({
+                        basemap: {
+                           baseLayers: [bing],
+                        },
+                        layers: [soilsLayers, layerAoiLabeled]
+                    });
+
+                    // Add the map to a MapView
+
+                    var view = new MapView({
+                        center: [-98.583, 39.833],
+                        zoom: 15,
+                        container: "viewDiv",
+                        map: map
+                    });
+                    applicationState.view = view;
+
+                    applicationState.ResizeCallback = function(response, errText) {
+                        // A resize based upon a user-defined AOI was requested.
+                        // We define the callback function in this context because 
+                        // we have access to the ArcGIS API's objects in this scope.
+                        if (response) {
+                            var ro = JSON.parse(response);
+                            var x1 = parseFloat(ro['Table'][0][0], 10);
+                            var y1 = parseFloat(ro['Table'][0][1], 10);
+                            var x3 = parseFloat(ro['Table'][0][2], 10);
+                            var y3 = parseFloat(ro['Table'][0][3], 10);
+                            var xmin = x1 < x3 ? x1 : x3;
+                            var ymin = y1 < y3 ? y1 : y3;
+                            var xmax = x1 > x3 ? x1 : x3;
+                            var ymax = y1 > y3 ? y1 : y3;
+                            var aoiExtent = new Extent({
+                                xmin: xmin,
+                                xmax: xmax,
+                                ymin: ymin,
+                                ymax: ymax
+                            });
+                            var color = constants.boundaryColors[layerSoilWithSLD.boundaryColorIndex];
+                            layerSoilWithSLD.customLayerParameters = {
+                                sld_id: applicationState.boundaryColorDictionary[color],
+                                aoiid: applicationState.aoiId
+                            };
+                            view.goTo(aoiExtent);
+
+                            layerAoiLabeled.visible = true;
+                            layerAoiLabeled.customLayerParameters = {
+                                aoiid: applicationState.aoiId
+                            };
+                            layerAoiLabeled.fullExtent = aoiExtent;
+                            layerAoiLabeled.refresh();
+                            
+                            layerSoilWithSLD.fullExtent = aoiExtent;
+                            layerSoilWithSLD.refresh();
+                        } else {
+                            alert("Error getting AOI extent: " + errText);
+                        }                        
+                    };
+
+                    // Create actions in the LayerList
+                    function defineActions(event) {
+                        // The event object contains an item property.
+                        // It is a ListItem referencing the associated layer
+                        // and other properties. You can control the visibility of the 
+                        // item, its title, and actions using this object.
+
+                        var item = event.item;
+
+                        if (item.title === "Soils with SLD") {
+                            // An array of objects defining actions to place in the LayerList.
+                            // By making this array two-dimensional, you can separate similar
+                            // actions into separate groups with a breaking line.
+                            item.actionsSections = [
+                            [{
+                                    title: "Increase color",
+                                    className: "esri-icon-up",
+                                    id: "increase-color"
+                                }, {
+                                    title: "Decrease color",
+                                    className: "esri-icon-down",
+                                    id: "decrease-color"
+                                }],
+                                [{
+                                    title: "Define AOI",
+                                    className: "esri-icon-right-arrow",
+                                    id: "define-aoi"
+                                }, {
+                                    title: "Clear AOI",
+                                    className: "esri-icon-left-arrow",
+                                    id: "clear-aoi"                                    
+                                }]
+                            ];
+                        }   // end of if (item.title ===  "Soils with SLD")
+                    }   // end of function defineActions(event)
+
+                    view.when(function() {
+                        // Create the LayerList wiget with the associated actions
+                        // and add it to the top-right corner of the view
+                        var layerList = new LayerList({
+                            view: view,
+                            // executes for each item in the LayerList
+                            listItemCreatedFunction: defineActions
+                        });
+
+                        // Event listener that fires each time an action is triggered
+                        layerList.on("trigger-action", function(event) {
+                            // The layer list visible in the view at the time of the trigger
+                            var visibleLayer = layerSoilWithSLD.visible ?
+                                layerSoilWithoutSLD : layerSoilWithSLD;
+
+                            // Capture the action id.
+                            var id = event.action.id;
+
+                            if (id === "increase-color") {
+                                // if the increase-opacity action is triggered, then
+                                // increase the color up the ramp
+                                var colorIndex = layerSoilWithSLD.boundaryColorIndex;
+                                if (colorIndex <= constants.boundaryColors.length - 1) {
+                                    colorIndex++;
+                                } else {
+                                    colorIndex = 0;
+                                }
+                                var nextColor = constants.boundaryColors[colorIndex];
+                                layerSoilWithSLD.customLayerParameters.sld_id =  applicationState.boundaryColorDictionary[nextColor];
+                                layerSoilWithSLD.boundaryColorIndex = colorIndex;
+                                layerSoilWithSLD.refresh();
+                                
+                            } else if (id === "decrease-color") {
+                                // if the decrease-opacity action is triggered, then
+                                // decrease the color down the ramp
+                                var colorIndex = layerSoilWithSLD.boundaryColorIndex;
+                                if (colorIndex > 0) {
+                                    colorIndex--;
+                                } else {
+                                    colorIndex = constants.boundaryColors.length - 1;
+                                }
+                                var nextColor = constants.boundaryColors[colorIndex];
+                                layerSoilWithSLD.customLayerParameters.sld_id =  applicationState.boundaryColorDictionary[nextColor];
+                                layerSoilWithSLD.boundaryColorIndex = colorIndex;
+                                layerSoilWithSLD.refresh();
+                            } else if (id === "define-aoi") {
+                                // Define an AOI and add aoiid specifier to the layer
+                                var wkt;
+                                if (document.getElementById("aoicoords").value != '') {
+                                    // Case: we have a user-specified coordinate specification
+                                    wkt = document.getElementById("aoicoords").value;
+                                    applicationState.isUserAoi = true;
+                                } else {                              
+                                    // We'll use 75% of the linear extent of the current view
+                                    var extentClone = view.extent.clone();
+                                    var expandedExtent = extentClone.expand(0.75);
+                                    var expandedPolygon = Polygon.fromExtent(expandedExtent);
+                                    var wgs84Polygon = webMercatorUtils.webMercatorToGeographic(expandedPolygon);
+                                    wkt = 'polygon(('
+                                        + wgs84Polygon.extent.xmin + ' ' + wgs84Polygon.extent.ymin + ','
+                                        + wgs84Polygon.extent.xmax + ' ' + wgs84Polygon.extent.ymin + ','
+                                        + wgs84Polygon.extent.xmax + ' ' + wgs84Polygon.extent.ymax + ','
+                                        + wgs84Polygon.extent.xmin + ' ' + wgs84Polygon.extent.ymax + ','
+                                        + wgs84Polygon.extent.xmin + ' ' + wgs84Polygon.extent.ymin
+                                        + '))';                                       
+                                    applicationState.isUserAoi = false;
+                                }
+                                AddLogText("wkt: " + wkt);
+                                DisplayLogText();
+                                document.getElementById("aoicoords").value = wkt ;
+                                document.getElementById("currentAoiId").innerHTML = 'AoiID: (waiting)';
+                                makeRequest({
+                                    method: 'POST',
+                                    url: applicationState.postRestUrl,
+                                    params: {
+                                        service: 'aoi',
+                                        request: 'create',
+                                        AoiCoords: wkt
+                                    }
+                                })
+                                .then(function(response) {
+                                    var responseObject = JSON.parse(response);
+                                    var ro = JSON.parse(response);
+                                    var aoiId = ro.id;
+                                    applicationState.aoiId = aoiId;
+                                    var color = constants.boundaryColors[layerSoilWithSLD.boundaryColorIndex];
+                                    AddLogText('aoiId=' + applicationState.aoiId + ' with color=' + color);
+                                    DisplayLogText();
+                                    applicationState.aoiId = aoiId;
+                                    document.getElementById("currentAoiId").innerHTML = 'AoiID: ' + aoiId;
+                                    if (applicationState.isUserAoi) {
+                                        // case: this is a user specified AOI we will need to reposition the map
+                                        // after getting the AOI's extent
+                                        ResizeViewForAoi();
+                                    } else {
+                                        // case: this is a default AOI (based upon visible extent), just refresh the map
+                                        layerAoiLabeled.visible = true;
+                                        layerAoiLabeled.customLayerParameters = {
+                                            aoiid: aoiId
+                                        };
+                                        layerAoiLabeled.fullExtent = wgs84Polygon.extent;
+                                        layerAoiLabeled.refresh();
+
+                                        layerSoilWithSLD.customLayerParameters = {
+                                            sld_id: applicationState.boundaryColorDictionary[color],
+                                            aoiid: aoiId
+                                        };
+                                        layerSoilWithSLD.fullExtent = wgs84Polygon.extent;
+                                        layerSoilWithSLD.refresh();
+                                    }
+                                })
+                                .catch(function(err) {
+                                    alert('aoi creation error: ' + err.statusText);
+                                    AddLogText('aoi creation error: ' + err.statusText);
+                                    DisplayLogText();             
+                                });  
+                            } else if (id === "clear-aoi") {
+                                // Remove the aoiid specifier from the layer
+                                if (applicationState.aoiId) {
+                                    applicationState.aoiId = false;
+                                    var color = constants.boundaryColors[layerSoilWithSLD.boundaryColorIndex];
+                                    AddLogText('removing aoiId=' + applicationState.aoiId + ' with color=' + color);
+                                    DisplayLogText();
+                                    document.getElementById("aoicoords").value = '' ;
+                                    document.getElementById("currentAoiId").innerHTML = 'AoiID: (n/a)';
+                                    layerAoiLabeled.visible = false;
+                                    layerSoilWithSLD.customLayerParameters = {
+                                        sld_id:  applicationState.boundaryColorDictionary[color]
+                                    };
+                                    layerSoilWithSLD.fullExtent = layerSoilWithoutSLD.extent;
+                                    layerSoilWithSLD.refresh();
+                                }
+                            }
+                        }); // end of layerList.on("trigger-action", function(event) {
+
+                        // Add widget to top right corner of the view
+                        view.ui.add(layerList, "top-right");
+                    }); // end of view.when(function()
+
+                });  // end of require block
+
+            }   // end of StartEsriContent()
+
+            function StartSldInitialization() {
+                // Define the dummy AOI that will act as a container for 
+                // SLD registration.
+                makeRequest({
+                    method: 'POST',
+                    url: applicationState.postRestUrl,
+                    params: {
+                        query: constants.sldAoiCreationQuery,
+                        format: 'json'
+                    }
+                })
+                .then(function(response) {
+                    var responseObject = JSON.parse(response);
+                    applicationState.sldAoiId = responseObject.Table[0][0];
+                    AddLogText("sldAoiId = " +applicationState.sldAoiId );
+                    DisplayLogText();
+                    // Request SLD registration for each color,
+                    // after that the ESRI map content will be loaded.
+                    RegisterSLDs();
+                })
+                .catch(function(err) {
+                    alert('sldAoi definition error: ' + err.statusText);
+                    AddLogText('sldAoi definition error: ' + err.statusText);
+                    DisplayLogText();             
+                });
+            }   // end of StartSldInitialization()
+        </script>        
+    </head>
+    <body>
+        <textarea id="logtext" cols="100" rows="3" placeholder="...loading"></textarea>
+        <br />
+        GeoJSON or WKT:&nbsp;&nbsp;
+        <button onclick="document.getElementById('aoicoords').value='';">Clear area</button>
+        <button onclick="document.getElementById('aoicoords').value=constants.brotherSisterSample;">Insert Brother/Sister Sample</button>
+        <br />
+        <textarea id="aoicoords" cols="100" rows="3"></textarea>
+        <br />
+        <div id="currentAoiId">AoiID: (n/a)</div>
+        <br />
+        SQL Statements:&nbsp;&nbsp;
+        <button onclick="document.getElementById('sqlStatements').value=''; document.getElementById('executeSqlResultText').innerHTML='';">Clear areas</button>
+        <button onclick="document.getElementById('sqlStatements').value=constants.aoiInventorySqlSample; document.getElementById('executeSqlResultText').innerHTML='';">Load sample Inventory SQL</button>
+        <button onclick="ExecuteSdaQuery(document.getElementById('sqlStatements').value, 'JSON', ExecutionCallbackForGenericSQL)">Run (JSON output)</button> 
+        <button onclick="ExecuteSdaQuery(document.getElementById('sqlStatements').value, 'JSON+COLUMNNAME', ExecutionCallbackForGenericSQL)">Run (JSON+column names)</button> 
+        <br />(use {AoiID} to substitute the AoiID value)<br />
+        <textarea id="sqlStatements" cols="100" rows="3"></textarea>
+        <br />
+        SQL Results:
+        <br />
+        <!-- <textarea id="executeSqlResultText" cols="100" rows="5"></textarea> -->
+        <div id="executeSqlResultText"></div>
+        <br />
+        <table><tr id="colorSamples"></tr></table>
+        <br />
+        <div id="viewDiv"></div>
+    </body>
+</html>

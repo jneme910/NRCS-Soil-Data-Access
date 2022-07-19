@@ -1,0 +1,22 @@
+# cdTest01.txt: GeoJSON with feature collection with two differently-named polygons
+{
+	'type': 'FeatureCollection',
+	'features': [
+		{
+			'type': 'Feature',
+			'geometry': {
+				'type': 'Polygon',
+				'coordinates': [[[-100.0,40.0],[-100.1,40.0],[-100.1,40.1],[-100.0,40.1],[-100.0,40.0]]]
+			},
+			'properties': {'partName': 'Sister' }
+		},
+		{
+			'type': 'Feature',
+			'geometry': {
+			   'type': 'Polygon',
+			   'coordinates': [[[-100.2,39.8],[-100.3,39.8],[-100.3,39.9],[-100.2,39.9],[-100.2,39.8]]]
+			 },
+			'properties': {'partName': 'Brother' }
+		}
+	   ]
+}

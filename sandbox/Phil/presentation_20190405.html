@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Presentation</title>
+        <!-- file://D:/notes/2019/04/CD_35295/presentation_20190405.html -->
+    </head>
+    <body>
+        Preparation
+        <ol>
+            <li>Use USDA backbone, not NAG</li>
+            <li>Start Firefox (note reverse-order opening)
+                <ul>
+                    <li>(this document, file://D:/notes/2019/04/CD_35295/presentation_20190405.html in tab 1)</li>
+                    <li>
+                        <a 
+                            href="https://sdmdataaccess.sc.egov.usda.gov/test/testwms.html"
+                            target="_blank">
+                            SDA Test WMS
+                        </a>
+                    </li>  
+
+                    <li>
+                        <a 
+                            href="https://sdmdataaccess.sc.egov.usda.gov/query.aspx"
+                            target="_blank">
+                            SDA Query page
+                        </a>
+                    </li>  
+                    <li>
+                        <a 
+                            href="file://D:/notes/2019/04/CD_35295/InventorySample.sql"
+                            target="_blank">
+                            Inventory query
+                        </a>
+                    </li>
+
+                    <li>
+                        <a 
+                            href="file://D:/notes/2019/04/CD_35295/cdTest01.txt"
+                            target="_blank">
+                            Sample GeoJSON file
+                        </a>
+                    </li>                    
+                    <li>
+                        <a 
+                            href="https://clm.cert.sc.egov.usda.gov/ccm/web/projects/CD-MPT#action=com.ibm.team.workitem.viewWorkItem&id=35295"
+                            target="_blank">
+                            Task 35295: "Research: prototype soil report processing"
+                        </a>
+                    </li>                    
+                    <li>
+                        <a 
+                            href="https://clm.cert.sc.egov.usda.gov/rm/web#action=com.ibm.rdm.web.pages.showArtifact&artifactURI=https%3A%2F%2Fclm.cert.sc.egov.usda.gov%2Frm%2Fresources%2F_Yv3ewTa3EeiP5aRGCPi9Vg&vvc.configuration=https%3A%2F%2Fclm.cert.sc.egov.usda.gov%2Frm%2Fcm%2Fstream%2F_4AsygFqmEeaZrIx-1PD4WA&componentURI=https%3A%2F%2Fclm.cert.sc.egov.usda.gov%2Frm%2Frm-projects%2F_98VzoJmbEeONkakGA20ghA%2Fcomponents%2F_31ExUFqmEeaZrIx-1PD4WA" 
+                            target="_blank">
+                            RRM artifact 78863: "Primary Path 2 - Create Map Unit Summary Report (2.3)"
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>In Windows shell, relocate to after cdTest01.txt
+                <br/>d:
+                <br/>cd D:\notes\2019\04\CD_35295
+                <br/>Powershell .\StartWss.ps1 -testfile cdTest01.txt -wssurl PROD -browser firefox
+            </li>
+        </ol>
+
+        Presentation - Soils Inventory Report (all in Firefox)
+        <ul>
+            <li>Tab 2: Rational/RRM artifact 78863</li>
+            <li>Tab 3: Task 35295</li>
+            <li>Tab 4: GeoJSON sample</li>
+            <li>Tab 5: WSS with pre-defined AOI:
+                <ul>
+                    <li>Set National Mapunit Symbols</li>
+                    <li>Discussion point for later: demo assumes use of national symbols (multiple SSA, multiple states in AOI)</li>
+                    <li>Switch to Soil Map</li>
+                    <li>Note first few data rows with grouping used in WSS and data shown</li>
+                </ul>
+            </li>
+            <li>New tab 6: Soil Inventory Report demo
+                <ul>
+                    <li>
+                        <a 
+                            href="file://D:/EsriWebApi4/TestAoiInventory_05.html" 
+                            target="_blank">
+                            Load demo page
+                        </a>
+                        (relocate from #2 to just after WSS)
+                    </li>
+                    <li>Load sample GeoJSON</li>
+                    <li>Define AOI
+                        <ul>
+                            <li>Detour: use AOiID and display inventory in SDA Query page, match to WSS</li>
+                        </ul>
+                    </li>
+                    <li>Zoom in to show Sister (note state line crossing)</li>
+                    <li>Load SQL for inventory</li>
+                    <li>Run with column headers
+                        <ul>
+                            <li>Overlay inventory from SDA Query page</li>
+                        </ul>                        
+                    </li>
+                </ul>
+            </li>
+            <li>Tab 7: Inventory SQL</li>
+            <li>Tab 8: SDA Query Page</li>
+            <li>Tab 9: SDA Test WMS Page (postpone for discussion, possible approach for Map Unit Description Report)
+                <ul>
+                    <li>Steps for selecting an interpretation</li>
+                    <li>Map Unit Report would return JSON, not a map image</li>
+                </ul>
+            </li>
+        </ul>
+        Discussion suggestions
+        <ul>
+            <li>Use of national mapunit symbols</li>
+            <li>Impedance matching with CD and the RRM artifact 78863 (tab 2)</li>
+            <li>Does this satisfy the requirement for an AOI Inventory?</li>
+            <li>Possible approach for Map Unit Description report: add services similar to SDA Interpretations (see Test WMS)</li>
+        </ul>
+    </body>
+</html>

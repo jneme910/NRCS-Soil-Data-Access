@@ -1,14 +1,14 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title>ex3 - load select list</title>
+	<title>Test2 - report 2</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 </head>
 <body>
-	<p>Soil Data Access (SDA) example #3</P
+	<p>Soil Data Access (SDA) Test2 - report 2</P
 	<p>
-	An SDA-populated select list is used to pick a state, SSA and map unit.
-	Select mapunit and aggregated data values are displayed for the mapunit.
+	An SDA-populated select list is used to pick a state and SSA 
+	which enables creation of "report 2" based upon those selections.
 	</p>
 	
 	<!-- The following "div" tag will be updated with the retrieved data
@@ -25,17 +25,7 @@
 	
 	<div id="selectedSSAId"><p>(no SSA selected)</p></div>
 	
-
-
 	<div id="id1"></div>
-	
-	<p>Notes:</p>
-	<ul>
-	<li>When the page is loaded the State selection option set is loaded from SDA.</li>
-	<li>At first selection the "(select a state)" option is removed.</li>
-	<li>The selection also triggers a second SDA query for the SSAs for that state.</li>
-	<li>The mapunit selection is similar, the mapunit selection presents a table.</li>
-	</ul>
 	<script>
 		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
 		var stateId = "";
@@ -96,47 +86,86 @@
 		}
 		
 		function ChangeSelectedSSA(event) {
-			// Update the selected state text area and then fetch mapunit records
+			// Update the selected SSA text area and then fetch and display report 2 results
 			var ssaId = event.target.value;
 			var notification = $("#selectedSSAId");
 			notification[0].innerHTML = "<p>selected SSA areasymbol = " + ssaId + "</p>";
 			
-			var query = "SELECT  LEFT((areasymbol), 2) as State_sym,  l.areasymbol as Area_Symbol,  l.areaname as Area_Name,  mu.mukey,  mu.musym as Mapunit_Symbol,  mu.muname as Mapunit_Name,  case when localphase is null then compname else compname + ', ' + localphase end as Component_Name_and_phase,  comppct_r/1 as Component_Representative_Percentage,  majcompflag,  ((muacres*comppct_r)/100) as Component_Acres,  (SELECT TOP 1 cogeomordesc.geomfname FROM cogeomordesc WHERE c.cokey = cogeomordesc.cokey AND cogeomordesc.rvindicator='yes' and cogeomordesc.geomftname = 'Landform')  as Component_Landform,  hydricrating as Hydric_Rating, SUBSTRING(  (  SELECT ( ', ' + hydriccriterion) FROM cohydriccriteria WHERE c.cokey = cohydriccriteria.cokey ORDER BY hydriccriterion ASC FOR XML PATH('') ), 3, 1000) as restrictions 						FROM legend l 						INNER JOIN mapunit mu ON mu.lkey = l.lkey 						INNER JOIN  muaggatt mg on mu.mukey=mg.mukey 						INNER JOIN component c ON mu.mukey=c.mukey  AND (hydricrating like 'yes') 						 AND  l.areasymbol = " + ssaId  + ";";
+			var query = 		
+" SELECT areasymbol, musym, muname, mu.mukey/1  AS mukey,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey) AS comp_count,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes') AS count_maj_comp,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating = 'Yes' ) AS all_hydric,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes' AND hydricrating = 'Yes') AS maj_hydric,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag = 'Yes' AND hydricrating != 'Yes') AS maj_not_hydric,"
++ "   (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND majcompflag != 'Yes' AND hydricrating  = 'Yes' ) AS hydric_inclusions,"
++ " (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating  != 'Yes') AS all_not_hydric, "
++ "   (SELECT TOP 1 COUNT_BIG(*)"
++ " FROM mapunit"
++ " INNER JOIN component ON component.mukey=mapunit.mukey AND mapunit.mukey = mu.mukey"
++ " AND hydricrating  IS NULL ) AS hydric_null "
++ "  INTO #main_query"
++ " FROM legend  AS l"
++ " INNER JOIN  mapunit AS mu ON mu.lkey = l.lkey AND  l.areasymbol LIKE '" + ssaId + "'"
++ " "
++ " SELECT  areasymbol, musym, muname, mukey,"
++ " CASE WHEN comp_count = all_not_hydric + hydric_null THEN  'Nonhydric' "
++ " WHEN comp_count = all_hydric  THEN 'Hydric' "
++ " WHEN comp_count != all_hydric AND count_maj_comp = maj_hydric THEN 'Predominantly Hydric' "
++ " WHEN hydric_inclusions >= 0.5 AND  maj_hydric < 0.5 THEN  'Predominantly Nonydric' "
++ " WHEN maj_not_hydric >= 0.5  AND  maj_hydric >= 0.5 THEN 'Partially Hydric' ELSE 'Error' END AS hydric_rating"
++ " FROM #main_query"
 			
-				
 			var data = {
 				query: query,
 				format: "json+columnname"
 			}
 			
 			$.post(url, data, function( callbackData ) {
-				// the success callback function: when executed add content to table
-					$('#id1')[0].innerHTML = "";
-					var tableHtml = '<table border="1">';
-					// for each row...
-					var iRow = 0;
-					while (iRow < callbackData.Table.length) {
-						var row = callbackData.Table[iRow];
-						tableHtml += "<tr>";
-						// for each column in each row...
-						var iCol = 0;
-						while (iCol < row.length) {
-							tableHtml += "<td>" + row[iCol] + "</td>";
-							iCol++;
-						};
-						tableHtml += "</tr>";				
-						iRow++;
-					};
-					tableHtml += '</table>'
-					$('#id1').append(tableHtml);
+					drawTable("id1", callbackData.Table);;
 				}, 
-				// Specify that we want the request to be sent in JSON format
 				"json");			
-			
-				
 		}
 		
-		
+		function drawTable(id, table) {
+			var tableHtml = '<table border="1">';
+			// for each row...
+			var iRow = 0;
+			while (iRow < table.length) {
+				var row = table[iRow];
+				tableHtml += "<tr>";
+				// for each column in each row...
+				var iCol = 0;
+				while (iCol < row.length) {
+					tableHtml += "<td>" + row[iCol] + "</td>";
+					iCol++;
+				};
+				tableHtml += "</tr>";				                                                                                   
+				iRow++;
+			};
+			tableHtml += '</table>'
+			$("#" + id).append(tableHtml);		
+		}
 	</script>
 </body>
 </html>

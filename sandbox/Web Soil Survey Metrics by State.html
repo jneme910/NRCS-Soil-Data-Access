@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<title>Potential Baseball Infield Soil Source</title>
+<!-- Start Map -->
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<!-- End Map -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+	<!--subtable -->
+	<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-ul38{text-align:left;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-rz9m{text-align:center;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+.tg-sort-header::-moz-selection{background:0 0}.tg-sort-header::selection{background:0 0}.tg-sort-header{cursor:pointer}.tg-sort-header:after{content:'';
+
+float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-color:#404040 transparent;visibility:hidden}.tg-sort-header:hover:after{visibility:visible}.tg-sort-asc:after,.tg-sort-asc:hover:after,
+.tg-sort-desc:after{visibility:visible;opacity:.4}.tg-sort-desc:after{border-bottom:none;border-width:5px 5px 0}@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}
+.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
+
+<!--subtable -->
+	
+
+
+	
+	<style type="text/css">
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .scrolltable > .header {
+        }
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+	
+
+</head>
+<body>
+<b>
+		<font color='red'>
+<h3>Web Soil Survey Metrics Report by a State</h3>
+		</font>
+	</b>
+
+	<p>
+	An SDA-populated select list is used to pick a state which enables creation of a "Web Soil Survey Metrics Report by State" based upon those selections. The report aggregates the montly counts by year.  
+	<br>
+	<a href='#reportref'> For more information about the table, </a>
+	</p>
+	<a name='top'>
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<div id="id1"></div>
+		<br></br>
+	<b>
+		<font color='red'>
+			<a name='reportref'>Report Metadata:</a>
+		</font>
+	</b>
+	<php>
+		<a href='#top'>Back to top</a>
+	</php>
+		<ul>
+
+<li><b>query_year: </b>	The name given to the specified geographic area.</li>
+<li><b>state: </b>	Filter by two-letter state abbreviation or “xnational” for National .</li>
+<li><b>Soil Survey Area: </b>	</li>
+<li><b>AOI Definition Type: </b>	</li>
+
+<li><b>Ratings: </b>	</li>
+<li><b>Reports	: </b>	</li>
+<li><b>Size(acres): </b>	</li>
+<li><b>Downloads Requested: </b>	</li>
+<li><b>AOI: </b>	</li>
+<li><b>CONTACT_US: </b>	</li>
+<li><b>CSRR: </b>	</li>
+<li><b>DOWNLOAD_SOILS_DATA: </b>	</li>
+<li><b>PRINTABLE_VERSION: </b>	</li>
+<li><b>SEARCH: </b>	</li>
+<li><b>SESSION_REFUSED: </b>	</li>
+<li><b>SESSION_START: </b>	</li>
+<li><b>SOIL_RATING: </b>	</li>
+<li><b>SOIL_REPORT: </b>	</li>
+<li><b>SUBSCRIBE: </b>	</li>
+<li><b>USE_CATEGORY: </b>	</li>
+
+		</ul>
+
+	<b>
+		<font color='red'>
+			<a name='reportref'>Report Description:</a>
+		</font>
+	</b>
+
+<p>Description being added</p>
+
+
+
+
+	<script>
+		var url =  "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			var data = {
+				query: "SELECT [state], state AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
+				//query: "Select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
+			
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+ 
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch and display report 1 results
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			
+			var query = 
+			
+"	 CREATE TABLE #wss_metrics "
++ " (id INT,	"
++ " query_id INT, "	
++ " query_name   VARCHAR(240),"
++ " query_frequency   VARCHAR(5),	"
++ " query_month SMALLINT, 	"
++ " month_abrv VARCHAR(5), "	
++ " month_name VARCHAR(15),		"
++ " query_year INT,	 "
++ " [state] VARCHAR(50),	"	
++ " seqnum INT, 	"
++ " query_title VARCHAR(240),	"
++ " query_header VARCHAR(240),	"	
++ " wssm_yr INT, 	"
++ "  [count] INT, "
++ " m_yr INT "
+ + " )"
+
+ + " INSERT INTO #wss_metrics "
+ + "(id,	"
+ + " query_id,"	
+ + "query_name, "
+ + "query_frequency,	"
+ + "query_month,	"
+ + "month_abrv,	"
+ + "month_name,	"
+ + "query_year,	"
+ + "[state],	"
+ + "seqnum,	"
+ + "query_title,	"
+ + "query_header,	"
+ + "wssm_yr,	"
+ + "[count],"
++ " m_yr"
+ + " )"
+ + "SELECT [id]"
+     + " ,[query_id]"
+      + ",[query_name]"
+     + " ,[query_frequency]"
+	  
+	      + "  ,[query_month]"
+        + " ,CASE "
+         + " WHEN [query_month] = 1 THEN 'Jan' "
+         + " WHEN [query_month] = 2 THEN 'Feb' "
+         + " WHEN [query_month] = 3 THEN 'Mar' "
+         + " WHEN [query_month] = 4 THEN 'Apr' "
+         + " WHEN [query_month] = 5 THEN 'May' "
+         + " WHEN [query_month] = 6 THEN 'Jun' "
+         + " WHEN [query_month] = 7 THEN 'Jul' "
+         + " WHEN [query_month] = 8 THEN 'Aug' "
+         + " WHEN [query_month] = 9 THEN 'Sep' "
+         + " WHEN [query_month] = 10 THEN 'Oct' "
+         + " WHEN [query_month] = 11 THEN 'Nov' "
+         + " WHEN [query_month] = 12 THEN 'Dec' "
+         + " ELSE 'OTHER' "
+      + " END AS [month_abrv] "
+        + "  ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name "
+      + ",[query_year] "
+      + ",[STATE] "
+      + ",[seqnum] "
+     + " ,CASE WHEN [query_title] = 'Activity Type' THEN  [query_header] ELSE [query_title] END AS query_title"
+      + ",[query_header]"
+	  + ", CONCAT ([query_month], [query_year]) AS wssm_yr"
+      + ",[COUNT] "
++ ", CONCAT ([query_month], [query_year]) AS m_yr"
+	
+
+ + " FROM [wss_metric_query_results]  WHERE "
++ "[query_frequency] = 'M'"
+ + " AND [STATE]  = '"  + stateId + "'"
+ + " AND CASE WHEN   [query_title]=  'Soil Survey Area'THEN 1  "
+ + " WHEN  [query_title] ='AOI Definition Type'THEN 1  "
+ + " WHEN  [query_title] ='Activity Type'THEN 1  "
+ + " WHEN  [query_title] ='Ratings'THEN 1  "
+ + " WHEN  [query_title] ='Reports'THEN 1  "
+ + " WHEN  [query_title] ='Downloads Requested'THEN 1  "
+ + " WHEN  [query_title] ='Size(acres)'  THEN 1 "
+ + " ELSE 2 END = 1 "
+
+
+      + "      SELECT "
+       + "         [query_year] AS [Query Year],"
+            + "        [State],"
+				+ "	FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],"
++ "FORMAT([AOI Definition Type], '#,#') AS [AOI Definition Type] , "
++ "FORMAT([Ratings], '#,#') AS [Ratings], "
++ "FORMAT([Reports], '#,#') AS [Reports], "
++ "FORMAT([Size(acres)], '#,#') AS [Size(acres)], "
++ "FORMAT([Downloads Requested], '#,#') AS [Downloads Requested] ,"
++ "FORMAT([AOI], '#,#') AS [AOI],"
++ "FORMAT([CONTACT_US], '#,#') AS [CONTACT_US],"
++ "FORMAT([CSRR], '#,#') AS [CSRR],"
++ "FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [DOWNLOAD_SOILS_DATA],"
++ "FORMAT([PRINTABLE_VERSION], '#,#') AS [PRINTABLE_VERSION],"
++ "FORMAT([SEARCH], '#,#') AS [SEARCH],"
++ "FORMAT([SESSION_REFUSED], '#,#') AS [SESSION_REFUSED],"
++ "FORMAT([SESSION_START], '#,#') AS [SESSION_START],"
++ "FORMAT([SOIL_RATING], '#,#') AS [SOIL_RATING],"
++ "FORMAT([SOIL_REPORT], '#,#') AS [SOIL_REPORT],"
++ "FORMAT([SUBSCRIBE], '#,#') AS [SUBSCRIBE],"
++ "FORMAT([USE_CATEGORY], '#,#') AS [USE_CATEGORY]"
+
+
+
+       + "     FROM "
+          + "      ( "
+                  + "  SELECT "
+				+ "	[query_year], "
+                 + "   [state], "
+				+ "	[count], "
+               + "     [query_title] "
+               + "     FROM "
+                       + " #wss_metrics "
+                      
+              + "  ) #w "
+            + "PIVOT "
+              + "  ( "
+               + "     SUM(count) "
+                 + "   FOR query_title IN ( "
+                        + " [Soil Survey Area], "
++ "[AOI Definition Type], "
++ "[Activity Type], "
++ "[Ratings], "
++ "[Reports], "
++ "[Downloads Requested], "
++ "[Size(acres)], "
++ "[AOI],"
++ "[CONTACT_US],"
++ "[CSRR],"
++ "[DOWNLOAD_SOILS_DATA],"
++ "[PRINTABLE_VERSION],"
++ "[SEARCH],"
++ "[SESSION_REFUSED],"
++ "[SESSION_START],"
++ "[SOIL_RATING],"
++ "[SOIL_REPORT],"
++ "[SUBSCRIBE],"
++ "[USE_CATEGORY]"
+                 + "                   ) "
+              + "  ) AS #yr_sum ORDER BY query_year ASC; "
+			
+			
+			
+
+
+;
+					
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			//+ " AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .40 ) "
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1">';
+					// for each row...
+					                var iRow = 0;
+                while (iRow < callbackData.Table.length) {
+                                var row = callbackData.Table[iRow];
+                                tableHtml += "<tr>";
+                                // for each column in each row...
+                                var iCol = 0;
+                                while (iCol < row.length) {
+                                                if (iRow == 0) {
+                                                                tableHtml += "<th>" + row[iCol] + "</th>";
+                                                } else {
+                                                                tableHtml += "<td>" + row[iCol] + "</td>";
+                                                }
+                                                iCol++;
+                                };
+                                tableHtml += "</tr>";                                  
+                                iRow++;
+                };
+
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+	</script>
+	
+
+</body>
+</html>
