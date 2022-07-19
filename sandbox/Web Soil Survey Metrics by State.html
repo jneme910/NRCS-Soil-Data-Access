@@ -135,25 +135,24 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 
 <li><b>query_year: </b>	The name given to the specified geographic area.</li>
 <li><b>state: </b>	Filter by two-letter state abbreviation or “xnational” for National .</li>
-<li><b>Soil Survey Area: </b>	</li>
+<li><b>Soil Survey Area: Web Soil Survey - Usage Of Ratings</b>	</li>
 <li><b>AOI Definition Type: </b>	</li>
 
-<li><b>Ratings: </b>	</li>
-<li><b>Reports	: </b>	</li>
-<li><b>Size(acres): </b>	</li>
+<li><b>Ratings: </b>Usage of Ratings</li>
+<li><b>Reports: Usage Of Soil Reports</b>	</li>
+<li><b>Size(acres): </b>Number of AOI Size Range Counts	</li>
 <li><b>Downloads Requested: </b>	</li>
-<li><b>AOI: </b>	</li>
-<li><b>CONTACT_US: </b>	</li>
+<li><b>AOI: Numbers AOIs Created By Soil Survey Area</b></li>
+<li><b>Contact US: </b>	</li>
 <li><b>CSRR: </b>	</li>
-<li><b>DOWNLOAD_SOILS_DATA: </b>	</li>
-<li><b>PRINTABLE_VERSION: </b>	</li>
-<li><b>SEARCH: </b>	</li>
-<li><b>SESSION_REFUSED: </b>	</li>
-<li><b>SESSION_START: </b>	</li>
-<li><b>SOIL_RATING: </b>	</li>
-<li><b>SOIL_REPORT: </b>	</li>
-<li><b>SUBSCRIBE: </b>	</li>
-<li><b>USE_CATEGORY: </b>	</li>
+<li><b>Download Soils Data: </b>	</li>
+<li><b>Printable Version: </b>Usage of Printable Output</li>
+<li><b>Search: </b>	</li>
+<li><b>Session Refused: </b>	</li>
+<li><b>Session Start: </b>	</li>
+
+<li><b>Subscribe: </b>Numbers of subscribed	</li>
+<li><b>Use Catagory: </b>	</li>
 
 		</ul>
 
@@ -175,7 +174,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 		$(document).ready(function(){
 			// Start by retrieving a state list
 			var data = {
-				query: "SELECT [state], state AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
+				query: "SELECT [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
 				//query: "Select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
 			
 				format: "json"
@@ -266,7 +265,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
       + " END AS [month_abrv] "
         + "  ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name "
       + ",[query_year] "
-      + ",[STATE] "
+      + ",CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS  [STATE]"
       + ",[seqnum] "
      + " ,CASE WHEN [query_title] = 'Activity Type' THEN  [query_header] ELSE [query_title] END AS query_title"
       + ",[query_header]"
@@ -277,7 +276,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 
  + " FROM [wss_metric_query_results]  WHERE "
 + "[query_frequency] = 'M'"
- + " AND [STATE]  = '"  + stateId + "'"
+ + " AND CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END = '"  + stateId + "'"
  + " AND CASE WHEN   [query_title]=  'Soil Survey Area'THEN 1  "
  + " WHEN  [query_title] ='AOI Definition Type'THEN 1  "
  + " WHEN  [query_title] ='Activity Type'THEN 1  "
@@ -298,17 +297,17 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 + "FORMAT([Size(acres)], '#,#') AS [Size(acres)], "
 + "FORMAT([Downloads Requested], '#,#') AS [Downloads Requested] ,"
 + "FORMAT([AOI], '#,#') AS [AOI],"
-+ "FORMAT([CONTACT_US], '#,#') AS [CONTACT_US],"
++ "FORMAT([CONTACT_US], '#,#') AS [Contact US],"
 + "FORMAT([CSRR], '#,#') AS [CSRR],"
-+ "FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [DOWNLOAD_SOILS_DATA],"
-+ "FORMAT([PRINTABLE_VERSION], '#,#') AS [PRINTABLE_VERSION],"
-+ "FORMAT([SEARCH], '#,#') AS [SEARCH],"
-+ "FORMAT([SESSION_REFUSED], '#,#') AS [SESSION_REFUSED],"
-+ "FORMAT([SESSION_START], '#,#') AS [SESSION_START],"
-+ "FORMAT([SOIL_RATING], '#,#') AS [SOIL_RATING],"
-+ "FORMAT([SOIL_REPORT], '#,#') AS [SOIL_REPORT],"
-+ "FORMAT([SUBSCRIBE], '#,#') AS [SUBSCRIBE],"
-+ "FORMAT([USE_CATEGORY], '#,#') AS [USE_CATEGORY]"
++ "FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [Download Soils Data],"
++ "FORMAT([PRINTABLE_VERSION], '#,#') AS [Printable Version],"
++ "FORMAT([SEARCH], '#,#') AS [Search],"
++ "FORMAT([SESSION_REFUSED], '#,#') AS [Session Refused],"
++ "FORMAT([SESSION_START], '#,#') AS [Session Start],"
++ "FORMAT([SOIL_RATING], '#,#') AS [Soil Rating],"
++ "FORMAT([SOIL_REPORT], '#,#') AS [Soil Report],"
++ "FORMAT([SUBSCRIBE], '#,#') AS [Subscribe],"
++ "FORMAT([USE_CATEGORY], '#,#') AS [Use Catagory]"
 
 
 
