@@ -26,12 +26,13 @@ M
 
 
 DECLARE @state VARCHAR(15);
-SELECT @state = 'xnational'; -- Enter xnational for national or state abbrev
+
 /* List options for State
 For National use xnational otherwise state abbrev
 */
 
 --~DeclareChar(@state,15)~ 
+SELECT @state = 'WI'; -- Enter xnational for national or state abbrev
  CREATE TABLE #wss_metrics
  (id INT,	
  query_id INT,	
@@ -92,7 +93,7 @@ For National use xnational otherwise state abbrev
       ,[query_year]
       ,[STATE]
       ,[seqnum]
-      ,[query_title]
+      ,CASE WHEN [query_title] = 'Activity Type' THEN  [query_header] ELSE [query_title] END AS query_title
       ,[query_header]
 	  , CONCAT ([query_month], [query_year]) AS wssm_yr
       ,[COUNT]
@@ -117,18 +118,32 @@ For National use xnational otherwise state abbrev
                     [state],
 					FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],
 FORMAT([AOI Definition Type], '#,#') AS [AOI Definition Type] ,
-FORMAT([Activity Type], '#,#') AS [Activity Type] ,
 FORMAT([Ratings], '#,#') AS [Ratings],
 FORMAT([Reports], '#,#') AS [Reports],
+
+FORMAT([Size(acres)], '#,#') AS [Size(acres)],
 FORMAT([Downloads Requested], '#,#') AS [Downloads Requested] ,
-FORMAT([Size(acres)], '#,#') AS [Size(acres)]
+FORMAT([AOI], '#,#') AS [AOI],
+FORMAT([CONTACT_US], '#,#') AS [CONTACT_US],
+FORMAT([CSRR], '#,#') AS [CSRR],
+FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [DOWNLOAD_SOILS_DATA],
+FORMAT([PRINTABLE_VERSION], '#,#') AS [PRINTABLE_VERSION],
+FORMAT([SEARCH], '#,#') AS [SEARCH],
+FORMAT([SESSION_REFUSED], '#,#') AS [SESSION_REFUSED],
+FORMAT([SESSION_START], '#,#') AS [SESSION_START],
+FORMAT([SOIL_RATING], '#,#') AS [SOIL_RATING],
+FORMAT([SOIL_REPORT], '#,#') AS [SOIL_REPORT],
+FORMAT([SUBSCRIBE], '#,#') AS [SUBSCRIBE],
+FORMAT([USE_CATEGORY], '#,#') AS [USE_CATEGORY]
+
             FROM
                 (
                     SELECT
 					[query_year],
                     [state],
 					[count],
-                    [query_title] 
+                    [query_title]
+
                     FROM
                         #wss_metrics
                       
@@ -143,7 +158,19 @@ FORMAT([Size(acres)], '#,#') AS [Size(acres)]
 [Ratings],
 [Reports],
 [Downloads Requested],
-[Size(acres)]
+[Size(acres)],
+[AOI],
+[CONTACT_US],
+[CSRR],
+[DOWNLOAD_SOILS_DATA],
+[PRINTABLE_VERSION],
+[SEARCH],
+[SESSION_REFUSED],
+[SESSION_START],
+[SOIL_RATING],
+[SOIL_REPORT],
+[SUBSCRIBE],
+[USE_CATEGORY]
                                     )
                 ) AS #yr_sum ORDER BY query_year ASC;
 
