@@ -175,7 +175,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 		$(document).ready(function(){
 			// Start by retrieving a state list
 			var data = {
-				query: "SELECT [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
+				query: "SELECT CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
 				//query: "Select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
 			
 				format: "json"
