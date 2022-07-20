@@ -32,6 +32,8 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 
 	
 	<style type="text/css">
+	<!-- -->
+	ul.space_list li { margin-bottom: .2em; }
         .scrolltable {
             overflow-x: scroll;
             height: 100%;
@@ -131,9 +133,9 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 	<php>
 		<a href='#top'>Back to top</a>
 	</php>
-		<ul>
+		<ul  class=space_list> <!-- class=space_list -->
 
-<li><b>Query Year: </b>	Using a monthly count to sum/aggregate by year</li>
+<li ><b>Query Year: </b>	Using a monthly count to sum/aggregate by year</li>
 <li><b>State: </b>	Filter by two-letter state abbreviation or National .</li>
 <li><b>AOI Definition Type:  </b>Number of Soil Survey Area, User Coordinates, User Rectangle, User Shape file, User URL created.</li>
 <li><b>Soil Survey Area: </b>Total numbers of usage within a Soil Survey Area</li>
@@ -152,6 +154,14 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 <li><b>Subscribe: </b>User clicked the "Subscribe" menu button (there's no separate indication whether the user actually subscribed to anything)	</li>
 <li><b>Use Catagory: </b>In the Soil Data Explorer page, the user changed the "View Soil Information by Use" selection.	</li>
 
+<li><b> &#60;25: </b> If a user created an area of interest the count of users who selected an area of &#60;25 acres     </li>
+<li><b> 25-100:   </b> If a user created an area of interest the count of users who selected an area of &#62;25 and &#60;= 100 acres      </li>
+<li><b> 100-1k:  </b> If a user created an area of interest the count of users who selected an area of &#62;100 and &#60;= 1,000 acres        </li>
+<li><b> 1k-5k:  </b>   If a user created an area of interest the count of users who selected an area of &#62;1,000 and &#60;= 5,000 acres     </li>
+<li><b> 5k-10k:  </b> If a user created an area of interest the count of users who selected an area of &#62;5,000 and &#60;= 10,000 acres       </li>
+<li><b>	5k-10k:   </b> If a user created an area of interest the count of users who selected an area of &#62;10,000 and &#60;= 100,000 acres       </li>
+<li><b> 100k-1M:  </b> If a user created an area of interest the count of users who selected an area of &#62;100,000 and &#60;= 1,000,000 acres       </li>
+<li><b> &#62;1M:</b> If a user created an area of interest the count of users who selected an area of &#62; 1,000,000 acres     </li>
 		</ul>
 
 	<b>
@@ -265,7 +275,10 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
       + ",[query_year] "
       + ",CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS  [STATE]"
       + ",[seqnum] "
-     + " ,CASE WHEN [query_title] = 'Activity Type' THEN  [query_header] ELSE [query_title] END AS query_title"
+     + " ,CASE WHEN [query_title] = 'Activity Type' THEN  [query_header] "
+	 + " WHEN [query_title] =  'Size(acres)' THEN [query_header] "
+	  + "ELSE [query_title] END AS query_title"
+	 
       + ",[query_header]"
 	  + ", CONCAT ([query_month], [query_year]) AS wssm_yr"
       + ",[COUNT] "
@@ -306,7 +319,15 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 + "FORMAT([SOIL_RATING], '#,#') AS [Soil Rating],"
 + "FORMAT([SOIL_REPORT], '#,#') AS [Soil Report],"
 + "FORMAT([SUBSCRIBE], '#,#') AS [Subscribe],"
-+ "FORMAT([USE_CATEGORY], '#,#') AS [Use Catagory]"
++ "FORMAT([USE_CATEGORY], '#,#') AS [Use Catagory],"
++ "FORMAT([1: < 25], '#,#') AS [<25],"
++ "FORMAT([2: > 25 and <= 100], '#,#') AS [25-100],"
++ "FORMAT([3: > 100 and <= 1,000], '#,#') AS [100-1k],"
++ "FORMAT([4: > 1,000 and <= 5,000], '#,#') AS [1k-5k],"
++ "FORMAT([5: > 5,000 and <= 10,000], '#,#') AS [5k-10k],"
++ "FORMAT([6: > 10,000 and <= 100,000], '#,#') AS [5k-10k],"
++ "FORMAT([7: > 100,000 and <= 1,000,000], '#,#') AS[100k-1M],"
++ "FORMAT([8: > 1,000,000], '#,#')  AS [>1M]"
 
 
 
@@ -343,7 +364,15 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 + "[SOIL_RATING],"
 + "[SOIL_REPORT],"
 + "[SUBSCRIBE],"
-+ "[USE_CATEGORY]"
++ "[USE_CATEGORY],"
++ "[1: < 25],"
++ "[2: > 25 and <= 100],"
++ "[3: > 100 and <= 1,000],"
++ "[4: > 1,000 and <= 5,000],"
++ "[5: > 5,000 and <= 10,000],"
++ "[6: > 10,000 and <= 100,000],"
++ "[7: > 100,000 and <= 1,000,000],"
++ "[8: > 1,000,000]"
                  + "                   ) "
               + "  ) AS #yr_sum ORDER BY query_year ASC; "
 			
