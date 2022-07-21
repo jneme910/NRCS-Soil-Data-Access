@@ -1,18 +1,15 @@
-
-
 <!DOCTYPE HTML>
 <html>
 <head>
  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
-	<title>Web Soil Survey Metrics Report by a State</title>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+    <title>Web Soil Survey Metrics Report by a State</title>
 <!-- Start Map -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- End Map -->
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-	<!--subtable -->
-	<style type="text/css">
+    <!--subtable -->
+    <style type="text/css">
 .tg  {border-collapse:collapse;border-spacing:0}
 .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
 .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
@@ -21,19 +18,13 @@
 .tg .tg-rz9m{text-align:center;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
 .tg .tg-0lax{text-align:left;vertical-align:top}
 .tg-sort-header::-moz-selection{background:0 0}.tg-sort-header::selection{background:0 0}.tg-sort-header{cursor:pointer}.tg-sort-header:after{content:'';
-
 float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-color:#404040 transparent;visibility:hidden}.tg-sort-header:hover:after{visibility:visible}.tg-sort-asc:after,.tg-sort-asc:hover:after,
 .tg-sort-desc:after{visibility:visible;opacity:.4}.tg-sort-desc:after{border-bottom:none;border-width:5px 5px 0}@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}
 .tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
-
 <!--subtable -->
-	
-
-	
-	<style type="text/css">
-	<!-- -->
-	
-	ul.space_list li { margin-bottom: .2em; }
+    <style type="text/css">
+    <!-- -->
+    ul.space_list li { margin-bottom: .2em; }
         .scrolltable {
             overflow-x: scroll;
             height: 100%;
@@ -53,8 +44,8 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
         }
         th, td {
             min-width: 25px;
-			border-width: 1px;
-			padding: 2px;
+            border-width: 1px;
+            padding: 2px;
         }
         /* an outside constraint to react against */
         #constrainer {
@@ -100,155 +91,137 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
             background-color: #eee;
         }
     </style>
-	
-
 </head>
 <body>
 <b>
-		<font color='red'>
+        <font color='red'>
 <h3>Web Soil Survey Metrics Report by a State</h3>
-		</font>
-	</b>
-
-	<p>
-	An SDA-populated select list is used to pick a state which enables creation of a "Web Soil Survey Metrics Report by State" based upon those selections. The report aggregates the montly counts by year.  
-	<br>
-	<a href='#reportref'> For more information about the table, </a>
-	</p>
-	<a name='top'>
-	
-	<!-- The following "div" tag will be updated with the retrieved data
-		After the first selection the "(select a state)" will disappear -->
-	<select id="selectId1" onchange="ChangeSelectedState(event)">
-		<option value='' style="display: none" id="remove">(select a state)</option>
-	</select>
-	
-	<div id="selectedStateId"><p>(no state selected)</p></div>
-	
-	<div id="id1"></div>
-		<br></br>
-	<b>
-		<font color='red'>
-			<a name='reportref'>Report Metadata:</a>
-		</font>
-	</b>
-	<php>
-		<a href='#top'>Back to top</a>
-	</php>
-		<ul  class=space_list> <!-- class=space_list -->
-
-<li ><b>Query Year: </b>	Using a monthly count to sum/aggregate by year</li>
-<li><b>State: </b>	Filter by two-letter state abbreviation or National .</li>
+        </font>
+    </b>
+    <p>
+    An SDA-populated select list is used to pick a state which enables creation of a "Web Soil Survey Metrics Report by State" based upon those selections. The report aggregates the montly counts by year.  
+    <br>
+    <a href='#reportref'> For more information about the table, </a>
+    </p>
+    <a name='top'>
+    <!-- The following "div" tag will be updated with the retrieved data
+        After the first selection the "(select a state)" will disappear -->
+    <select id="selectId1" onchange="ChangeSelectedState(event)">
+        <option value='' style="display: none" id="remove">(select a state)</option>
+    </select>
+    <div id="selectedStateId"><p>(no state selected)</p></div>
+    <div id="id1"></div>
+        <br></br>
+        <div id="main" style="width: 600px;height:400px;"></div>
+    <b>
+        <font color='red'>
+            <a name='reportref'>Report Metadata:</a>
+        </font>
+    </b>
+    <php>
+        <a href='#top'>Back to top</a>
+    </php>
+        <ul  class=space_list> <!-- class=space_list -->
+<li ><b>Query Year: </b>    Using a monthly count to sum/aggregate by year</li>
+<li><b>State: </b>  Filter by two-letter state abbreviation or National .</li>
 <li><b>AOI Definition Type:  </b>Number of Soil Survey Area, User Coordinates, User Rectangle, User Shape file, User URL created.</li>
 <li><b>Soil Survey Area: </b>Total numbers of usage within a Soil Survey Area</li>
 <li><b>Ratings: </b>Soil ratings were created by customers. i.e Hydrologic Soil Group, Hydric Rating by Map Unit, Farmland Classification </li>
-<li><b>Reports: </b>Soil Reports created by customers. i.e. Engineering Properties, Physical Soil Properties, Map Unit Description (Brief, Generated)	</li>
+<li><b>Reports: </b>Soil Reports created by customers. i.e. Engineering Properties, Physical Soil Properties, Map Unit Description (Brief, Generated)   </li>
 <li><b>Downloads Requested: </b>Downloads Requested for either"AOI","SSURGO SSA","STATSGO". AOI export link created -  the link was created in the UI so the user may actually download the file or User downloaded a cached SSURGO or STATSGO file or a just-created AOI export.</li>
 <li><b>AOI:</b> Numbers AOIs Created. Areas of Interest (AOI) 100,000 acres or less can be drawn or imported as shape file. AOIs greater than 100,000 acres can be set by setting the entire soil survey area (SSA) as an AOI</li>
-<li><b>Contact US: </b> Number of customers that clicked on contact us	</li>
+<li><b>Contact US: </b> Number of customers that clicked on contact us  </li>
 <li><b>CSRR: </b>CSRR is the number of Custom Soil Resource Report created </li>
 <li><b>Download Soils Data: </b>Downloads Requested for a Users defined AOI or Soil Survey Area AOI </li>
 <li><b>Printable Version: </b>Usage of Printable Output. User clicked "Printable Version(s)"  "View" button from any of the pages Soil Map, Concepts, Suitability and Limitations, Soil Properties and Qualities, or Soil Report.</li>
 <li><b>Search: </b>Number of customers who used the search by location feature. User performed a "search"</li>
 <li><b>Session Refused: </b>New session could not be created - there are too many sessions already active.</li>
-<li><b>Session Start: </b>Number of customers who started a web soil survey session. Customers may have been visiting the site to download data for an entire SSA. This does not require setting an AOI first so session starts are higher than the number of AOIs set. Customers may also have been looking at the soil map or reading information available on the WSS web page which would account for more session starts than AOIs set. 	</li>
-
-<li><b>Subscribe: </b>User clicked the "Subscribe" menu button (there's no separate indication whether the user actually subscribed to anything)	</li>
-<li><b>Use Catagory: </b>In the Soil Data Explorer page, the user changed the "View Soil Information by Use" selection.	</li>
-
+<li><b>Session Start: </b>Number of customers who started a web soil survey session. Customers may have been visiting the site to download data for an entire SSA. This does not require setting an AOI first so session starts are higher than the number of AOIs set. Customers may also have been looking at the soil map or reading information available on the WSS web page which would account for more session starts than AOIs set.    </li>
+<li><b>Subscribe: </b>User clicked the "Subscribe" menu button (there's no separate indication whether the user actually subscribed to anything)    </li>
+<li><b>Use Catagory: </b>In the Soil Data Explorer page, the user changed the "View Soil Information by Use" selection. </li>
 <li><b> &#60;25: </b> If a user created an area of interest the count of users who selected an area of &#60;25 acres     </li>
 <li><b> 25-100:   </b> If a user created an area of interest the count of users who selected an area of &#62;25 and &#60;= 100 acres      </li>
 <li><b> 100-1k:  </b> If a user created an area of interest the count of users who selected an area of &#62;100 and &#60;= 1,000 acres        </li>
 <li><b> 1k-5k:  </b>   If a user created an area of interest the count of users who selected an area of &#62;1,000 and &#60;= 5,000 acres     </li>
 <li><b> 5k-10k:  </b> If a user created an area of interest the count of users who selected an area of &#62;5,000 and &#60;= 10,000 acres       </li>
-<li><b>	5k-10k:   </b> If a user created an area of interest the count of users who selected an area of &#62;10,000 and &#60;= 100,000 acres       </li>
+<li><b> 5k-10k:   </b> If a user created an area of interest the count of users who selected an area of &#62;10,000 and &#60;= 100,000 acres       </li>
 <li><b> 100k-1M:  </b> If a user created an area of interest the count of users who selected an area of &#62;100,000 and &#60;= 1,000,000 acres       </li>
 <li><b> &#62;1M:</b> If a user created an area of interest the count of users who selected an area of &#62; 1,000,000 acres     </li>
-		</ul>
-
-	<b>
-		<font color='red'>
-			<a name='reportref'>Report Description:</a>
-		</font>
-	</b>
-
+        </ul>
+    <b>
+        <font color='red'>
+            <a name='reportref'>Report Description:</a>
+        </font>
+    </b>
 <p>Description being added</p>
-
-
-
-
-	<script>
-		var url =  "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
-		var stateId = "";
-		// Wait for everything to be loaded before starting the first SDA request
-		$(document).ready(function(){
-			// Start by retrieving a state list
-			var data = {
-				query: "SELECT CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
-				//query: "Select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
-			
-				format: "json"
-			}
-			$.post(url, data, function( callbackData ) {
-					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
-				}, 
-				"json");
-		});
-		
-		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
-			// Add options to the specified select list. The content of the table[valueColumn]
-			// defines the value of the selection, the table[labelColumn] is used for the 
-			// displayed option's text.
-			var iRow = 0;
-			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
-			while (iRow < table.length) {
-				var row = table[iRow];
-				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
-				$("#" + id).append(optionHtml);
-				iRow++;
-			}
-		}
- 
-		function ChangeSelectedState(event) {
-			// Update the selected state text area and then fetch and display report 1 results
-			var stateId = event.target.value;
-			var notification = $("#selectedStateId");
-			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
-			
-			var query = 
-			
-"	 CREATE TABLE #wss_metrics "
-+ " (id INT,	"
-+ " query_id INT, "	
+    <script>
+        var tableData = []; 
+        var url =  "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+        var stateId = "";
+        // Wait for everything to be loaded before starting the first SDA request
+        $(document).ready(function(){
+            // Start by retrieving a state list
+            var data = {
+                query: "SELECT CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
+                //query: "Select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
+                format: "json"
+            }
+            $.post(url, data, function( callbackData ) {
+                console.log(callbackData, 'callbackData')
+                    loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+                }, 
+                "json");
+        });
+        function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+            // Add options to the specified select list. The content of the table[valueColumn]
+            // defines the value of the selection, the table[labelColumn] is used for the 
+            // displayed option's text.
+            var iRow = 0;
+            $("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+            while (iRow < table.length) {
+                var row = table[iRow];
+                var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+                $("#" + id).append(optionHtml);
+                iRow++;
+            }
+        }
+        function ChangeSelectedState(event) {
+            // Update the selected state text area and then fetch and display report 1 results
+            var stateId = event.target.value;
+            var notification = $("#selectedStateId");
+            notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+            var query = 
+"    CREATE TABLE #wss_metrics "
++ " (id INT,    "
++ " query_id INT, " 
 + " query_name   VARCHAR(240),"
-+ " query_frequency   VARCHAR(5),	"
-+ " query_month SMALLINT, 	"
-+ " month_abrv VARCHAR(5), "	
-+ " month_name VARCHAR(15),		"
-+ " query_year INT,	 "
-+ " [state] VARCHAR(50),	"	
-+ " seqnum INT, 	"
-+ " query_title VARCHAR(240),	"
-+ " query_header VARCHAR(240),	"	
-+ " wssm_yr INT, 	"
++ " query_frequency   VARCHAR(5),   "
++ " query_month SMALLINT,   "
++ " month_abrv VARCHAR(5), "    
++ " month_name VARCHAR(15),     "
++ " query_year INT,  "
++ " [state] VARCHAR(50),    "   
++ " seqnum INT,     "
++ " query_title VARCHAR(240),   "
++ " query_header VARCHAR(240),  "   
++ " wssm_yr INT,    "
 + "  [count] INT, "
 + " m_yr INT "
  + " )"
-
  + " INSERT INTO #wss_metrics "
- + "(id,	"
- + " query_id,"	
+ + "(id,    "
+ + " query_id," 
  + "query_name, "
- + "query_frequency,	"
- + "query_month,	"
- + "month_abrv,	"
- + "month_name,	"
- + "query_year,	"
- + "[state],	"
- + "seqnum,	"
- + "query_title,	"
- + "query_header,	"
- + "wssm_yr,	"
+ + "query_frequency,    "
+ + "query_month,    "
+ + "month_abrv, "
+ + "month_name, "
+ + "query_year, "
+ + "[state],    "
+ + "seqnum, "
+ + "query_title,    "
+ + "query_header,   "
+ + "wssm_yr,    "
  + "[count],"
 + " m_yr"
  + " )"
@@ -256,8 +229,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
      + " ,[query_id]"
       + ",[query_name]"
      + " ,[query_frequency]"
-	  
-	      + "  ,[query_month]"
+          + "  ,[query_month]"
         + " ,CASE "
          + " WHEN [query_month] = 1 THEN 'Jan' "
          + " WHEN [query_month] = 2 THEN 'Feb' "
@@ -278,15 +250,12 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
       + ",CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS  [STATE]"
       + ",[seqnum] "
      + " ,CASE WHEN [query_title] = 'Activity Type' THEN  [query_header] "
-	 + " WHEN [query_title] =  'Size(acres)' THEN [query_header] "
-	  + "ELSE [query_title] END AS query_title"
-	 
+     + " WHEN [query_title] =  'Size(acres)' THEN [query_header] "
+      + "ELSE [query_title] END AS query_title"
       + ",[query_header]"
-	  + ", CONCAT ([query_month], [query_year]) AS wssm_yr"
+      + ", CONCAT ([query_month], [query_year]) AS wssm_yr"
       + ",[COUNT] "
 + ", CONCAT ([query_month], [query_year]) AS m_yr"
-	
-
  + " FROM [wss_metric_query_results]  WHERE "
 + "[query_frequency] = 'M'"
  + " AND CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END = '"  + stateId + "'"
@@ -298,17 +267,13 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
  + " WHEN  [query_title] ='Downloads Requested'THEN 1  "
  + " WHEN  [query_title] ='Size(acres)'  THEN 1 "
  + " ELSE 2 END = 1 "
-
-
       + "      SELECT "
        + "         [query_year] AS [Query Year],"
             + "        [State],"
-			+ "FORMAT([AOI Definition Type], '#,#') AS [AOI Definition Type] , "
-				+ "	FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],"
-
+            + "FORMAT([AOI Definition Type], '#,#') AS [AOI Definition Type] , "
+                + " FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],"
 + "FORMAT([Ratings], '#,#') AS [Ratings], "
 + "FORMAT([Reports], '#,#') AS [Reports], "
-
 + "FORMAT([Downloads Requested], '#,#') AS [Downloads Requested] ,"
 + "FORMAT([AOI], '#,#') AS [AOI],"
 + "FORMAT([CONTACT_US], '#,#') AS [Contact US],"
@@ -330,19 +295,15 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 + "FORMAT([6: > 10,000 and <= 100,000], '#,#') AS [5k-10k],"
 + "FORMAT([7: > 100,000 and <= 1,000,000], '#,#') AS[100k-1M],"
 + "FORMAT([8: > 1,000,000], '#,#')  AS [>1M]"
-
-
-
        + "     FROM "
           + "      ( "
                   + "  SELECT "
-				+ "	[query_year], "
+                + " [query_year], "
                  + "   [state], "
-				+ "	[count], "
+                + " [count], "
                + "     [query_title] "
                + "     FROM "
                        + " #wss_metrics "
-                      
               + "  ) #w "
             + "PIVOT "
               + "  ( "
@@ -354,7 +315,6 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 + "[Ratings], "
 + "[Reports], "
 + "[Downloads Requested], "
-
 + "[AOI],"
 + "[CONTACT_US],"
 + "[CSRR],"
@@ -377,24 +337,42 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 + "[8: > 1,000,000]"
                  + "                   ) "
               + "  ) AS #yr_sum ORDER BY query_year ASC; "
-			
-			
-			
-
-
 ;
-					
-			var data = {
-				query: query,
-				format: "json+columnname"
-			}
-			//+ " AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .40 ) "
-			$.post(url, data, function( callbackData ) {
-				// the success callback function: when executed add content to table
-					$('#id1')[0].innerHTML = "";
-					var tableHtml = '<table border="1">';
-					// for each row...
-					                var iRow = 0;
+            var data = {
+                query: query,
+                format: "json+columnname"
+            }
+            //+ " AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .40 ) "
+            $.post(url, data, function( callbackData ) {
+                console.log(callbackData, 'callbackData2')
+                let i = 0
+                // callbackData.forEach((item,i) => {
+                //     tableData.push({
+                //         name: item
+                //     })
+                // });
+                let index2 = 0;
+                for (let i = 0; i < callbackData.Table.length; i++) {
+                        tableData.push({
+                        name: callbackData.Table[0][i],
+                        values: []
+                    })
+                    for (let i2 = 0; i2 < callbackData.Table.length; i2++) {
+                        index2 = i2;
+                        console.log(tableData, 88)
+                        tableData[i].values.push(
+                        callbackData.Table[i2][i]
+                    )
+                    }
+                    tableData[i].values.shift()
+                }
+                console.log(tableData, 'tableData')
+                createChart()
+                // the success callback function: when executed add content to table
+                    $('#id1')[0].innerHTML = "";
+                    var tableHtml = '<table border="1">';
+                    // for each row...
+                                    var iRow = 0;
                 while (iRow < callbackData.Table.length) {
                                 var row = callbackData.Table[iRow];
                                 tableHtml += "<tr>";
@@ -411,17 +389,95 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
                                 tableHtml += "</tr>";                                  
                                 iRow++;
                 };
-
-					tableHtml += '</table>'
-					$('#id1').append(tableHtml);
-				}, 
-				// Specify that we want the request to be sent in JSON format
-				"json");			
-			
-				
-		}
-	</script>
-	
-
+                    tableHtml += '</table>'
+                    $('#id1').append(tableHtml);
+                }, 
+                // Specify that we want the request to be sent in JSON format
+                "json");            
+        }
+        function createChart(){
+        var myChart = echarts.init(document.getElementById('main'));
+        let legend = []
+        tableData.forEach(element => {
+            legend.push(element.name)
+        });
+        // let chartData = []
+        // tableData.forEach(element => {
+        //     legend.push(element.name)
+        // });
+        let xAxis = tableData[0].values
+        let series = []
+        tableData.forEach(element => {
+            let data = [...element.values]
+            data.forEach((item, i) =>{
+                try {
+                    data[i] = parseFloat(item.replace(/,/g, ''))
+                } catch (error) {
+                }
+            })
+            series.push(
+            {
+                name: element.name,
+                type: 'bar',
+                data: data
+            }
+            )
+        });
+        console.log(series, xAxis, legend, 'series, xAxis, chartData, legend')
+        var option = {
+        title: {
+            text: ''
+        },
+        tooltip: {},
+        // legend: {
+        //     // data: [legend]
+        //     data: ['Year']
+        // },
+        legend: {data: legend},
+        xAxis: {
+            // data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
+            data: xAxis,
+            name: 'Year',
+        },
+        yAxis: {
+            name: ''
+        },
+        series: series
+        };
+        // Display the chart using the configuration items and data just specified.
+        myChart.setOption(option);
+        }
+        // CHart Script
+        $(document).ready(function(){
+        // Initialize the echarts instance based on the prepared dom
+        var myChart = echarts.init(document.getElementById('main'));
+        // Specify the configuration items and data for the chart
+        var option = {
+        title: {
+            text: 'ECharts Getting Started Example'
+        },
+        tooltip: {},
+        legend: {
+            data: ['sales']
+        },
+        xAxis: {
+            data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
+            name: '',
+        },
+        yAxis: {
+            name: ''
+        },
+        series: [
+            {
+            name: 'sales',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+            }
+        ]
+        };
+        // Display the chart using the configuration items and data just specified.
+        // myChart.setOption(option);
+        });
+    </script>
 </body>
 </html>
