@@ -458,7 +458,8 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
         // CHart Script
         $(document).ready(function(){
         // Initialize the echarts instance based on the prepared dom
-        var myChart = echarts.init(document.getElementById('main'));
+        var chartDom = document.getElementById('main');
+		var myChart = echarts.init(chartDom, 'dark');
         // Specify the configuration items and data for the chart
         var option = {
         title: {
