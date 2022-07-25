@@ -26,10 +26,10 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
     width: 2500px;
     height:2600px
 }-- >
-    <style type="text/css">
+    
     <!-- -->
    
-
+<style type="text/css">
    ul.space_list li { margin-bottom: .2em; }
         .scrolltable {
             overflow-x: scroll;
@@ -119,6 +119,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
     <div id="id1"></div>
         <br></br>
         <div id="main" style="width: 1000px;height:600px;"></div>
+		</br>
     <b>
         <font color='red'>
             <a name='reportref'>Report Metadata:</a>
@@ -458,7 +459,8 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
         // CHart Script
         $(document).ready(function(){
         // Initialize the echarts instance based on the prepared dom
-        var myChart = echarts.init(document.getElementById('main'));
+        var chartDom = document.getElementById('main');
+		var myChart = echarts.init(chartDom, 'dark');
         // Specify the configuration items and data for the chart
         var option = {
         title: {
