@@ -299,8 +299,7 @@ div {
  + " WHEN  [query_title] ='Size(acres)'  THEN 1 "
  + " ELSE 2 END = 1 "
       + "      SELECT "
-       + "         [query_year] AS [Query Year],"
-            + "        [State],"
+
             + "FORMAT([AOI Definition Type], '#,#') AS [AOI Definition Type] , "
                 + " FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],"
 + "FORMAT([Ratings], '#,#') AS [Ratings], "
@@ -318,6 +317,8 @@ div {
 + "FORMAT([SOIL_REPORT], '#,#') AS [Soil Report],"
 + "FORMAT([SUBSCRIBE], '#,#') AS [Subscribe],"
 + "FORMAT([USE_CATEGORY], '#,#') AS [Use Catagory],"
+       + "         [query_year] AS [Query Year],"
+            + "        [State],"
 + "FORMAT([1: < 25], '#,#') AS [<25],"
 + "FORMAT([2: > 25 and <= 100], '#,#') AS [25-100],"
 + "FORMAT([3: > 100 and <= 1,000], '#,#') AS [100-1k],"
