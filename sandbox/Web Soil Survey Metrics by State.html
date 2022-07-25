@@ -22,10 +22,15 @@
 float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-color:#404040 transparent;visibility:hidden}.tg-sort-header:hover:after{visibility:visible}.tg-sort-asc:after,.tg-sort-asc:hover:after,
 .tg-sort-desc:after{visibility:visible;opacity:.4}.tg-sort-desc:after{border-bottom:none;border-width:5px 5px 0}@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}
 .tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
-<!--subtable -->
+<!--subtable .chart-container {
+    width: 2500px;
+    height:2600px
+}-- >
     <style type="text/css">
     <!-- -->
-    ul.space_list li { margin-bottom: .2em; }
+   
+
+   ul.space_list li { margin-bottom: .2em; }
         .scrolltable {
             overflow-x: scroll;
             height: 100%;
@@ -113,7 +118,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
     <div id="selectedStateId"><p>(no state selected)</p></div>
     <div id="id1"></div>
         <br></br>
-        <div id="main" style="width: 600px;height:400px;"></div>
+        <div id="main" style="width: 1000px;height:600px;"></div>
     <b>
         <font color='red'>
             <a name='reportref'>Report Metadata:</a>
@@ -426,6 +431,7 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
         });
         console.log(series, xAxis, legend, 'series, xAxis, chartData, legend')
         var option = {
+		
         title: {
             text: ''
         },
@@ -434,7 +440,8 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
         //     // data: [legend]
         //     data: ['Year']
         // },
-        legend: {data: legend},
+        
+		legend: {data: legend},
         xAxis: {
             // data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
             data: xAxis,
