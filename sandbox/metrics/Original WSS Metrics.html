@@ -1,10 +1,7 @@
 <!DOCTYPE HTML>
-
 <html>
 <head>
  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
-   <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style.min.css" media="all">
-  <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style-docs.min.css" media="all">
  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
     <title>Web Soil Survey Metrics Report by a State</title>
 <!-- Start Map -->
@@ -24,19 +21,10 @@
 float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-color:#404040 transparent;visibility:hidden}.tg-sort-header:hover:after{visibility:visible}.tg-sort-asc:after,.tg-sort-asc:hover:after,
 .tg-sort-desc:after{visibility:visible;opacity:.4}.tg-sort-desc:after{border-bottom:none;border-width:5px 5px 0}@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}
 .tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
-<!--subtable .chart-container {
-    width: 2500px;
-    height:2600px
-}-- >
-    
+<!--subtable -->
+    <style type="text/css">
     <!-- -->
-   
-<style type="text/css">
-div {
-    box-sizing: border-box;
-    padding: 10px;
-}
-   ul.space_list li { margin-bottom: .2em; }
+    ul.space_list li { margin-bottom: .2em; }
         .scrolltable {
             overflow-x: scroll;
             height: 100%;
@@ -105,21 +93,13 @@ div {
     </style>
 </head>
 <body>
-<section class="docs__section docs__intro">
-      <h1 class="docs__bd docs__title">Web Soil Survey Metrics Summary Report<span class="docs__title__version" title="version"> </span></h1>
-      <div class="docs__nav-shell" id="global-nav">
-        <nav class="docs__nav">
-          <ul class="docs__primary-nav" id="primary-navigation" aria-label="Primary Navigation" data-title="nrcs-style">
-		  </section>
-	<div>
 <b>
- <!--        <font color='red'>
+        <font color='red'>
 <h3>Web Soil Survey Metrics Report by a State</h3>
-
-        </font> -->
+        </font>
     </b>
     <p>
-    An SDA Web Services Query select list is used to pick a state or National which enables creation of a "Web Soil Survey Metrics Report" based upon those selections. The report aggregates the monthly counts to a calander year.  Note: currently the chart amends data when selecting a new state. Work around is to refresh the webpage with a using the "F5" key. In the chart fields can be deselected. The current year may not have all the data since they year is not complete. Some "null" columns are only associated to the national metrics. 
+    An SDA-populated select list is used to pick a state which enables creation of a "Web Soil Survey Metrics Report by State" based upon those selections. The report aggregates the montly counts by year.  
     <br>
     <a href='#reportref'> For more information about the table, </a>
     </p>
@@ -132,9 +112,7 @@ div {
     <div id="selectedStateId"><p>(no state selected)</p></div>
     <div id="id1"></div>
         <br></br>
-        <div id="main" style="width: 1500px;height:600px;"></div>
-		
-		</br>
+        <div id="main" style="width: 600px;height:400px;"></div>
     <b>
         <font color='red'>
             <a name='reportref'>Report Metadata:</a>
@@ -146,7 +124,7 @@ div {
         <ul  class=space_list> <!-- class=space_list -->
 <li ><b>Query Year: </b>    Using a monthly count to sum/aggregate by year</li>
 <li><b>State: </b>  Filter by two-letter state abbreviation or National .</li>
-<li><b>Number of AOIs Created:  </b>Number of Soil Survey Area, User Coordinates, User Rectangle, User Shape file, User URL created.</li>
+<li><b>AOI Definition Type:  </b>Number of Soil Survey Area, User Coordinates, User Rectangle, User Shape file, User URL created.</li>
 <li><b>Soil Survey Area: </b>Total numbers of usage within a Soil Survey Area</li>
 <li><b>Ratings: </b>Soil ratings were created by customers. i.e Hydrologic Soil Group, Hydric Rating by Map Unit, Farmland Classification </li>
 <li><b>Reports: </b>Soil Reports created by customers. i.e. Engineering Properties, Physical Soil Properties, Map Unit Description (Brief, Generated)   </li>
@@ -170,21 +148,12 @@ div {
 <li><b> 100k-1M:  </b> If a user created an area of interest the count of users who selected an area of &#62;100,000 and &#60;= 1,000,000 acres       </li>
 <li><b> &#62;1M:</b> If a user created an area of interest the count of users who selected an area of &#62; 1,000,000 acres     </li>
         </ul>
-		
     <b>
         <font color='red'>
-            <a name='reportref'>Issues or Enhancements to work on:</a>
-			        <ul  class=space_list> <!-- class=space_list -->
-<li > Needs ability to refresh chart and note ammend to chart</li>
-<li > Add download options at the bottom of the chart</li>
-<li > Restrict State and Year on the X-Axis of chart</li>
-<li > Add NCSS Icon to Chart</li>
-<li > Add more fields to chart and restrict null columns</li>
-        </ul>
+            <a name='reportref'>Report Description:</a>
         </font>
     </b>
-	</div>
-
+<p>Description being added</p>
     <script>
         var tableData = []; 
         var url =  "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
@@ -299,8 +268,9 @@ div {
  + " WHEN  [query_title] ='Size(acres)'  THEN 1 "
  + " ELSE 2 END = 1 "
       + "      SELECT "
-      + "         [query_year] AS [Query Year],"
-            + "FORMAT([AOI Definition Type], '#,#') AS [Number of AOIs Created] , "
+       + "         [query_year] AS [Query Year],"
+            + "        [State],"
+            + "FORMAT([AOI Definition Type], '#,#') AS [AOI Definition Type] , "
                 + " FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],"
 + "FORMAT([Ratings], '#,#') AS [Ratings], "
 + "FORMAT([Reports], '#,#') AS [Reports], "
@@ -317,8 +287,6 @@ div {
 + "FORMAT([SOIL_REPORT], '#,#') AS [Soil Report],"
 + "FORMAT([SUBSCRIBE], '#,#') AS [Subscribe],"
 + "FORMAT([USE_CATEGORY], '#,#') AS [Use Catagory],"
- 
-            + "        [State],"
 + "FORMAT([1: < 25], '#,#') AS [<25],"
 + "FORMAT([2: > 25 and <= 100], '#,#') AS [25-100],"
 + "FORMAT([3: > 100 and <= 1,000], '#,#') AS [100-1k],"
@@ -428,7 +396,7 @@ div {
                 "json");            
         }
         function createChart(){
-        var myChart = echarts.init(document.getElementById('main'), 'dark'); 
+        var myChart = echarts.init(document.getElementById('main'));
         let legend = []
         tableData.forEach(element => {
             legend.push(element.name)
@@ -457,35 +425,15 @@ div {
         });
         console.log(series, xAxis, legend, 'series, xAxis, chartData, legend')
         var option = {
-		
         title: {
             text: ''
         },
-        //tooltip: {}, //pounded out
-		  toolbox: {
-		  orient:'verticle',
-		  
-        show : true,
-        feature : {
-            mark : {show: true},
-            dataView : {show: true, readOnly: false},
-            magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
-            restore : {show: true},
-            saveAsImage : {show: true}
-        }
-		
-    },
-	
-		
+        tooltip: {},
         // legend: {
         //     // data: [legend]
         //     data: ['Year']
         // },
-     tooltip: {
-    trigger: 'item'
-
-  },
-		legend: {data: legend},
+        legend: {data: legend},
         xAxis: {
             // data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
             data: xAxis,
@@ -502,20 +450,18 @@ div {
         // CHart Script
         $(document).ready(function(){
         // Initialize the echarts instance based on the prepared dom
-        var chartDom = document.getElementById('main');
-		var myChart = echarts.init(chartDom, 'dark');
+        var myChart = echarts.init(document.getElementById('main'));
         // Specify the configuration items and data for the chart
         var option = {
         title: {
-            text: 'Web Soil Survey Metrics Report by a State or National'
+            text: 'ECharts Getting Started Example'
         },
         tooltip: {},
-		
         legend: {
-            data: ['']
+            data: ['sales']
         },
         xAxis: {
-            data: ['', '', '', '', '', ''],
+            data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
             name: '',
         },
         yAxis: {
@@ -523,13 +469,12 @@ div {
         },
         series: [
             {
-            name: '',
+            name: 'sales',
             type: 'bar',
-            data: [, , , , , ]
+            data: [5, 20, 36, 10, 10, 20]
             }
         ]
         };
-		
         // Display the chart using the configuration items and data just specified.
         // myChart.setOption(option);
         });
