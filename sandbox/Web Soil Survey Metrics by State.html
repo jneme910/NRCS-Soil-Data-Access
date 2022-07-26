@@ -441,7 +441,8 @@ div {
         // tableData.forEach(element => {
         //     legend.push(element.name)
         // });
-        let xAxis = tableData[0].values
+        let xAxis = tableData[0].values; 
+	
         let series = []
         tableData.forEach(element => {
             let data = [...element.values]
@@ -458,7 +459,7 @@ div {
                 data: data
             }
             )
-        });
+        });	series.shift();
         console.log(series, xAxis, legend, 'series, xAxis, chartData, legend')
         var option = {
 		
@@ -536,6 +537,7 @@ div {
 		
         // Display the chart using the configuration items and data just specified.
        //  myChart.setOption(option);
+	
         });
     </script>
 </body>
