@@ -6,7 +6,7 @@
    <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style.min.css" media="all">
   <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style-docs.min.css" media="all">
  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
-    <title>Web Soil Survey Metrics Report by a State</title>
+    <title>Web Soil Survey Metrics Report by a State or National</title>
 <!-- Start Map -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- End Map -->
@@ -119,10 +119,12 @@ div {
         </font> -->
     </b>
     <p>
-    An SDA Web Services Query select list is used to pick a state or National which enables creation of a "Web Soil Survey Metrics Report" based upon those selections. The report aggregates the monthly counts to a calander year.  Note: currently the chart amends data when selecting a new state. Work around is to refresh the webpage with a using the "F5" key. In the chart fields can be deselected. The current year may not have all the data since the year is not complete. Some "null" columns are only associated to the national metrics. 
+   The Soil Data Access Web Services Query select list is used to pick a state or the Nation enabling creation of a "Web Soil Survey Metrics Report" based upon those selections. The report aggregates the monthly counts for a calendar year. 
     <br>
+	  <p>Notes: Currently the chart amends data when selecting a new state or multiple states. Work around is to refresh the webpage with a using the "F5" key. In the chart, fields can be deselected. The current year will not show all the data when the year is not complete. Some "null" columns are only associated with the national metrics.
+	 
     <a href='#reportref'> For more information about the table, </a>
-    </p>
+    </p> </p>
     <a name='top'>
     <!-- The following "div" tag will be updated with the retrieved data
         After the first selection the "(select a state)" will disappear -->
@@ -150,7 +152,7 @@ div {
 <li><b>Soil Survey Area: </b>Total numbers of usage within a Soil Survey Area</li>
 <li><b>Ratings: </b>Soil ratings were created by customers. i.e Hydrologic Soil Group, Hydric Rating by Map Unit, Farmland Classification </li>
 <li><b>Reports: </b>Soil Reports created by customers. i.e. Engineering Properties, Physical Soil Properties, Map Unit Description (Brief, Generated)   </li>
-<li><b>Downloads Requested: </b>Downloads Requested for either"AOI","SSURGO SSA","STATSGO". AOI export link created -  the link was created in the UI so the user may actually download the file or User downloaded a cached SSURGO or STATSGO file or a just-created AOI export.</li>
+<li><b>Downloads Requested: </b>Downloads Requested for either"AOI","SSURGO SSA","STATSGO". AOI export link created.</li>
 <li><b>AOI:</b> Numbers AOIs Created. Areas of Interest (AOI) 100,000 acres or less can be drawn or imported as shape file. AOIs greater than 100,000 acres can be set by setting the entire soil survey area (SSA) as an AOI</li>
 <li><b>Contact US: </b> Number of customers that clicked on contact us  </li>
 <li><b>CSRR: </b>CSRR is the number of Custom Soil Resource Report created </li>
@@ -160,7 +162,7 @@ div {
 <li><b>Session Refused: </b>New session could not be created - there are too many sessions already active.</li>
 <li><b>Session Start: </b>Number of customers who started a web soil survey session. Customers may have been visiting the site to download data for an entire SSA. This does not require setting an AOI first so session starts are higher than the number of AOIs set. Customers may also have been looking at the soil map or reading information available on the WSS web page which would account for more session starts than AOIs set.    </li>
 <li><b>Subscribe: </b>User clicked the "Subscribe" menu button (there's no separate indication whether the user actually subscribed to anything)    </li>
-<li><b>Use Catagory: </b>In the Soil Data Explorer page, the user changed the "View Soil Information by Use" selection. </li>
+<li><b>Use Category: </b>In the Soil Data Explorer page, the user changed the "View Soil Information by Use" selection. </li>
 <li><b> &#60;25: </b> If a user created an area of interest the count of users who selected an area of &#60;25 acres     </li>
 <li><b> 25-100:   </b> If a user created an area of interest the count of users who selected an area of &#62;25 and &#60;= 100 acres      </li>
 <li><b> 100-1k:  </b> If a user created an area of interest the count of users who selected an area of &#62;100 and &#60;= 1,000 acres        </li>
@@ -175,7 +177,7 @@ div {
         <font color='red'>
             <a name='reportref'>Issues or Enhancements to work on:</a>
 			        <ul  class=space_list> <!-- class=space_list -->
-<li > Needs ability to refresh chart and note ammend to chart</li>
+<li > Needs ability to refresh chart and note amend to chart</li>
 <li > Add download options at the bottom of the chart</li>
 <li > Restrict State and Year on the X-Axis of chart</li>
 <li > Add NCSS Icon to Chart</li>
@@ -531,7 +533,7 @@ div {
         };
 		
         // Display the chart using the configuration items and data just specified.
-        // myChart.setOption(option);
+       //  myChart.setOption(option);
         });
     </script>
 </body>
