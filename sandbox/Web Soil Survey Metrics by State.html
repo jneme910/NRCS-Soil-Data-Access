@@ -180,8 +180,6 @@ div {
             <a name='reportref'>Issues or Enhancements to work on:</a>
 			        <ul  class=space_list> <!-- class=space_list -->
 <li > Needs ability to refresh chart and note amend to chart</li>
-<li > Add download options at the bottom of the chart</li>
-<li > Restrict State and Year on the X-Axis of chart</li>
 <li > Add NCSS Icon to Chart</li>
 <li > Add more fields to chart and restrict null columns</li>
         </ul>
@@ -305,18 +303,20 @@ div {
       + "      SELECT "
       + "         [query_year] AS [Query Year],"
             + "FORMAT([AOI Definition Type], '#,#') AS [Number of AOIs Created] , "
+		
                 + " FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],"
 + "FORMAT([Ratings], '#,#') AS [Ratings], "
 + "FORMAT([Reports], '#,#') AS [Reports], "
 + "FORMAT([Downloads Requested], '#,#') AS [Downloads Requested] ,"
-+ "FORMAT([AOI], '#,#') AS [AOI],"
+	+ "FORMAT([SESSION_START], '#,#') AS [Session Start],"
+//+ "FORMAT([AOI], '#,#') AS [AOI],"
 + "FORMAT([CONTACT_US], '#,#') AS [Contact US],"
 + "FORMAT([CSRR], '#,#') AS [CSRR],"
 + "FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [Download Soils Data],"
 + "FORMAT([PRINTABLE_VERSION], '#,#') AS [Printable Version],"
 + "FORMAT([SEARCH], '#,#') AS [Search],"
 + "FORMAT([SESSION_REFUSED], '#,#') AS [Session Refused],"
-+ "FORMAT([SESSION_START], '#,#') AS [Session Start],"
+
 + "FORMAT([SOIL_RATING], '#,#') AS [Soil Rating],"
 + "FORMAT([SOIL_REPORT], '#,#') AS [Soil Report],"
 + "FORMAT([SUBSCRIBE], '#,#') AS [Subscribe],"
@@ -351,7 +351,7 @@ div {
 + "[Ratings], "
 + "[Reports], "
 + "[Downloads Requested], "
-+ "[AOI],"
+//+ "[AOI],"
 + "[CONTACT_US],"
 + "[CSRR],"
 + "[DOWNLOAD_SOILS_DATA],"
@@ -388,6 +388,7 @@ div {
                 //     })
                 // });
                 let index2 = 0;
+				tableData = [];
                 for (let i = 0; i < callbackData.Table.length; i++) {
                         tableData.push({
                         name: callbackData.Table[0][i],
@@ -478,6 +479,7 @@ div {
             magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
             restore : {show: true},
             saveAsImage : {show: true}
+
         }
 		
     },
@@ -504,6 +506,9 @@ div {
         };
         // Display the chart using the configuration items and data just specified.
         myChart.setOption(option);
+	
+		
+		
         }
         // CHart Script
         $(document).ready(function(){
@@ -535,6 +540,7 @@ div {
             }
         ]
         };
+		
 		
         // Display the chart using the configuration items and data just specified.
        //  myChart.setOption(option);
