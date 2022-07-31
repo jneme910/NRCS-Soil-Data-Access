@@ -133,7 +133,7 @@ div {
 
     <div id="id1"></div>
         <br></br>
-			<p> Click on legend field to deselect or select field in the chart below </p>
+			<p> Click on the legend item to deselect or select field at the bottom of the chart below </p>
         <div id="main" style="width: 1500px;height:600px;"></div>
 		
 		</br>
@@ -169,7 +169,6 @@ div {
 			        <ul  class=space_list> <!-- class=space_list -->
 
 <li > Add NCSS Icon to Chart</li>
-<li > Add Title</li>
 <li > Add State or National</li>
         </ul>
         </font>
@@ -455,7 +454,9 @@ div {
         var option = {
 		
         title: {
-            text: ''
+            text: 'Web Soil Survey Metrics Summary'  ,
+				 left: 'center',
+			 bottom: '94%'
         },
         //tooltip: {}, //pounded out
 		  toolbox: {
@@ -482,13 +483,13 @@ div {
     trigger: 'item'
 
   },
-  legend: {data: legend},
-	//	legend: {
-	//	 orient: 'horizontal',
-   //right: 500,
-  //  top: 550,
-  //  bottom: 20,
-	//	data: legend},
+ // legend: {data: legend},
+		legend: {
+		 orient: 'horizontal',
+   right: 600,
+    top: 550,
+    bottom: 20,
+		data: legend},
 
 	grid: {
   left: 80,
