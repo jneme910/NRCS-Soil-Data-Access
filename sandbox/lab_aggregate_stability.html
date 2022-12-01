@@ -282,19 +282,6 @@ float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-colo
 + "	 WHERE state_code = '" + stateId + "'"
 + "	 ORDER BY p.[pedlabsampnum] ASC,l.[labsampnum] ASC, hzn_top, hzn_bot "
 	 
-	 "SELECT * "
-+ "FROM [lab_combine_nasis_ncss] AS cnn "
-+ "INNER JOIN [lab_pedon] AS p ON p.pedon_key=cnn.pedon_key "
-+ "INNER JOIN [lab_layer] AS l ON l.pedon_key=p.pedon_key  "
-+ "INNER JOIN [lab_physical_properties] AS lcp ON lcp.labsampnum=l.labsampnum  "
-+ "INNER JOIN (SELECT [area_code] AS country_code,[area_name] AS country_name, area_key FROM lab_area) AS c ON cnn.[country_key]=c.area_key "
-+ "INNER JOIN (SELECT [area_code] AS state_code,[area_name] AS state_name, area_key FROM lab_area "
-+ "WHERE [area_code]  = '" + stateId + "'"
-
-+ ")AS s ON cnn.[state_key]=s.area_key "
-+ "INNER JOIN (SELECT [area_code] AS county_code,[area_name] AS county_name, area_key FROM lab_area) AS ct ON cnn.[county_key]=ct.area_key "
-+ "INNER JOIN (SELECT [area_code] AS mlra_code,[area_name] AS mlra_name, area_key FROM lab_area) AS m ON cnn.[mlra_key]=m.area_key "
-+ "INNER JOIN (SELECT [area_code] AS ssa_code,[area_name] AS ssa_name, area_key FROM lab_area) AS ss ON cnn.[ssa_key]=ss.area_key "
 
 ;
 					

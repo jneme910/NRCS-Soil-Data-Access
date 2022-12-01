@@ -77,7 +77,7 @@ INNER JOIN mapunit ON legend.lkey=mapunit.lkey
 --AND mukind = 'Consociation' 
 --AND mapunit.mukey=1444409
 --AND LEFT(legend.areasymbol,2) = @area
-AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
+--AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
 )  --- State
 --AND areasymbol = @area)  --- SSA
 INNER JOIN sacatalog SC ON legend.areasymbol = SC.areasymbol

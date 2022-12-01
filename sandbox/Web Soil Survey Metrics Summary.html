@@ -156,7 +156,7 @@ div {
 <li><b>Downloads Requested: </b>Downloads Requested for either"AOI","SSURGO SSA","STATSGO". AOI export link created.</li>
 <li><b>Contact US: </b> Number of customers that clicked on contact us  </li>
 <li><b>CSRR: </b>CSRR is the number of Custom Soil Resource Report created </li>
-<li><b>Download Soils Data: </b>Downloads Requested for a Users defined AOI or Soil Survey Area AOI </li>
+<!--<li><b>Download Soils Data: </b>Downloads Requested for a Users defined AOI or Soil Survey Area AOI </li>  -->
 <li><b>Printable Version: </b>Usage of Printable Output. User clicked "Printable Version(s)"  "View" button from any of the pages Soil Map, Concepts, Suitability and Limitations, Soil Properties and Qualities, or Soil Report.</li>
 
 <li><b>Session Start: </b>Number of customers who started a web soil survey session. Customers may have been visiting the site to download data for an entire SSA. This does not require setting an AOI first so session starts are higher than the number of AOIs set. Customers may also have been looking at the soil map or reading information available on the WSS web page which would account for more session starts than AOIs set.    </li>
@@ -300,7 +300,7 @@ div {
 //+ "FORMAT([AOI], '#,#') AS [AOI],"
 //+ "FORMAT([CONTACT_US], '#,#') AS [Contact US],"
 + "FORMAT([CSRR], '#,#') AS [CSRR],"
-+ "FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [Download Soils Data],"
+//+ "FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [Download Soils Data],"
 + "FORMAT([PRINTABLE_VERSION], '#,#') AS [Printable Version]"
 //+ "FORMAT([SEARCH], '#,#') AS [Search],"
 //+ "FORMAT([SESSION_REFUSED], '#,#') AS [Session Refused],"
@@ -342,7 +342,7 @@ div {
 //+ "[AOI],"
 + "[CONTACT_US],"
 + "[CSRR],"
-+ "[DOWNLOAD_SOILS_DATA],"
+//+ "[DOWNLOAD_SOILS_DATA],"
 + "[PRINTABLE_VERSION],"
 + "[SEARCH],"
 + "[SESSION_REFUSED],"
