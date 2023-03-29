@@ -25,7 +25,6 @@ INNER JOIN component ON component.mukey=mapunit.mukey
 AND mapunit.mukey = mu.mukey 
 GROUP BY taxsuborder, comppct_r ORDER BY SUM(comppct_r) over(partition by taxsuborder) DESC) AS  dom_cond_pct_suborder
 
-
 FROM legend  AS l
 INNER JOIN  mapunit AS mu ON mu.lkey = l.lkey AND  LEFT (l.areasymbol,2) LIKE 'WI' 
 INNER JOIN  component AS c ON c.mukey = mu.mukey 

@@ -1,7 +1,7 @@
 SET STATISTICS IO ON 
 
 USE sdmONLINE
-GO
+go
 
 DROP TABLE IF EXISTS #map;
 DROP TABLE IF EXISTS #water2
@@ -40,10 +40,10 @@ INSERT INTO #map (areaname, areasymbol, musym, mapunit.mukey, muname, datestamp,
 SELECT legend.areaname, legend.areasymbol, musym, mapunit.mukey, muname, CONCAT ([SC].[areasymbol] , ' ' , FORMAT ( [SC].[saverest], 'dd-MM-yy')) AS datestamp, 
 (SELECT SUM (CCO.comppct_r)
 FROM mapunit AS MM2
-INNER JOIN component AS CCO ON CCO.mukey = MM2.mukey AND mapunit.mukey = MM2.mukey AND majcompflag = 'Yes') AS  major_mu_pct_sum
+INNER JOIN component AS CCO ON CCO.mukey = MM2.mukey AND mapunit.mukey = MM2.mukey AND majcompflag = 'Yes' ) AS  major_mu_pct_sum
 FROM (legend 
-INNER JOIN mapunit ON legend.lkey=mapunit.lkey 
-AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area AND mapunit.mukey  = 85953
+INNER JOIN mapunit ON legend.lkey=mapunit.lkey AND mapunit.mukey =  85953 
+AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
 )  
 INNER JOIN sacatalog SC ON legend.areasymbol = SC.areasymbol
 
@@ -61,6 +61,7 @@ CREATE TABLE #water2
 	cokey INT, 
 	comppct_r SMALLINT,
 	min_soimoistdept_l SMALLINT, min_soimoistdept_r SMALLINT,  max_soimoistdept_h SMALLINT,  min_soimoistdepb_l SMALLINT, max_soimoistdepb_l SMALLINT, max_soimoistdepb_h SMALLINT, wtbottom_l SMALLINT, wtbottom_l_moist SMALLINT, wtbottom_r_moist SMALLINT, max_soimoistdepb_r SMALLINT, adj_comp_pct REAL, last_soimoiststat VARCHAR (10), last_soimoistdept_r SMALLINT, last_soimoistdepb_r SMALLINT,
+	count_soil_moisture_all SMALLINT, count_soil_moisture_wet SMALLINT,
 	datestamp VARCHAR(32)
 	)
 
@@ -68,47 +69,54 @@ CREATE TABLE #water2
 --Queries the map unit and legend
 INSERT INTO #water2 (areaname, areasymbol, musym, mukey, muname,  major_mu_pct_sum, compname, localphase, cokey,comppct_r, 
 min_soimoistdept_l , min_soimoistdept_r,max_soimoistdept_h,  min_soimoistdepb_l, max_soimoistdepb_l, max_soimoistdepb_h, wtbottom_l, wtbottom_l_moist, wtbottom_r_moist, max_soimoistdepb_r, 
-adj_comp_pct, last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r,
+adj_comp_pct, last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r ,
+count_soil_moisture_all, 
+count_soil_moisture_wet,
 datestamp)
 SELECT DISTINCT 
 areaname, areasymbol, musym, #map.mukey, muname,  major_mu_pct_sum, --Map Temp Table
 c.compname, c.localphase, c.cokey, c.comppct_r, --Component Table
 CAST((SELECT MIN (soimoistdept_l) FROM comonth AS co9
-INNER JOIN cosoilmoist AS cospt9 ON cospt9.comonthkey=co9.comonthkey AND co9.comonthkey=c.cokey  AND soimoiststat='wet' AND soimoiststat IS NOT NULL) AS INT)  AS min_soimoistdept_l,
+INNER JOIN cosoilmoist AS cospt9 ON cospt9.comonthkey=co9.comonthkey AND co9.comonthkey=co.comonthkey AND soimoiststat='wet' AND soimoiststat IS NOT NULL) AS int)  AS min_soimoistdept_l,
+
+
 CAST ((SELECT MIN (soimoistdept_r) FROM comonth AS co13
-INNER JOIN cosoilmoist AS cospt13 ON cospt13.comonthkey=co13.comonthkey AND co13.comonthkey=c.cokey  AND soimoiststat='wet' AND soimoiststat IS NOT NULL)AS INT)  AS min_soimoistdept_r,
+INNER JOIN cosoilmoist AS cospt13 ON cospt13.comonthkey=co13.comonthkey AND co13.comonthkey=co.comonthkey AND soimoiststat='wet' AND soimoiststat IS NOT NULL)AS int)  AS min_soimoistdept_r,
 (SELECT MAX (soimoistdept_h) FROM comonth AS co10
-INNER JOIN cosoilmoist AS cospt10 ON cospt10.comonthkey=co10.comonthkey AND co10.comonthkey=c.cokey  AND soimoiststat='wet' AND soimoiststat IS NOT NULL)  AS max_soimoistdept_h,
+INNER JOIN cosoilmoist AS cospt10 ON cospt10.comonthkey=co10.comonthkey AND co10.comonthkey=co.comonthkey AND soimoiststat='wet' AND soimoiststat IS NOT NULL)  AS max_soimoistdept_h,
 (SELECT MIN (CASE WHEN soimoistdepb_l >= 183 THEN 183 ELSE soimoistdepb_l END) FROM comonth AS co8
-INNER JOIN cosoilmoist AS cospt8 ON cospt8.comonthkey=co8.comonthkey AND co8.comonthkey=c.cokey  AND soimoiststat='wet' AND soimoiststat IS NOT NULL)  AS min_soimoistdepb_l,
+INNER JOIN cosoilmoist AS cospt8 ON cospt8.comonthkey=co8.comonthkey AND co8.comonthkey=co.comonthkey AND soimoiststat='wet' AND soimoiststat IS NOT NULL)  AS min_soimoistdepb_l,
 (SELECT MAX (soimoistdepb_l) FROM comonth AS co8
-INNER JOIN cosoilmoist AS cospt8 ON cospt8.comonthkey=co8.comonthkey AND co8.comonthkey=c.cokey  AND soimoiststat='wet' AND soimoiststat IS NOT NULL)  AS max_soimoistdepb_l,
+INNER JOIN cosoilmoist AS cospt8 ON cospt8.comonthkey=co8.comonthkey AND co8.comonthkey=co.comonthkey AND soimoiststat='wet' AND soimoiststat IS NOT NULL)  AS max_soimoistdepb_l,
 (SELECT MAX (CASE WHEN soimoistdepb_h >= 183 THEN 183 ELSE soimoistdepb_h END) FROM comonth AS co7
-INNER JOIN cosoilmoist AS cospt7 ON cospt7.comonthkey=co7.comonthkey AND co7.comonthkey=c.cokey  AND ISNULL (soimoiststat, 'moist') ='wet')  AS max_soimoistdepb_h,
+INNER JOIN cosoilmoist AS cospt7 ON cospt7.comonthkey=co7.comonthkey AND co7.comonthkey=co.comonthkey AND ISNULL (soimoiststat, 'moist') ='wet')  AS max_soimoistdepb_h,
 (SELECT MAX (CASE WHEN (soimoistdepb_l) IS NULL THEN soimoistdepb_r ELSE soimoistdepb_l END) FROM comonth AS co5
-INNER JOIN cosoilmoist AS cospt5 ON cospt5.comonthkey=co5.comonthkey AND co5.comonthkey=c.cokey )  AS wtbottom_l,
+INNER JOIN cosoilmoist AS cospt5 ON cospt5.comonthkey=co5.comonthkey AND co5.comonthkey=co.comonthkey)  AS wtbottom_l,
 (SELECT MAX (soimoistdepb_l) FROM comonth AS co11
-INNER JOIN cosoilmoist AS cospt11 ON cospt11.comonthkey=co11.comonthkey AND co11.comonthkey=c.cokey   AND ISNULL (soimoiststat, 'moist') !='wet')   AS wtbottom_l_moist,
-CAST((SELECT CAST(MAX (CAST (soimoistdepb_r AS INT))AS INT)  FROM comonth AS co12
-INNER JOIN cosoilmoist AS cospt12 ON cospt12.comonthkey=co12.comonthkey AND co12.comonthkey=c.cokey   AND ISNULL (soimoiststat, 'moist') !='wet') AS INT)  AS wtbottom_r_moist,
-CAST ((SELECT CAST (MAX (CAST(soimoistdepb_r AS INT)) AS INT) FROM comonth AS co15
-INNER JOIN cosoilmoist AS cospt15 ON cospt15.comonthkey=co15.comonthkey AND co15.comonthkey=c.cokey  AND soimoiststat='wet' AND soimoiststat IS NOT NULL)AS INT)  AS max_soimoistdepb_r,
+INNER JOIN cosoilmoist AS cospt11 ON cospt11.comonthkey=co11.comonthkey AND co11.comonthkey=co.comonthkey  AND ISNULL (soimoiststat, 'moist') !='wet')   AS wtbottom_l_moist,
+CAST((SELECT CAST(MAX (CAST (soimoistdepb_r AS int))AS int)  FROM comonth AS co12
+INNER JOIN cosoilmoist AS cospt12 ON cospt12.comonthkey=co12.comonthkey AND co12.comonthkey=co.comonthkey  AND ISNULL (soimoiststat, 'moist') !='wet') AS int)  AS wtbottom_r_moist,
+CAST ((SELECT CAST (MAX (CAST(soimoistdepb_r AS int)) AS int) FROM comonth AS co15
+INNER JOIN cosoilmoist AS cospt15 ON cospt15.comonthkey=co15.comonthkey AND co15.comonthkey=co.comonthkey AND soimoiststat='wet' AND soimoiststat IS NOT NULL)AS int)  AS max_soimoistdepb_r,
 LEFT (ROUND ((1.0 * comppct_r / NULLIF(major_mu_pct_sum, 0)),2), 4) AS adj_comp_pct,
 
 ISNULL((SELECT TOP 1  ISNULL(soimoiststat, 'moist') FROM comonth AS co15
-INNER JOIN cosoilmoist AS cospt15 ON cospt15.comonthkey=co15.comonthkey AND co15.comonthkey=c.cokey  ORDER BY soimoistdept_r DESC, soimoistdepb_r DESC, cosoilmoistkey DESC ), 'no data' ) AS last_soimoiststat,
+INNER JOIN cosoilmoist AS cospt15 ON cospt15.comonthkey=co15.comonthkey AND co15.comonthkey=co.comonthkey ORDER BY soimoistdept_r DESC, soimoistdepb_r DESC, cosoilmoistkey DESC ), 'no data' ) AS last_soimoiststat,
 (SELECT TOP 1  (soimoistdept_r) FROM comonth AS co16
-INNER JOIN cosoilmoist AS cospt16 ON cospt16.comonthkey=co16.comonthkey AND co16.comonthkey=c.cokey   ORDER BY soimoistdept_r DESC, soimoistdept_l DESC, soimoistdept_h DESC, soimoistdepb_r DESC, cosoilmoistkey DESC ) AS last_soimoistdept_r,
+INNER JOIN cosoilmoist AS cospt16 ON cospt16.comonthkey=co16.comonthkey AND co16.comonthkey=co.comonthkey  ORDER BY soimoistdept_r DESC, soimoistdept_l DESC, soimoistdept_h DESC, soimoistdepb_r DESC, cosoilmoistkey DESC ) AS last_soimoistdept_r,
 (SELECT TOP 1  (soimoistdepb_r) FROM comonth AS co16
-INNER JOIN cosoilmoist AS cospt16 ON cospt16.comonthkey=co16.comonthkey AND co16.comonthkey=c.cokey  ORDER BY soimoistdept_r DESC, soimoistdept_l DESC, soimoistdept_h DESC, soimoistdepb_r DESC, cosoilmoistkey DESC  ) AS last_soimoistdepb_r,
-
+INNER JOIN cosoilmoist AS cospt16 ON cospt16.comonthkey=co16.comonthkey AND co16.comonthkey=co.comonthkey ORDER BY soimoistdept_r DESC, soimoistdept_l DESC, soimoistdept_h DESC, soimoistdepb_r DESC, cosoilmoistkey DESC  ) AS last_soimoistdepb_r,
+(SELECT COUNT (*)  FROM comonth AS co17
+INNER JOIN cosoilmoist AS cospt17 ON cospt17.comonthkey=co17.comonthkey AND co17.comonthkey=co.comonthkey  AND soimoiststat IS NOT NULL)  AS count_soil_moisture_all,
+(SELECT COUNT (*)  FROM comonth AS co18
+INNER JOIN cosoilmoist AS cospt18 ON cospt18.comonthkey=co18.comonthkey AND co18.comonthkey=co.comonthkey  AND soimoiststat IS NOT NULL AND soimoiststat='wet')  AS count_soil_moisture_wet,
 datestamp
 FROM #map
 INNER JOIN component AS c ON #map.mukey=c.mukey AND majcompflag = 'yes'
-INNER JOIN comonth AS co ON c.cokey =c.cokey
-GROUP BY areaname, areasymbol, musym, #map.mukey, muname,  major_mu_pct_sum, compname, localphase, c.cokey,comppct_r, c.cokey , datestamp
+INNER JOIN comonth AS co ON co.cokey=c.cokey
+GROUP BY areaname, areasymbol, musym, #map.mukey, muname,  major_mu_pct_sum, compname, localphase, c.cokey,comppct_r, co.comonthkey, datestamp;
 
-
+SELECT * FROM #water2
 --Table
 CREATE TABLE #water3
    ( areaname VARCHAR (255), 
@@ -122,7 +130,7 @@ CREATE TABLE #water3
 	cokey INT, 
 	comppct_r SMALLINT,
 	min_soimoistdept_l SMALLINT, min_soimoistdept_r SMALLINT,  max_soimoistdept_h SMALLINT,  min_soimoistdepb_l SMALLINT, max_soimoistdepb_l SMALLINT, max_soimoistdepb_h SMALLINT, wtbottom_l SMALLINT, wtbottom_l_moist SMALLINT, wtbottom_r_moist SMALLINT, max_soimoistdepb_r SMALLINT, moisture_b2 REAL, adj_comp_pct REAL,
-	 last_soimoiststat VARCHAR (10), last_soimoistdept_r SMALLINT, last_soimoistdepb_r SMALLINT,
+	 last_soimoiststat VARCHAR (10), last_soimoistdept_r SMALLINT, last_soimoistdepb_r SMALLINT, count_soil_moisture_all SMALLINT, count_soil_moisture_wet SMALLINT,
 	datestamp VARCHAR(32)
 	)
 
@@ -130,6 +138,7 @@ CREATE TABLE #water3
 --Queries Component Month
 INSERT INTO #water3 (areaname, areasymbol, musym, mukey, muname,  major_mu_pct_sum, compname, localphase, cokey,comppct_r, 
 min_soimoistdept_l , min_soimoistdept_r,max_soimoistdept_h,  min_soimoistdepb_l, max_soimoistdepb_l, max_soimoistdepb_h, wtbottom_l, wtbottom_l_moist, wtbottom_r_moist, max_soimoistdepb_r,moisture_b2, adj_comp_pct, last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r,
+count_soil_moisture_all , count_soil_moisture_wet ,
 datestamp)
 
 SELECT areaname, areasymbol, musym, mukey, muname,  major_mu_pct_sum, compname, localphase, cokey,comppct_r, 
@@ -137,7 +146,7 @@ min_soimoistdept_l , min_soimoistdept_r,max_soimoistdept_h,  min_soimoistdepb_l,
 CASE WHEN min_soimoistdepb_l IS NULL THEN  NULL
 WHEN (min_soimoistdepb_l) = (max_soimoistdepb_h) THEN  LEFT (ROUND (min_soimoistdepb_l/30.48, 2) ,3)
 WHEN (max_soimoistdepb_h) IS NULL AND  (min_soimoistdepb_l) IS NOT NULL  THEN LEFT (ROUND( min_soimoistdepb_l/30.48, 2),3) 
-ELSE LEFT (ROUND(min_soimoistdepb_l/30.48, 2),3) END AS moisture_b2, adj_comp_pct, last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r, datestamp
+ELSE LEFT (ROUND(min_soimoistdepb_l/30.48, 2),3) END AS moisture_b2, adj_comp_pct, last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r, count_soil_moisture_all , count_soil_moisture_wet , datestamp
 FROM #water2
 
 CREATE TABLE #water4
@@ -172,14 +181,13 @@ WHEN wtbottom_l = max_soimoistdepb_l THEN 'Apparent'
 WHEN wtbottom_r_moist >  max_soimoistdepb_r THEN 'Perched'  
 WHEN wtbottom_l_moist >  max_soimoistdepb_l  THEN 'Perched'
 WHEN last_soimoiststat = 'Wet' THEN 'Apparent'  
-WHEN max_soimoistdepb_h IS NULL  THEN 'Not Rated' 
+WHEN max_soimoistdepb_h IS NULL  THEN 'Not Rated'
+WHEN count_soil_moisture_all = count_soil_moisture_wet AND max_soimoistdepb_h <200 THEN 'Perched'
 WHEN (moisture_b2)  IS NULL THEN 'Not Rated'  
-WHEN count_soil_moisture_all = count_soil_moisture_wet AND max_soimoistdepb_h <200 AND last_soimoiststat = 'Wet'THEN 'Perched'
-ELSE 'Perched' END AS perched_apparent,last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r, count_soil_moisture_all = count_soil_moisture_wet
+ELSE 'Perched' END AS perched_apparent,last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r,
 datestamp
 FROM #water3
 
-SELECT * FROM #water4
 
 CREATE TABLE #water5
    ( areaname VARCHAR (255), 

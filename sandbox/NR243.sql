@@ -75,8 +75,8 @@ AS WATER_TABLE_RATING_DRY
 INTO #NRCS590
 FROM sacatalog 
 INNER JOIN legend  ON legend.areasymbol = sacatalog.areasymbol ---AND sacatalog.areasymbol = 'WI007'
-AND LEFT (sacatalog.areasymbol,2) = 'WI' -- SOIL SURVEYS 
-INNER JOIN mapunit  ON mapunit.lkey = legend.lkey
+--AND LEFT (sacatalog.areasymbol,2) = 'WI' -- SOIL SURVEYS 
+INNER JOIN mapunit  ON mapunit.lkey = legend.lkey AND mapunit.mukey  = 85953
 --INNER JOIN component ON component.mukey=mapunit.mukey AND majcompflag = 'Yes'
 --AND component.cokey =
 --(SELECT TOP 1 c1.cokey FROM component AS c1 

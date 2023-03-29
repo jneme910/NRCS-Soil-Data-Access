@@ -19,7 +19,7 @@ DECLARE @area_type INT ;
 --~DeclareINT(@area_type)~ 
 --~DeclareINT(@area_type)~ 
 -- End soil data access
-SELECT @area= 'WI'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
+SELECT @area= 'WA063'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
 
 SELECT @area_type = LEN (@area); --determines number of characters of area 2-State, 5- Soil Survey Area
 
@@ -30,8 +30,9 @@ FROM legend l inner join mapunit m left outer join component c left outer join c
 	ON c.cokey = cm.cokey
     	ON m.mukey = c.mukey
     	ON l.lkey = m.lkey
-WHERE CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
-AND c.majcompflag IN ('yes')
+		
+WHERE --CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
+ c.majcompflag IN ('yes') AND m.mukey =  85953
 
 
 --PERCHED QUERY --Perched
