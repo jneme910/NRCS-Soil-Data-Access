@@ -125,7 +125,7 @@ div {
         </font> -->
     </b>
     <p>
-   The Soil Data Access Web Services Query select list is used to pick a state or the Nation enabling creation of a "Lab Data Mart - Lab Analysis By State Report" based upon those selections. The report list pedons by state with associated lab reports and pedon description . 
+   The Soil Data Access Web Services Query select list is used to pick a state or the Nation enabling creation of a "Lab Data Mart - Lab Analysis By State Report" based upon those selections. The report list pedons by state with associated lab reports and pedon description . This report is for the federal, state, and university partners working on the Upper Missouri River Basin (UMRB) project.  Soil and Plants Science Division (SPSD) is doing the soil sampling and lab analyses for that project.  
  	 
     <a href='#reportref'> For more information about the table, </a>
     </p> </p>
@@ -139,7 +139,19 @@ div {
 
     <div id="id1"></div>
         <br></br>
-			<p> Click on legend field to deselect or select field in the chart below </p>
+		
+		<div class='section'>
+		<head>
+		<meta charset='utf-8'>
+		</meta>
+		<link rel='stylesheet' href='http://cdn.leafletjs.com/leaflet-0.7/leaflet.css'>
+		</link>
+		</head>
+		<body>
+		<div id='map' style='width: 100%; height: 100vh'>
+		</div>
+		<script type='text/javascript' src='http://cdn.leafletjs.com/leaflet-0.7/leaflet.js'>
+</script>	
         <div id="main" style="width: 1500px;height:600px;"></div>
 		
 		</br>
@@ -152,32 +164,16 @@ div {
         <a href='#top'>Back to top</a>
     </php>
         <ul  class=space_list> <!-- class=space_list -->
-<li ><b>Query Year: </b>    Using a monthly count to sum/aggregate by year</li>
-<li><b>State: </b>  Filter by two-letter state abbreviation or National .</li>
-<li><b>Number of AOIs Created:  </b>Number of Soil Survey Area, User Coordinates, User Rectangle, User Shape file, User URL created.</li>
-<li><b>Soil Survey Area: </b>Total numbers of usage within a Soil Survey Area</li>
-<li><b>Ratings: </b>Soil ratings were created by customers. i.e Hydrologic Soil Group, Hydric Rating by Map Unit, Farmland Classification </li>
-<li><b>Reports: </b>Soil Reports created by customers. i.e. Engineering Properties, Physical Soil Properties, Map Unit Description (Brief, Generated)   </li>
-<li><b>Downloads Requested: </b>Downloads Requested for either"AOI","SSURGO SSA","STATSGO". AOI export link created.</li>
-<li><b>AOI:</b> Numbers AOIs Created. Areas of Interest (AOI) 100,000 acres or less can be drawn or imported as shape file. AOIs greater than 100,000 acres can be set by setting the entire soil survey area (SSA) as an AOI</li>
-<li><b>Contact US: </b> Number of customers that clicked on contact us  </li>
-<li><b>CSRR: </b>CSRR is the number of Custom Soil Resource Report created </li>
-<li><b>Download Soils Data: </b>Downloads Requested for a Users defined AOI or Soil Survey Area AOI </li>
-<li><b>Printable Version: </b>Usage of Printable Output. User clicked "Printable Version(s)"  "View" button from any of the pages Soil Map, Concepts, Suitability and Limitations, Soil Properties and Qualities, or Soil Report.</li>
-<li><b>Search: </b>Number of customers who used the search by location feature. User performed a "search"</li>
-<li><b>Session Refused: </b>New session could not be created - there are too many sessions already active.</li>
-<li><b>Session Start: </b>Number of customers who started a web soil survey session. Customers may have been visiting the site to download data for an entire SSA. This does not require setting an AOI first so session starts are higher than the number of AOIs set. Customers may also have been looking at the soil map or reading information available on the WSS web page which would account for more session starts than AOIs set.    </li>
-<li><b>Subscribe: </b>User clicked the "Subscribe" menu button (there's no separate indication whether the user actually subscribed to anything)    </li>
-<li><b>Use Category: </b>In the Soil Data Explorer page, the user changed the "View Soil Information by Use" selection. </li>
-<li><b> &#60;25: </b> If a user created an area of interest the count of users who selected an area of &#60;25 acres     </li>
-<li><b> 25-100:   </b> If a user created an area of interest the count of users who selected an area of &#62;25 and &#60;= 100 acres      </li>
-<li><b> 100-1k:  </b> If a user created an area of interest the count of users who selected an area of &#62;100 and &#60;= 1,000 acres        </li>
-<li><b> 1k-5k:  </b>   If a user created an area of interest the count of users who selected an area of &#62;1,000 and &#60;= 5,000 acres     </li>
-<li><b> 5k-10k:  </b> If a user created an area of interest the count of users who selected an area of &#62;5,000 and &#60;= 10,000 acres       </li>
-<li><b> 5k-10k:   </b> If a user created an area of interest the count of users who selected an area of &#62;10,000 and &#60;= 100,000 acres       </li>
-<li><b> 100k-1M:  </b> If a user created an area of interest the count of users who selected an area of &#62;100,000 and &#60;= 1,000,000 acres       </li>
-<li><b> &#62;1M:</b> If a user created an area of interest the count of users who selected an area of &#62; 1,000,000 acres     </li>
-        </ul>
+<li ><b>Series: </b>The name assigned to the soil series.</li>
+<li><b> User_pedon_ID:  </b>A short label to help a user identify a particular pedon.</li>
+<li><b>Soil_Classification: </b>The date when the most recent change to the taxonomic classification of a particular soil series was made.</li>
+<li><b>lat:  </b>Standardized latitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original latitude coordinates using standard conversion algorithms.</li>
+<li><b>lat:  </b>Standardized latitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original latitude coordinates using standard conversion algorithms.</li>
+<li><b>
+
+Standardized longitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original longitude coordinates using standard conversion algorithms.
+   </li>   
+   </ul>
 		
     <b>
         <font color='red'>
@@ -202,9 +198,13 @@ div {
                 query: " WITH area_cte  (area_name, area_code) AS ( "
 					+ "	SELECT area_name, "
 					+ "	area_code "
-					+ "	FROM lab_area WHERE "
-					+ "	area_type= 'state_admin_div' AND area_sub_type ='state' AND parent_area_key = 244) "
-					+ "	SELECT area_name, area_code AS state "
+					+ "		FROM lab_webmap "
+					+ "		INNER JOIN lab_combine_nasis_ncss ON  lab_combine_nasis_ncss.pedon_key = lab_webmap.pedon_Key"
+					+ "		INNER JOIN  (SELECT pedon_key FROM lab_layer "
+					+ "		WHERE project_key IN (6357,6374,6375,6376,6395) ) AS s ON s.pedon_key = lab_combine_nasis_ncss.pedon_key"
+					+ "		INNER JOIN lab_area ON lab_area.area_key=lab_combine_nasis_ncss.state_key"
+					+ "		AND area_type= 'state_admin_div' AND area_sub_type ='state' AND parent_area_key = 244) "
+					+ "		SELECT DISTINCT area_name, area_code"
 					+ "	FROM area_cte ;",
 				
 				
@@ -238,156 +238,29 @@ div {
             var stateId = event.target.value;
             var notification = $("#selectedStateId");
             notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
-            var query = 
-"    CREATE TABLE #wss_metrics "
-+ " (id INT,    "
-+ " query_id INT, " 
-+ " query_name   VARCHAR(240),"
-+ " query_frequency   VARCHAR(5),   "
-+ " query_month SMALLINT,   "
-+ " month_abrv VARCHAR(5), "    
-+ " month_name VARCHAR(15),     "
-+ " query_year INT,  "
-+ " [state] VARCHAR(50),    "   
-+ " seqnum INT,     "
-+ " query_title VARCHAR(240),   "
-+ " query_header VARCHAR(240),  "   
-+ " wssm_yr INT,    "
-+ "  [count] INT, "
-+ " m_yr INT "
- + " )"
- + " INSERT INTO #wss_metrics "
- + "(id,    "
- + " query_id," 
- + "query_name, "
- + "query_frequency,    "
- + "query_month,    "
- + "month_abrv, "
- + "month_name, "
- + "query_year, "
- + "[state],    "
- + "seqnum, "
- + "query_title,    "
- + "query_header,   "
- + "wssm_yr,    "
- + "[count],"
-+ " m_yr"
- + " )"
- + "SELECT [id]"
-     + " ,[query_id]"
-      + ",[query_name]"
-     + " ,[query_frequency]"
-          + "  ,[query_month]"
-        + " ,CASE "
-         + " WHEN [query_month] = 1 THEN 'Jan' "
-         + " WHEN [query_month] = 2 THEN 'Feb' "
-         + " WHEN [query_month] = 3 THEN 'Mar' "
-         + " WHEN [query_month] = 4 THEN 'Apr' "
-         + " WHEN [query_month] = 5 THEN 'May' "
-         + " WHEN [query_month] = 6 THEN 'Jun' "
-         + " WHEN [query_month] = 7 THEN 'Jul' "
-         + " WHEN [query_month] = 8 THEN 'Aug' "
-         + " WHEN [query_month] = 9 THEN 'Sep' "
-         + " WHEN [query_month] = 10 THEN 'Oct' "
-         + " WHEN [query_month] = 11 THEN 'Nov' "
-         + " WHEN [query_month] = 12 THEN 'Dec' "
-         + " ELSE 'OTHER' "
-      + " END AS [month_abrv] "
-        + "  ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name "
-      + ",[query_year] "
-      + ",CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS  [STATE]"
-      + ",[seqnum] "
-     + " ,CASE WHEN [query_title] = 'Activity Type' THEN  [query_header] "
-     + " WHEN [query_title] =  'Size(acres)' THEN [query_header] "
-      + "ELSE [query_title] END AS query_title"
-      + ",[query_header]"
-      + ", CONCAT ([query_month], [query_year]) AS wssm_yr"
-      + ",[COUNT] "
-+ ", CONCAT ([query_month], [query_year]) AS m_yr"
- + " FROM [wss_metric_query_results]  WHERE "
-+ "[query_frequency] = 'M'"
- + " AND CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END = '"  + stateId + "'"
- + " AND CASE WHEN   [query_title]=  'Soil Survey Area'THEN 1  "
- + " WHEN  [query_title] ='AOI Definition Type'THEN 1  "
- + " WHEN  [query_title] ='Activity Type'THEN 1  "
- + " WHEN  [query_title] ='Ratings'THEN 1  "
- + " WHEN  [query_title] ='Reports'THEN 1  "
- + " WHEN  [query_title] ='Downloads Requested'THEN 1  "
- + " WHEN  [query_title] ='Size(acres)'  THEN 1 "
- + " ELSE 2 END = 1 "
-      + "      SELECT "
-      + "         [query_year] AS [Query Year],"
-            + "FORMAT([AOI Definition Type], '#,#') AS [Number of AOIs Created] , "
-		
-                + " FORMAT([Soil Survey Area], '#,#') AS [Soil Survey Area],"
-+ "FORMAT([Ratings], '#,#') AS [Ratings], "
-+ "FORMAT([Reports], '#,#') AS [Reports], "
-+ "FORMAT([Downloads Requested], '#,#') AS [Downloads Requested] ,"
-	+ "FORMAT([SESSION_START], '#,#') AS [Session Start],"
-//+ "FORMAT([AOI], '#,#') AS [AOI],"
-//+ "FORMAT([CONTACT_US], '#,#') AS [Contact US],"
-+ "FORMAT([CSRR], '#,#') AS [CSRR],"
-+ "FORMAT([DOWNLOAD_SOILS_DATA], '#,#') AS [Download Soils Data],"
-+ "FORMAT([PRINTABLE_VERSION], '#,#') AS [Printable Version]"
-//+ "FORMAT([SEARCH], '#,#') AS [Search],"
-//+ "FORMAT([SESSION_REFUSED], '#,#') AS [Session Refused],"
+            var query =     " SELECT TOP 10 [Series] "
+					+ "	,[User_pedon_ID] "
+					//+ "	,lab_webmap.[pedon_Key] "
+					//+ "	,[peiid] "
+					+ "	,[Soil_Classification] "
+                    + "	 , REPLACE (CONCAT ('<a target=zz_blankzz href=zz' , [Primary_Lab_Report], 'zz>Click Here</a>'), 'zz', '''') AS [Primary Lab Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	 [Taxonomy_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Taxonomy Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Supplementary_Lab_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Supplementary Lab Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Water_Retention_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Water Retention Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Correlation_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Correlation Report] " 
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [pedon_Description_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [pedon Description Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Soil_Profile]	, 'zz>Click Here</a>'), 'zz', '''') AS [Soil Profile] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Soil_web]	, 'zz>Click Here</a>'), 'zz', '''') AS [Soil Web] "
+					+ "	 ,[lat] "
+					+ "	,[long] "
+					+ "	FROM lab_webmap "
+					+ "	INNER JOIN lab_combine_nasis_ncss ON  lab_combine_nasis_ncss.pedon_key = lab_webmap.pedon_Key "
+					+ "	INNER JOIN lab_area ON lab_area.area_key=lab_combine_nasis_ncss.state_key AND area_code = '"  + stateId + "'"
+					+ "	INNER JOIN  (SELECT pedon_key FROM lab_layer "
+					+ "	WHERE project_key IN (6357,6374,6375,6376,6395) ) AS s ON s.pedon_key = lab_combine_nasis_ncss.pedon_key"
 
-//+ "FORMAT([SOIL_RATING], '#,#') AS [Soil Rating],"
-//+ "FORMAT([SOIL_REPORT], '#,#') AS [Soil Report],"
-//+ "FORMAT([SUBSCRIBE], '#,#') AS [Subscribe],"
-//+ "FORMAT([USE_CATEGORY], '#,#') AS [Use Catagory],"
- 
-     //       + "        [State],"
-//+ "FORMAT([1: < 25], '#,#') AS [<25],"
-//+ "FORMAT([2: > 25 and <= 100], '#,#') AS [25-100],"
-//+ "FORMAT([3: > 100 and <= 1,000], '#,#') AS [100-1k],"
-//+ "FORMAT([4: > 1,000 and <= 5,000], '#,#') AS [1k-5k],"
-//+ "FORMAT([5: > 5,000 and <= 10,000], '#,#') AS [5k-10k],"
-//+ "FORMAT([6: > 10,000 and <= 100,000], '#,#') AS [5k-10k],"
-//+ "FORMAT([7: > 100,000 and <= 1,000,000], '#,#') AS[100k-1M],"
-//+ "FORMAT([8: > 1,000,000], '#,#')  AS [>1M]"
-       + "     FROM "
-          + "      ( "
-                  + "  SELECT "
-                + " [query_year], "
-                 + "   [state], "
-                + " [count], "
-               + "     [query_title] "
-               + "     FROM "
-                       + " #wss_metrics "
-              + "  ) #w "
-            + "PIVOT "
-              + "  ( "
-               + "     SUM(count) "
-                 + "   FOR query_title IN ( "
-                        + " [Soil Survey Area], "
-+ "[AOI Definition Type], "
-+ "[Activity Type], "
-+ "[Ratings], "
-+ "[Reports], "
-+ "[Downloads Requested], "
-//+ "[AOI],"
-+ "[CONTACT_US],"
-+ "[CSRR],"
-+ "[DOWNLOAD_SOILS_DATA],"
-+ "[PRINTABLE_VERSION],"
-+ "[SEARCH],"
-+ "[SESSION_REFUSED],"
-+ "[SESSION_START],"
-+ "[SOIL_RATING],"
-+ "[SOIL_REPORT],"
-+ "[SUBSCRIBE],"
-+ "[USE_CATEGORY],"
-+ "[1: < 25],"
-+ "[2: > 25 and <= 100],"
-+ "[3: > 100 and <= 1,000],"
-+ "[4: > 1,000 and <= 5,000],"
-+ "[5: > 5,000 and <= 10,000],"
-+ "[6: > 10,000 and <= 100,000],"
-+ "[7: > 100,000 and <= 1,000,000],"
-+ "[8: > 1,000,000]"
-                 + "                   ) "
-              + "  ) AS #yr_sum ORDER BY query_year ASC; "
+			
+
 ;
             var data = {
                 query: query,
@@ -585,5 +458,47 @@ div {
 	
         });
     </script>
+	
+
+<script>
+var Pedon = [
+["S2021MT003703",45.586055756,-107.438331604],
+["S2021MT017702",46.408527374,-105.956970215],
+["S2021MT031711",45.580055237,-111.072387695],
+["S2021MT041701",48.489021301,-109.799499512],
+["S2021MT045710",47.782222748,-104.248252869],
+["S2021MT065704",46.578369141,-108.423072815],
+["S2021MT083709",47.782287598,-104.247886658],
+["S2021MT087706",46.656833649,-107.223831177],
+["S2021MT095705",45.556369781,-109.611511230],
+["S2021MT097707",46.001415253,-109.841529846],
+["S2021MT111708",46.128250122,-108.755279541],
+["S2021ND001001",46.132221222,-102.721900940],
+["S2021ND011001",46.199584961,-103.473052979],
+["S2021ND021001",46.066940308,-98.102775574],
+["S2021ND023001",48.735069275,-103.881126404],
+["S2021ND023002",48.963779449,-103.805831909],
+["S2021ND037001",46.442859650,-101.373725891],
+["S2021ND041001",46.379730225,-102.322013855],
+["S2021ND043001",47.173030853,-99.797996521],
+["S2021ND043002",46.717998505,-99.460899353],
+["S2021ND057001",47.301807404,-101.679420471],
+["S2021ND087001",46.488521576,-103.316307068],
+["S2021ND093016",47.221248627,-98.679847717],
+["S2021ND105001",48.735069275,-103.881126404],
+["S2021ND105002",48.133117676,-103.738533020],
+["S2021SD027001",43.052600861,-96.904098511],
+["S2021SD047500",43.473701477,-103.971702576],
+["S2021SD093001",44.564300537,-102.674499512],
+["S2021SD103001",44.000789642,-103.000831604],
+["S2021SD105001",45.515964508,-102.465797424]
+
+];
+
+
+var map = L.map('map').setView([47.9629806,-106.0336278]
+
+, 4);mapLink ='<a href="http://openstreetmap.org">OpenStreetMap</a>';L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; ' + mapLink + ' Contributors',maxZoom: 18,}).addTo(map);for (var i = 0; i , Pedon.length; i++) {marker = new L.marker([Pedon[i][1],Pedon[i][2]]).bindPopup(Pedon[i][0]).addTo(map);};</script>
+</body>	
 </body>
 </html>
