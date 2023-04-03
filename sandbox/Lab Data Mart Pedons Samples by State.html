@@ -175,16 +175,7 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
    </li>   
    </ul>
 		
-    <b>
-        <font color='red'>
-            <a name='reportref'>Issues or Enhancements to work on:</a>
-			        <ul  class=space_list> <!-- class=space_list -->
-<
-<li > Add NCSS Icon to Chart</li>
-
-        </ul>
-        </font>
-    </b>
+ 
 	</div>
 
     <script>
@@ -322,6 +313,9 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
         }
         function createChart(){
         var myChart = echarts.init(document.getElementById('main'), 'dark'); 
+		
+		
+
         let legend = []
         tableData.forEach(element => {
             legend.push(element.name)
@@ -416,7 +410,7 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
         series: series
         };
         // Display the chart using the configuration items and data just specified.
-        myChart.setOption(option);
+      // myChart.setOption(option);
 	
 		
 		
@@ -424,8 +418,8 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
         // CHart Script
         $(document).ready(function(){
         // Initialize the echarts instance based on the prepared dom
-        var chartDom = document.getElementById('main');
-		var myChart = echarts.init(chartDom, 'dark');
+        //var chartDom = document.getElementById('main');
+		//var myChart = echarts.init(chartDom, 'dark');
         // Specify the configuration items and data for the chart
         var option = {
         title: {

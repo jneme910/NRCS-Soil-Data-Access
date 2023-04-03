@@ -1,0 +1,178 @@
+<!--
+	THIS EXAMPLE WAS DOWNLOADED FROM https://echarts.apache.org/examples/en/editor.html?c=graphgl-npm-dep&gl=1&theme=dark
+-->
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+  <div id="container" style="height: 100%"></div>
+
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-stat@latest/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/extension/bmap.min.js"></script>
+  -->
+
+  <script type="text/javascript">
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, 'dark', {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+    var app = {};
+    var ROOT_PATH = 'https://echarts.apache.org/examples';
+    var option;
+
+    function loadScript(scriptUrl, cb) {
+  var scriptTag = document.createElement('script');
+  scriptTag.onload = cb;
+  scriptTag.src = scriptUrl;
+  document.body.appendChild(scriptTag);
+}
+loadScript(
+  'https://fastly.jsdelivr.net/npm/echarts-graph-modularity@2.0.0/dist/echarts-graph-modularity.min.js',
+  function () {
+    // Reinit chart again
+    // TODO: visual encoding registerion must been done before echarts.init.
+    var dom = myChart.getDom();
+    myChart.dispose();
+    myChart = echarts.init(dom);
+    $.getJSON(ROOT_PATH + '/data-gl/asset/data/npmdep.json', function (data) {
+      var nodes = data.nodes.map(function (nodeName, idx) {
+        return {
+          name: nodeName,
+          value: data.dependentsCount[idx]
+        };
+      });
+      var edges = [];
+      for (var i = 0; i < data.edges.length; ) {
+        var s = data.edges[i++];
+        var t = data.edges[i++];
+        edges.push({
+          source: s,
+          target: t
+        });
+      }
+      nodes.forEach(function (node) {
+        // if (node.value > 100) {
+        node.emphasis = {
+          label: {
+            show: true
+          }
+        };
+        // }
+        if (node.value > 5000) {
+          node.label = {
+            show: true
+          };
+        }
+      });
+      myChart.setOption({
+        backgroundColor: '#000',
+        series: [
+          {
+            color: [
+              'rgb(203,239,15)',
+              'rgb(73,15,239)',
+              'rgb(15,217,239)',
+              'rgb(30,15,239)',
+              'rgb(15,174,239)',
+              'rgb(116,239,15)',
+              'rgb(239,15,58)',
+              'rgb(15,239,174)',
+              'rgb(239,102,15)',
+              'rgb(239,15,15)',
+              'rgb(15,44,239)',
+              'rgb(239,145,15)',
+              'rgb(30,239,15)',
+              'rgb(239,188,15)',
+              'rgb(159,239,15)',
+              'rgb(159,15,239)',
+              'rgb(15,239,44)',
+              'rgb(15,239,87)',
+              'rgb(15,239,217)',
+              'rgb(203,15,239)',
+              'rgb(239,15,188)',
+              'rgb(239,15,102)',
+              'rgb(239,58,15)',
+              'rgb(239,15,145)',
+              'rgb(116,15,239)',
+              'rgb(15,131,239)',
+              'rgb(73,239,15)',
+              'rgb(15,239,131)',
+              'rgb(15,87,239)',
+              'rgb(239,15,231)'
+            ],
+            type: 'graphGL',
+            nodes: nodes,
+            edges: edges,
+            modularity: {
+              resolution: 2,
+              sort: true
+            },
+            lineStyle: {
+              color: 'rgba(255,255,255,1)',
+              opacity: 0.05
+            },
+            itemStyle: {
+              opacity: 1
+              // borderColor: '#fff',
+              // borderWidth: 1
+            },
+            focusNodeAdjacency: false,
+            focusNodeAdjacencyOn: 'click',
+            symbolSize: function (value) {
+              return Math.sqrt(value / 10);
+            },
+            label: {
+              color: '#fff'
+            },
+            emphasis: {
+              label: {
+                show: false
+              },
+              lineStyle: {
+                opacity: 0.5,
+                width: 4
+              }
+            },
+            forceAtlas2: {
+              steps: 5,
+              stopThreshold: 20,
+              jitterTolerence: 10,
+              edgeWeight: [0.2, 1],
+              gravity: 5,
+              edgeWeightInfluence: 0
+              // preventOverlap: true
+            }
+          }
+        ]
+      });
+    });
+  }
+);
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+</body>
+</html>
