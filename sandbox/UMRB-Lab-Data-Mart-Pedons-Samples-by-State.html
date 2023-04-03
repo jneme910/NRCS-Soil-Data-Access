@@ -1,0 +1,498 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+ <!--  <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style.min.css" media="all"> -->
+ <link rel="stylesheet" href="https://jneme910.github.io/NRCS-Soil-Data-Access/style-sheet/nrcs-style.min.css" media="all"> 
+  <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style-docs.min.css" media="all">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+    <title>Lab Data Mart - Lab Analysis By State</title>
+<!-- Start Map -->
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<!-- End Map -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!--subtable -->
+	
+	
+    <style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;text-decoration:none !important}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-ul38{text-align:left;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-rz9m{text-align:center;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+.tg-sort-header::-moz-selection{background:0 0}.tg-sort-header::selection{background:0 0}.tg-sort-header{cursor:pointer}.tg-sort-header:after{content:'';
+float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-color:#404040 transparent;visibility:hidden}.tg-sort-header:hover:after{visibility:visible}.tg-sort-asc:after,.tg-sort-asc:hover:after,
+.tg-sort-desc:after{visibility:visible;opacity:.4}.tg-sort-desc:after{border-bottom:none;border-width:5px 5px 0}@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}
+.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
+<!--subtable .chart-container {
+    width: 2500px;
+    height:2600px
+}-- >
+    
+    <!-- -->
+   
+<style type="text/css">
+div {
+    box-sizing: border-box;
+    padding: 10px;
+}
+   ul.space_list li { margin-bottom: .2em; }
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .scrolltable > .header {
+        }
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+            border-width: 1px;
+            padding: 2px;
+			text-decoration:none !important;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+			text-decoration:none !important;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+			text-decoration:none !important;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+<section class="docs__section docs__intro">
+      <h1 class="docs__bd docs__title">Lab Data Mart - Lab Analysis By State<span class="docs__title__version" title="version"> </span></h1>
+      <div class="docs__nav-shell" id="global-nav">
+        <nav class="docs__nav">
+          <ul class="docs__primary-nav" id="primary-navigation" aria-label="Primary Navigation" data-title="nrcs-style">
+		  </section>
+	<div>
+<b>
+ <!--        <font color='red'>
+<h3>Web Soil Survey Metrics Report by a State</h3>
+
+        </font> -->
+    </b>
+    <p>
+   The Soil Data Access Web Services Query select list is used to pick a state or the Nation enabling creation of a "Lab Data Mart - Lab Analysis By State Report" based upon those selections. The report list pedons by state with associated lab reports and pedon description . This report is for the federal, state, and university partners working on the Upper Missouri River Basin (UMRB) project.  Soil and Plants Science Division (SPSD) is doing the soil sampling and lab analyses for that project.  
+ 	 
+    <a href='#reportref'> For more information about the table, </a>
+    </p> </p>
+    <a name='top'>
+    <!-- The following "div" tag will be updated with the retrieved data
+        After the first selection the "(select a state)" will disappear -->
+    <select id="selectId1" onchange="ChangeSelectedState(event)">
+        <option value='' style="display: none" id="remove">(select a state)</option>
+    </select>
+    <div id="selectedStateId"><p>(no state selected)</p></div>
+
+    <div id="id1"></div>
+        <br></br>
+		
+		<div class='section'>
+		<head>
+		<meta charset='utf-8'>
+		</meta>
+		<link rel='stylesheet' href='http://cdn.leafletjs.com/leaflet-0.7/leaflet.css'>
+		</link>
+		</head>
+		<body>
+		<div id='map' style='width: 100%; height: 100vh'>
+		</div>
+		<script type='text/javascript' src='http://cdn.leafletjs.com/leaflet-0.7/leaflet.js'>
+</script>	
+        <div id="main" style="width: 1500px;height:600px;"></div>
+		
+		</br>
+    <b>
+        <font color='red'>
+            <a name='reportref'>Report Metadata:</a>
+        </font>
+    </b>
+    <php>
+        <a href='#top'>Back to top</a>
+    </php>
+        <ul  class=space_list> <!-- class=space_list -->
+<li ><b>Series: </b>The name assigned to the soil series.</li>
+<li><b> User_pedon_ID:  </b>A short label to help a user identify a particular pedon.</li>
+<li><b>Soil_Classification: </b>The date when the most recent change to the taxonomic classification of a particular soil series was made.</li>
+<li><b>lat:  </b>Standardized latitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original latitude coordinates using standard conversion algorithms.</li>
+<li><b>lat:  </b>Standardized latitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original latitude coordinates using standard conversion algorithms.</li>
+<li><b>Long: </b>
+
+Standardized longitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original longitude coordinates using standard conversion algorithms.
+   </li>   
+   </ul>
+		
+ 
+	</div>
+
+    <script>
+        var tableData = []; 
+        var url =  "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+        var stateId = "";
+        // Wait for everything to be loaded before starting the first SDA request
+        $(document).ready(function(){
+            // Start by retrieving a state list
+            var data = {
+                query: " WITH area_cte  (area_name, area_code) AS ( "
+					+ "	SELECT area_name, "
+					+ "	area_code "
+					+ "		FROM lab_webmap "
+					+ "		INNER JOIN lab_combine_nasis_ncss ON  lab_combine_nasis_ncss.pedon_key = lab_webmap.pedon_Key"
+					+ "		INNER JOIN  (SELECT pedon_key FROM lab_layer "
+					+ "		WHERE project_key IN (6357,6374,6375,6376,6395) ) AS s ON s.pedon_key = lab_combine_nasis_ncss.pedon_key"
+					+ "		INNER JOIN lab_area ON lab_area.area_key=lab_combine_nasis_ncss.state_key"
+					+ "		AND area_type= 'state_admin_div' AND area_sub_type ='state' AND parent_area_key = 244) "
+					+ "		SELECT DISTINCT area_name, area_code"
+					+ "	FROM area_cte ;",
+				
+				
+				//"SELECT CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
+				
+				
+                //query: "Select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
+                format: "json"
+            }
+            $.post(url, data, function( callbackData ) {
+                console.log(callbackData, 'callbackData')
+                    loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+                }, 
+                "json");
+        });
+        function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+            // Add options to the specified select list. The content of the table[valueColumn]
+            // defines the value of the selection, the table[labelColumn] is used for the 
+            // displayed option's text.
+            var iRow = 0;
+            $("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+            while (iRow < table.length) {
+                var row = table[iRow];
+                var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+                $("#" + id).append(optionHtml);
+                iRow++;
+            }
+        }
+        function ChangeSelectedState(event) {
+            // Update the selected state text area and then fetch and display report 1 results
+            var stateId = event.target.value;
+            var notification = $("#selectedStateId");
+            notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+            var query =     " SELECT TOP 10 [Series] "
+					+ "	,[User_pedon_ID] "
+					//+ "	,lab_webmap.[pedon_Key] "
+					//+ "	,[peiid] "
+					+ "	,[Soil_Classification] "
+                    + "	 , REPLACE (CONCAT ('<a target=zz_blankzz href=zz' , [Primary_Lab_Report], 'zz>Click Here</a>'), 'zz', '''') AS [Primary Lab Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	 [Taxonomy_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Taxonomy Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Supplementary_Lab_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Supplementary Lab Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Water_Retention_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Water Retention Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Correlation_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Correlation Report] " 
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [pedon_Description_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [pedon Description Report] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Soil_Profile]	, 'zz>Click Here</a>'), 'zz', '''') AS [Soil Profile] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Soil_web]	, 'zz>Click Here</a>'), 'zz', '''') AS [Soil Web] "
+					+ "	 ,[lat] "
+					+ "	,[long] "
+					+ "	FROM lab_webmap "
+					+ "	INNER JOIN lab_combine_nasis_ncss ON  lab_combine_nasis_ncss.pedon_key = lab_webmap.pedon_Key "
+					+ "	INNER JOIN lab_area ON lab_area.area_key=lab_combine_nasis_ncss.state_key AND area_code = '"  + stateId + "'"
+					+ "	INNER JOIN  (SELECT pedon_key FROM lab_layer "
+					+ "	WHERE project_key IN (6357,6374,6375,6376,6395) ) AS s ON s.pedon_key = lab_combine_nasis_ncss.pedon_key"
+
+			
+
+;
+            var data = {
+                query: query,
+                format: "json+columnname"
+            }
+            //+ " AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .40 ) "
+            $.post(url, data, function( callbackData ) {
+                console.log(callbackData, 'callbackData2')
+                let i = 0
+                // callbackData.forEach((item,i) => {
+                //     tableData.push({
+                //         name: item
+                //     })
+                // });
+                let index2 = 0;
+				tableData = [];
+                for (let i = 0; i < callbackData.Table.length; i++) {
+                        tableData.push({
+                        name: callbackData.Table[0][i],
+                        values: []
+                    })
+                    for (let i2 = 0; i2 < callbackData.Table.length; i2++) {
+                        index2 = i2;
+                        console.log(tableData, 88)
+                        tableData[i].values.push(
+                        callbackData.Table[i2][i]
+                    )
+                    }
+                    tableData[i].values.shift()
+                }
+                console.log(tableData, 'tableData')
+                createChart()
+                // the success callback function: when executed add content to table
+                    $('#id1')[0].innerHTML = "";
+                    var tableHtml = '<table border="1">';
+                    // for each row...
+                                    var iRow = 0;
+                while (iRow < callbackData.Table.length) {
+                                var row = callbackData.Table[iRow];
+                                tableHtml += "<tr>";
+                                // for each column in each row...
+                                var iCol = 0;
+                                while (iCol < row.length) {
+                                                if (iRow == 0) {
+                                                                tableHtml += "<th>" + row[iCol] + "</th>";
+                                                } else {
+                                                                tableHtml += "<td>" + row[iCol] + "</td>";
+                                                }
+                                                iCol++;
+                                };
+                                tableHtml += "</tr>";                                  
+                                iRow++;
+                };
+                    tableHtml += '</table>'
+                    $('#id1').append(tableHtml);
+                }, 
+                // Specify that we want the request to be sent in JSON format
+                "json");            
+        }
+        function createChart(){
+        var myChart = echarts.init(document.getElementById('main'), 'dark'); 
+		
+		
+
+        let legend = []
+        tableData.forEach(element => {
+            legend.push(element.name)
+        });
+        // let chartData = []
+        // tableData.forEach(element => {
+        //     legend.push(element.name)
+        // });
+        let xAxis = tableData[0].values; 
+	
+        let series = []
+        tableData.forEach(element => {
+            let data = [...element.values]
+            data.forEach((item, i) =>{
+                try {
+                    data[i] = parseFloat(item.replace(/,/g, ''))
+                } catch (error) {
+                }
+            })
+            series.push(
+            {
+                name: element.name,
+                type: 'bar',
+                data: data
+            }
+            )
+        });	
+		series.shift();
+        console.log(series, xAxis, legend, 'series, xAxis, chartData, legend')
+        var option = {
+		
+        title: {
+            text: ''
+        },
+        //tooltip: {}, //pounded out
+		  toolbox: {
+		  orient:'verticle',
+		  
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+
+        }
+		
+    },
+	
+		
+        // legend: {
+        //     // data: [legend]
+        //     data: ['Year']
+        // },
+     tooltip: {
+    trigger: 'item'
+
+  },
+  legend: {data: legend},
+	//	legend: {
+	//	 orient: 'horizontal',
+   //right: 500,
+  //  top: 550,
+  //  bottom: 20,
+	//	data: legend},
+
+	grid: {
+  left: 80,
+  top: 80,
+  right: '10%',
+  bottom: '20%'
+},	
+
+
+    type: 'image',
+    style: {
+        image: 'https://www.nrcs.usda.gov/NRCS_WIDTheme/themes/html/NRCS_WIDTheme/images/USDA-Logo.jpg',
+        x: 100,
+        y: 200,
+        width: 230,
+        height: 400
+    }	,
+        xAxis: {
+            // data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
+            data: xAxis,
+            name: 'Year',
+        },
+        yAxis: {
+            name: ''
+        },
+        series: series
+        };
+        // Display the chart using the configuration items and data just specified.
+      // myChart.setOption(option);
+	
+		
+		
+        }
+        // CHart Script
+        $(document).ready(function(){
+        // Initialize the echarts instance based on the prepared dom
+        //var chartDom = document.getElementById('main');
+		//var myChart = echarts.init(chartDom, 'dark');
+        // Specify the configuration items and data for the chart
+        var option = {
+        title: {
+            text: 'Web Soil Survey Metrics Report by a State or National'
+        },
+        tooltip: {},
+		
+        legend: {
+            data: ['']
+        },
+        xAxis: {
+            data: ['', '', '', '', '', ''],
+            name: '',
+        },
+        yAxis: {
+            name: ''
+        },
+        series: [
+            {
+            name: '',
+            type: 'bar',
+            data: [, , , , , ]
+            }
+        ]
+        };
+		
+		
+        // Display the chart using the configuration items and data just specified.
+       //  myChart.setOption(option);
+	
+        });
+    </script>
+	
+
+<script>
+var Pedon = [
+["S2021MT003703",45.586055756,-107.438331604],
+["S2021MT017702",46.408527374,-105.956970215],
+["S2021MT031711",45.580055237,-111.072387695],
+["S2021MT041701",48.489021301,-109.799499512],
+["S2021MT045710",47.782222748,-104.248252869],
+["S2021MT065704",46.578369141,-108.423072815],
+["S2021MT083709",47.782287598,-104.247886658],
+["S2021MT087706",46.656833649,-107.223831177],
+["S2021MT095705",45.556369781,-109.611511230],
+["S2021MT097707",46.001415253,-109.841529846],
+["S2021MT111708",46.128250122,-108.755279541],
+["S2021ND001001",46.132221222,-102.721900940],
+["S2021ND011001",46.199584961,-103.473052979],
+["S2021ND021001",46.066940308,-98.102775574],
+["S2021ND023001",48.735069275,-103.881126404],
+["S2021ND023002",48.963779449,-103.805831909],
+["S2021ND037001",46.442859650,-101.373725891],
+["S2021ND041001",46.379730225,-102.322013855],
+["S2021ND043001",47.173030853,-99.797996521],
+["S2021ND043002",46.717998505,-99.460899353],
+["S2021ND057001",47.301807404,-101.679420471],
+["S2021ND087001",46.488521576,-103.316307068],
+["S2021ND093016",47.221248627,-98.679847717],
+["S2021ND105001",48.735069275,-103.881126404],
+["S2021ND105002",48.133117676,-103.738533020],
+["S2021SD027001",43.052600861,-96.904098511],
+["S2021SD047500",43.473701477,-103.971702576],
+["S2021SD093001",44.564300537,-102.674499512],
+["S2021SD103001",44.000789642,-103.000831604],
+["S2021SD105001",45.515964508,-102.465797424]
+
+];
+
+
+var map = L.map('map').setView([47.9629806,-106.0336278]
+
+, 4);mapLink ='<a href="http://openstreetmap.org">OpenStreetMap</a>';L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; ' + mapLink + ' Contributors',maxZoom: 18,}).addTo(map);for (var i = 0; i , Pedon.length; i++) {marker = new L.marker([Pedon[i][1],Pedon[i][2]]).bindPopup(Pedon[i][0]).addTo(map);};</script>
+</body>	
+</body>
+</html>
