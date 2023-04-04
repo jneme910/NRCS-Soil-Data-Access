@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-
+https://jneme910.github.io/NRCS-Soil-Data-Access/sandbox/UMRB%20Lab%20Data%20Mart%20Pedons%20Samples%20by%20State.html
 <html>
 <head>
  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
@@ -229,7 +229,7 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
             var stateId = event.target.value;
             var notification = $("#selectedStateId");
             notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
-            var query =     " SELECT TOP 10 [Series] "
+            var query =     " SELECT DISTINCT [Series] "
 					+ "	,[User_pedon_ID] "
 					//+ "	,lab_webmap.[pedon_Key] "
 					//+ "	,[peiid] "
