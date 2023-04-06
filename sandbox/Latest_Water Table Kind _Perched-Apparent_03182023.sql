@@ -18,7 +18,7 @@ DECLARE @area_type INT ;
 --~DeclareChar(@area,20)~  -- Used for Soil Data Access
 --~DeclareINT(@area_type)~ 
 -- End soil data access
-SELECT @area= 'WA'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
+SELECT @area= 'WA063'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
 
 ----------------------------------------------------------------------------------
 SELECT @area_type = LEN (@area); --determines number of characters of area 2-State, 5- Soil Survey Area
@@ -42,7 +42,7 @@ SELECT legend.areaname, legend.areasymbol, musym, mapunit.mukey, muname, CONCAT 
 FROM mapunit AS MM2
 INNER JOIN component AS CCO ON CCO.mukey = MM2.mukey AND mapunit.mukey = MM2.mukey AND majcompflag = 'Yes' ) AS  major_mu_pct_sum
 FROM (legend 
-INNER JOIN mapunit ON legend.lkey=mapunit.lkey --AND mapunit.mukey =  85953 
+INNER JOIN mapunit ON legend.lkey=mapunit.lkey --AND mapunit.mukey = 621224
 AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
 )  
 INNER JOIN sacatalog SC ON legend.areasymbol = SC.areasymbol
@@ -149,6 +149,7 @@ WHEN (max_soimoistdepb_h) IS NULL AND  (min_soimoistdepb_l) IS NOT NULL  THEN LE
 ELSE LEFT (ROUND(min_soimoistdepb_l/30.48, 2),3) END AS moisture_b2, adj_comp_pct, last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r, count_soil_moisture_all , count_soil_moisture_wet , datestamp
 FROM #water2
 
+
 CREATE TABLE #water4
    ( areaname VARCHAR (255), 
     areasymbol VARCHAR (20),
@@ -171,11 +172,12 @@ min_soimoistdept_l , min_soimoistdept_r,max_soimoistdept_h,  min_soimoistdepb_l,
 last_soimoiststat, last_soimoistdept_r, last_soimoistdepb_r,count_soil_moisture_all, count_soil_moisture_wet ,
  datestamp)
 
+ 
 SELECT areaname, areasymbol, musym, mukey, muname,  major_mu_pct_sum, compname, localphase, cokey,comppct_r, 
 min_soimoistdept_l , min_soimoistdept_r,max_soimoistdept_h,  min_soimoistdepb_l, max_soimoistdepb_l, max_soimoistdepb_h, wtbottom_l, wtbottom_l_moist, wtbottom_r_moist, max_soimoistdepb_r,moisture_b2,
 adj_comp_pct, 
 CASE 
-WHEN (count_soil_moisture_all = count_soil_moisture_wet AND max_soimoistdepb_h <200 AND last_soimoiststat = 'Wet')  THEN 'Perched'
+WHEN (count_soil_moisture_all = count_soil_moisture_wet AND max_soimoistdepb_r <190 AND last_soimoiststat = 'Wet')  THEN 'Perched'
 WHEN moisture_b2 = 6 THEN 'Apparent' 
 
 WHEN wtbottom_l = max_soimoistdepb_l THEN 'Apparent'  
