@@ -25,13 +25,13 @@ M
 
 
 
---DECLARE @state VARCHAR(15);
+DECLARE @state VARCHAR(15);
 
 /* List options for State
 For National use xnational otherwise state abbrev
 */
 
-~DeclareChar(@state,15)~ 
+--~DeclareChar(@state,15)~ 
 SELECT @state = 'WI'; -- Enter xnational for national or state abbrev
  CREATE TABLE #wss_metrics
  (id INT,	

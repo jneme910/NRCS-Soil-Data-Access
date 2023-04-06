@@ -1,0 +1,275 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+	<link rel="stylesheet" href="https://jneme910.github.io/NRCS-Soil-Data-Access/style-sheet/nrcs-style.min.css" media="all"> 
+   <!--  <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style.min.css" media="all">-->
+	<link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style-docs.min.css" media="all">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+	  <title>Web Soil Survey Metrics Top Report by a State or National</title>
+  <!-- Start Map -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- End Map -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <style type="text/css">
+	.tg  {border-collapse:collapse;border-spacing:0}
+	.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+	.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+	.tg .tg-ul38{text-align:left;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+	.tg .tg-baqh{text-align:center;vertical-align:top}
+	.tg .tg-rz9m{text-align:center;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+	.tg .tg-0lax{text-align:left;vertical-align:top}
+	.tg-sort-header::-moz-selection{background:0 0}.tg-sort-header::selection{background:0 0}.tg-sort-header{cursor:pointer}.tg-sort-header:after{content:'';
+	float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-color:#404040 transparent;visibility:hidden}.tg-sort-header:hover:after{visibility:visible}.tg-sort-asc:after,.tg-sort-asc:hover:after,
+	.tg-sort-desc:after{visibility:visible;opacity:.4}.tg-sort-desc:after{border-bottom:none;border-width:5px 5px 0}@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}
+	.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
+
+<style type="text/css">
+	div {
+		box-sizing: border-box;
+		padding: 10px;
+	}
+	   ul.space_list li { margin-bottom: .2em; }
+			.scrolltable {
+				overflow-x: scroll;
+				height: 100%;
+				display: flex;
+				display: -webkit-flex;
+				flex-direction: column;
+				-webkit-flex-direction: column;
+			}
+			.scrolltable > .header {
+			}
+			.scrolltable > .body {
+				/*noinspection CssInvalidPropertyValue*/
+				width: -webkit-fit-content;
+				overflow-y: scroll;
+				flex: 1;
+				-webkit-flex: 1;
+			}
+			th, td {
+				min-width: 25px;
+				border-width: 1px;
+				padding: 2px;
+			}
+			/* an outside constraint to react against */
+			#constrainer {
+				width: 400px;
+				height: 200px;
+			}
+			#constrainer2 {
+				width: 400px;
+				overflow-x: scroll;
+			}
+			#constrainer2 table {
+				overflow-y: scroll;
+			}
+			#constrainer2 tbody {
+				overflow-x: scroll;
+				display: block;
+				height: 200px;
+			}
+			#constrainer2 thead {
+				display: table-row;
+			}
+			/* only styling below here */
+			#constrainer, #constrainer2 {
+				border: 1px solid lightgrey;
+			}
+			table {
+				border-collapse: collapse;
+			}
+			th, td {
+				border: 1px solid gray;
+			}
+			th {
+				background-color: lightgrey;
+				border-width: 1px;
+			}
+			td {
+				border-width: 1px;
+			}
+			tr:first-child td {
+				border-top-width: 0;
+			}
+			tr:nth-child(even) {
+				background-color: #eee;
+			}
+		</style>
+	
+	</head>
+<body>
+	<section class="docs__section docs__intro">
+		<h1 class="docs__bd docs__title">Web Soil Survey Metrics Top Reports, Ratings and Soil Survey Areas<span class="docs__title__version" title="version"> </span></h1>
+		<div class="docs__nav-shell" id="global-nav">
+		  <nav class="docs__nav">
+			<ul class="docs__primary-nav" id="primary-navigation" aria-label="Primary Navigation" data-title="nrcs-style">
+			</section>
+	  <div>
+
+	
+	<p>
+	An SDA-populated select list is used to pick a state, SSA and year.
+	<a href='#reportref'> For more information about the table, </a>
+	</p>
+
+	
+	
+	
+	<!-- The following "div" tag will be updated with the retrieved data
+		After the first selection the "(select a state)" will disappear -->
+	<select id="selectId1" onchange="ChangeSelectedState(event)">
+		<option value='' style="display: none" id="remove">(select a state)</option>
+	</select>
+	
+	<div id="selectedStateId"><p>(no state selected)</p></div>
+	
+	<select id="selectId2" onchange="ChangeSelectedSSA(event)">
+		<option value='' style="display: none" id="remove">(select a soil survey area)</option>
+	</select>
+	
+	<div id="selectedSSAId"><p>(no SSA selected)</p></div>
+	
+	<select id="selectId3" onchange="ChangeSelectedMapunit(event)">
+		<option value='' style="display: none" id="remove">(select a mapunit)</option>
+	</select>
+	<br></br>
+	<div id="id1"></div>
+	<br></br>
+	<p>Notes: <a href='#top'>Back to top</a></p>
+	<ul>
+	<li>When the page is loaded the State selection option set is loaded from SDA.</li>
+
+	</ul>
+
+	<script>
+		var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+		var stateId = "";
+		// Wait for everything to be loaded before starting the first SDA request
+		$(document).ready(function(){
+			// Start by retrieving a state list
+			//STATE	stateId
+			// 1
+			var data = {
+				query: 
+				 "SELECT CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
+			
+				format: "json"
+			}
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId1", callbackData.Table, 1, 0, "select a state");
+				}, 
+				"json");
+		});
+		
+		function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+			// Add options to the specified select list. The content of the table[valueColumn]
+			// defines the value of the selection, the table[labelColumn] is used for the 
+			// displayed option's text.
+			var iRow = 0;
+			$("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+			while (iRow < table.length) {
+				var row = table[iRow];
+				var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+				$("#" + id).append(optionHtml);
+				iRow++;
+			}
+		}
+		
+		function ChangeSelectedState(event) {
+			// Update the selected state text area and then fetch SSA names and symbols
+			var stateId = event.target.value;
+			var notification = $("#selectedStateId");
+			notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+			//SSA	ssaId
+			//2
+			query = 
+				"SELECT DISTINCT query_name AS ssaId"
+				+ "	FROM wss_metric_query_results WHERE query_name IN ('wss_top100reports', 'wss_top100ratings', 'wss_top100AOIs') AND [state] = '" + stateId  + "'" 
+				+ "GROUP BY query_name;"
+					
+				;
+
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId2", callbackData.Table, 1, 0, "select an SSA");
+				}, 
+				"json");
+		}
+		
+		function ChangeSelectedSSA(event) {
+			// Update the selected state text area and then fetch mapunit records
+			//Map Unit
+			//3
+			var ssaId = event.target.value;
+			var notification = $("#selectedSSAId");
+			notification[0].innerHTML = "<p>selected SSA areasymbol = " + ssaId + "</p>";
+	
+			var query = 
+			"SELECT DISTINCT query_year "
+				+ "  FROM wss_metric_query_results WHERE query_year >=2015  AND  query_name = '" + ssaId + "'" 
+				+ "  GROUP BY query_year  ORDER BY  query_year DESC; "
+
+			
+				;
+				
+			var data = {
+				query: query,
+				format: "json"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+					loadSelect("selectId3", callbackData.Table, 0, 1, "select a mapunit");
+				}, 
+				"json");			
+		}
+		
+		function ChangeSelectedMapunit(event) {
+			// Given the mukey, get the "extended" mapunit attributes
+			var mukey = event.target.value;
+	//MU		
+			query = 
+		"SELECT muname, compname, comppct_r, text, component.cokey FROM mapunit"
+		+ "		INNER JOIN (component INNER JOIN cotext ON component.cokey=cotext.cokey AND comptextkind = 'Nontechnical description' AND textcat='GENSOIL') ON mapunit.mukey=component.mukey AND mapunit.mukey = " + mukey 
+		+ " ORDER BY comppct_r DESC , component.cokey"
+		+ ";";
+
+			var data = {
+				query: query,
+				format: "json+columnname"
+			}
+			
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					$('#id1')[0].innerHTML = "";
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+			
+				
+		}
+	</script>
+</body>
+</html>
