@@ -42,8 +42,8 @@ SELECT legend.areaname, legend.areasymbol, musym, mapunit.mukey, muname, CONCAT 
 FROM mapunit AS MM2
 INNER JOIN component AS CCO ON CCO.mukey = MM2.mukey AND mapunit.mukey = MM2.mukey AND majcompflag = 'Yes' ) AS  major_mu_pct_sum
 FROM (legend 
-INNER JOIN mapunit ON legend.lkey=mapunit.lkey --AND mapunit.mukey = 621224
-AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
+INNER JOIN mapunit ON legend.lkey=mapunit.lkey 
+--AND  CASE WHEN @area_type = 2 THEN LEFT (areasymbol, 2) ELSE areasymbol END = @area
 )  
 INNER JOIN sacatalog SC ON legend.areasymbol = SC.areasymbol
 
@@ -239,9 +239,9 @@ CREATE TABLE #water6
     musym VARCHAR (20), 
 	mukey INT, 
 	muname VARCHAR (250) ,
-	dom_cond_pearched_apparent VARCHAR (10))
+	dom_cond_pearched_apparent VARCHAR (10), datestamp VARCHAR(32))
 
-INSERT INTO #water6 (areaname, areasymbol, musym, mukey, muname, dom_cond_pearched_apparent)
+INSERT INTO #water6 (areaname, areasymbol, musym, mukey, muname, dom_cond_pearched_apparent, datestamp)
 SELECT DISTINCT  #map.areaname, #map.areasymbol, #map.musym, #map.mukey, #map.muname , 
 
 --(SELECT TOP 1 perched_apparent
@@ -251,15 +251,15 @@ SELECT DISTINCT  #map.areaname, #map.areasymbol, #map.musym, #map.mukey, #map.mu
 (SELECT TOP 1  dom_cond_comp
 FROM #water5 AS w 
 WHERE w.mukey = #water5.mukey 
-GROUP BY w.mukey, dom_cond_comp, adj_comp_pct ORDER BY SUM(CAST (adj_comp_pct AS real)) over(partition by dom_cond_comp) DESC) AS  dom_cond_pearched_apparent
+GROUP BY w.mukey, dom_cond_comp, adj_comp_pct ORDER BY SUM(CAST (adj_comp_pct AS real)) over(partition by dom_cond_comp) DESC) AS  dom_cond_pearched_apparent, #map.datestamp
 
 FROM #map
 LEFT OUTER JOIN #water5 ON #water5.mukey=#map.mukey 
-GROUP BY #map.areaname , #map.areasymbol, #map.musym, #map.mukey, #water5.mukey , #map.muname , adj_comp_pct
-ORDER BY #map.areasymbol ASC, #map.musym ASC, #map.mukey ASC, #map.muname ASC
+GROUP BY #map.areaname , #map.areasymbol, #map.musym, #map.mukey, #water5.mukey , #map.muname , adj_comp_pct, #map.datestamp
+ORDER BY #map.areasymbol ASC, #map.musym ASC, #map.mukey ASC, #map.muname ASC, #map.datestamp DESC
 
 
-SELECT areaname, areasymbol, #water6.musym, #water6.mukey, #water6.muname, dom_cond_pearched_apparent--, drclassdcd, drclasswettest--, wtdepannmin, wtdepaprjunmin
+SELECT areaname, areasymbol, #water6.musym, #water6.mukey, #water6.muname, dom_cond_pearched_apparent, datestamp--, drclassdcd, drclasswettest--, wtdepannmin, wtdepaprjunmin
 FROM #water6
 --INNER JOIN muaggatt ON muaggatt.mukey=#water6.mukey --AND dom_cond_pearched_apparent = 'Not Rated' AND wtdepannmin IS NOT NULL
 
