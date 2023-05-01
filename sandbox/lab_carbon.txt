@@ -1,0 +1,162 @@
+-- Insert Dynamic Pedon Lab Sample numbers
+DECLARE @depth INT;
+SELECT @depth = 0;
+
+
+
+SELECT  l.[labsampnum]
+    , [latitude_decimal_degrees]
+     , [longitude_decimal_degrees]
+       , cnn.[pedon_key]
+     
+     , p.[pedlabsampnum]
+     
+ 
+     , [hzn_top]
+     , [hzn_bot]
+     , [hzn_desgn]
+     , [pedoniid]
+     , [upedonid]
+     , CASE
+           WHEN [corr_name] IS NULL THEN
+               [samp_name]
+           ELSE
+               upper(substring([corr_name], 1, 1)) + lower(substring([corr_name], 2, 120))
+       END                            AS soil_name
+     , CASE
+           WHEN [corr_class_type] IS NULL THEN
+               [samp_class_type]
+           ELSE
+               [corr_class_type]
+       END                            AS class_type
+     , CASE
+           WHEN [corr_classification_name] IS NULL THEN
+               [samp_classification_name]
+           ELSE
+               [corr_classification_name]
+       END                            AS [classification_name]
+  
+     , [usiteid]
+     , [site_obsdate]
+         , country_code
+     , country_name
+     , state_code
+     , state_name
+     , county_code
+     , county_name
+     , mlra_code
+     , mlra_name
+     , ssa_code
+     , ssa_name
+     , [pedobjupdate]
+     ,  CASE
+           WHEN [estimated_organic_carbon] IS NOT NULL THEN
+               estimated_organic_carbon
+          WHEN ([estimated_organic_carbon] IS NOT NULL
+               AND [caco3_lt_2_mm] IS NOT NULL) THEN
+             ([total_carbon_ncs] - ([caco3_lt_2_mm] * 0.12))
+           WHEN [estimated_organic_carbon] IS NULL
+                AND [caco3_lt_2_mm] IS NULL
+                AND [total_carbon_ncs] IS NOT NULL THEN
+                [total_carbon_ncs]
+           WHEN [organic_carbon_walkley_black] IS NOT NULL THEN
+               0.25 +  [organic_carbon_walkley_black] * 0.86
+       END                            AS [calc_estimated_organic_carbon]
+
+     , CASE
+           WHEN [estimated_organic_carbon] IS NOT NULL THEN
+               'estimated_organic_carbon'
+           WHEN [estimated_organic_carbon] IS NULL
+                AND [caco3_lt_2_mm] IS NOT NULL THEN
+               '([total_carbon_ncs]- ([caco3_lt_2_mm]*0.12))'
+           WHEN [estimated_organic_carbon] IS NULL
+                AND [caco3_lt_2_mm] IS NULL
+                AND [total_carbon_ncs] IS NOT NULL THEN
+               '[total_carbon_ncs]'
+           WHEN [organic_carbon_walkley_black] IS NOT NULL THEN
+               '0.25 +  [organic_carbon_walkley_black] * 0.86'
+       END                            AS [calc_estimated_organic_carbon_field]
+   
+   
+     , [estimated_organic_carbon]
+	  [texture_lab]
+     , [total_carbon_ncs]
+     ,[caco3_lt_2_mm]
+	  , [organic_carbon_walkley_black]
+	     , (
+           SELECT TOP 1
+               [texture_lab]
+           FROM [sdmONLINE].[dbo].[lab_physical_properties] AS lpp2
+           WHERE lpp2.labsampnum = l.labsampnum
+                 AND [texture_lab] IS NOT NULL
+       )                              AS [lab_texture]
+
+
+
+	   ,[Soil_Classification]
+      ,[Primary_Lab_Report]
+      ,[Taxonomy_Report]
+      ,[Supplementary_Lab_Report]
+      ,[Water_Retention_Report]
+      ,[Correlation_Report]
+      ,[pedon_Description_Report]
+      ,[Soil_Profile]
+      ,[Soil_web]
+    
+ 
+FROM [lab_pedon]                                                                                        AS p
+  INNER JOIN  [lab_combine_nasis_ncss]     AS cnn 
+        ON p.pedon_key = cnn.pedon_key AND CASE WHEN [latitude_decimal_degrees] IS NULL THEN 2 
+  WHEN [longitude_decimal_degrees] IS NULL THEN 2 ELSE 1 END = 1
+    INNER JOIN [lab_layer]                                               AS l
+        ON l.pedon_key = p.pedon_key
+           AND ([hzn_top] = @depth)
+    INNER JOIN [lab_chemical_properties]                                 AS lcp
+        ON lcp.labsampnum = l.labsampnum
+     LEFT OUTER JOIN  [lab_physical_properties]                                 AS lpp
+        ON lpp.labsampnum = l.labsampnum
+   LEFT OUTER JOIN [lab_calculations_including_estimates_and_default_values] AS lce
+        ON lce.labsampnum = l.labsampnum
+    LEFT OUTER JOIN
+    (
+        SELECT [area_code] AS country_code
+             , [area_name] AS country_name
+             , area_key
+        FROM lab_area
+    )                                                                    AS c
+        ON cnn.[country_key] = c.area_key -- Country
+    LEFT OUTER JOIN
+    (
+        SELECT [area_code] AS state_code
+             , [area_name] AS state_name
+             , area_key
+        FROM lab_area
+    )                                                                    AS s
+        ON cnn.[state_key] = s.area_key --State
+    LEFT OUTER JOIN
+    (
+        SELECT [area_code] AS county_code
+             , [area_name] AS county_name
+             , area_key
+        FROM lab_area
+    )                                                                    AS ct
+        ON cnn.[county_key] = ct.area_key --County
+    LEFT OUTER JOIN
+    (
+        SELECT [area_code] AS mlra_code
+             , [area_name] AS mlra_name
+             , area_key
+        FROM lab_area
+    )                                                                    AS m
+        ON cnn.[mlra_key] = m.area_key --MLRA
+    LEFT OUTER JOIN
+    (
+        SELECT [area_code] AS ssa_code
+             , [area_name] AS ssa_name
+             , area_key
+        FROM lab_area
+    )                                                                    AS ss
+        ON cnn.[ssa_key] = ss.area_key --SSA
+INNER JOIN [lab_webmap] ON lab_webmap.pedon_Key = p.pedon_key
+
+

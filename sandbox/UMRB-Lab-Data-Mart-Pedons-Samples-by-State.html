@@ -6,7 +6,7 @@
  <link rel="stylesheet" href="https://jneme910.github.io/NRCS-Soil-Data-Access/style-sheet/nrcs-style.min.css" media="all"> 
   <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style-docs.min.css" media="all">
  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
-    <title>Lab Data Mart - Lab Analysis By State</title>
+    <title>Upper Missouri River Basin (UMRB) Project</title>
 <!-- Start Map -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 <!-- End Map -->
@@ -111,7 +111,7 @@ div {
 </head>
 <body>
 <section class="docs__section docs__intro">
-      <h1 class="docs__bd docs__title">Lab Data Mart - Lab Analysis By State<span class="docs__title__version" title="version"> </span></h1>
+      <h1 class="docs__bd docs__title">Upper Missouri River Basin (UMRB) Project<span class="docs__title__version" title="version"> </span></h1>
       <div class="docs__nav-shell" id="global-nav">
         <nav class="docs__nav">
           <ul class="docs__primary-nav" id="primary-navigation" aria-label="Primary Navigation" data-title="nrcs-style">
@@ -124,7 +124,7 @@ div {
         </font> -->
     </b>
     <p>
-   The Soil Data Access Web Services Query select list is used to pick a state or the Nation enabling creation of a "Lab Data Mart - Lab Analysis By State Report" based upon those selections. The report list pedons by state with associated lab reports and pedon description . This report is for the federal, state, and university partners working on the Upper Missouri River Basin (UMRB) project.  Soil and Plants Science Division (SPSD) is doing the soil sampling and lab analyses for that project.  
+   The Soil Data Access Web Services Query select list is used to pick a state or the Nation enabling creation of a "Upper Missouri River Basin (UMRB) Project Report" based upon those selections. The report list pedons by state with associated lab reports and pedon description . This report is for the federal, state, and university partners working on the Upper Missouri River Basin (UMRB) Project.  Soil and Plants Science Division (SPSD) is doing the soil sampling and lab analyses for that project.  
  	 
     <a href='#reportref'> For more information about the table, </a>
     </p> </p>
@@ -143,14 +143,7 @@ div {
 		<head>
 		<meta charset='utf-8'>
 		</meta>
-		<link rel='stylesheet' href='http://cdn.leafletjs.com/leaflet-0.7/leaflet.css'>
-		</link>
-		</head>
-		<body>
-		<div id='map' style='width: 100%; height: 100vh'>
-		</div>
-		<script type='text/javascript' src='http://cdn.leafletjs.com/leaflet-0.7/leaflet.js'>
-</script>	
+	
         <div id="main" style="width: 1500px;height:600px;"></div>
 		
 		</br>
@@ -166,12 +159,18 @@ div {
 <li ><b>Series: </b>The name assigned to the soil series.</li>
 <li><b> User_pedon_ID:  </b>A short label to help a user identify a particular pedon.</li>
 <li><b>Soil_Classification: </b>The date when the most recent change to the taxonomic classification of a particular soil series was made.</li>
-<li><b>lat:  </b>Standardized latitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original latitude coordinates using standard conversion algorithms.</li>
-<li><b>lat:  </b>Standardized latitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original latitude coordinates using standard conversion algorithms.</li>
-<li><b>Long: </b>
 
-Standardized longitude value in decimal degrees, in geographic coordinate system, WGS84 datum. Values are either auto-populated from GPS, or computed from original longitude coordinates using standard conversion algorithms.
-   </li>   
+<li><b>	hzn_desgn:	</b>	The concatenation of three kinds of symbols (four data elements) used in various combinations to designate layers within the soil. (SSM)	</li>
+<li><b>	hzn_top:	</b>	The top (upper) depth of the layer.	</li>
+<li><b>	hzn_bot:	</b>	The bottom (lower) depth of the layer.	</li>
+<li><b>	sand_total:	</b>	Mineral particles 0.05mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.	</li>
+<li><b>	silt_total:	</b>	Total silt is the soil separate with 0.002 to 0.05 mm particle size. It is reported as a gravimetric percent of the less than 2 mm fraction.	</li>
+<li><b>	clay_total:	</b>	Total clay is the soil separate with less than 0.002 mm particle diameter. Clay size carbonate is included. Total clay is reported as a gravimetric percent of the less than2 mm fraction.	</li>
+<li><b>	33 kPa wa:	</b>	The volumetric content of soil water retained at a tension of 1/3 bar (33 kPa), expressed as a percentage of the whole soil.	</li>
+<li><b>	1500 kPa water:	</b>	The volumetric content of soil water retained at a tension of 15 bars (1500 kPa), expressed as a percentage of the whole soil.	</li>
+<li><b>	BD 33 kPa:	</b>	The oven dry weight of the less than 2 mm soil material per unit volume of soil at a water tension of one third bar.	</li>
+<li><b>	BD Oven Dry:	</b>	The oven dry weight of the less than 2 mm soil material per unit volume of soil exclusive of the desiccation cracks, measured on a coated clod.	</li>
+ 
    </ul>
 		
 	</div>
@@ -226,11 +225,13 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
             var stateId = event.target.value;
             var notification = $("#selectedStateId");
             notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
-            var query =     " SELECT TOP 10 [Series] "
+            var query =     " SELECT DISTINCT [Series] "
 					+ "	,[User_pedon_ID] "
-					//+ "	,lab_webmap.[pedon_Key] "
-					//+ "	,[peiid] "
+
 					+ "	,[Soil_Classification] "
+					+ ", hzn_desgn, CAST (hzn_top AS real) AS hzn_top ,CAST (hzn_bot AS real) AS hzn_bot,  CAST ( sand_total AS REAL)  AS sand_total   , CAST (silt_total AS  real) AS silt_total, CAST (clay_total AS real) clay_total "
+					+ " , CAST (water_retention_third_bar AS REAL) AS  [33 kPa water] , CAST (water_retention_15_bar AS REAL) AS [1500 kPa water]  , bulk_density_third_bar AS [BD 33 kPa] "
+					+ " ,	bulk_density_oven_dry AS [BD Oven Dry] "
                     + "	 , REPLACE (CONCAT ('<a target=zz_blankzz href=zz' , [Primary_Lab_Report], 'zz>Click Here</a>'), 'zz', '''') AS [Primary Lab Report] "
 					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	 [Taxonomy_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Taxonomy Report] "
 					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Supplementary_Lab_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Supplementary Lab Report] "
@@ -238,15 +239,15 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
 					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Correlation_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [Correlation Report] " 
 					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [pedon_Description_Report]	, 'zz>Click Here</a>'), 'zz', '''') AS [pedon Description Report] "
 					//+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Soil_Profile]	, 'zz>Click Here</a>'), 'zz', '''') AS [Soil Profile] "
-					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Soil_web]	, 'zz>Click Here</a>'), 'zz', '''') AS [Soil Web] "
-					+ "	 ,[lat] "
-					+ "	,[long] "
+					+ "	, REPLACE (CONCAT ('<a target=zz_blankzz href=zz' ,	      [Soil_web]	, 'zz>Click Here</a>'), 'zz', '''') AS [ Soil_Web ] "
+				
 					+ "	FROM lab_webmap "
 					+ "	INNER JOIN lab_combine_nasis_ncss ON  lab_combine_nasis_ncss.pedon_key = lab_webmap.pedon_Key "
 					+ "	INNER JOIN lab_area ON lab_area.area_key=lab_combine_nasis_ncss.state_key AND area_code = '"  + stateId + "'"
-					+ "	INNER JOIN  (SELECT pedon_key FROM lab_layer "
+					+ "	INNER JOIN  (SELECT pedon_key  , labsampnum, layer_key, hzn_desgn, hzn_top ,hzn_bot FROM lab_layer "
 					+ "	WHERE project_key IN (6357,6374,6375,6376,6395) ) AS s ON s.pedon_key = lab_combine_nasis_ncss.pedon_key"
-
+					+ "	INNER JOIN lab_physical_properties AS p ON p.labsampnum=s.labsampnum "
+	+ " ORDER BY User_pedon_ID ASC, hzn_top ASC ,hzn_bot ASC "
 			
 
 ;
@@ -451,45 +452,7 @@ Standardized longitude value in decimal degrees, in geographic coordinate system
     </script>
 	
 
-<script>
-var Pedon = [
-["S2021MT003703",45.586055756,-107.438331604],
-["S2021MT017702",46.408527374,-105.956970215],
-["S2021MT031711",45.580055237,-111.072387695],
-["S2021MT041701",48.489021301,-109.799499512],
-["S2021MT045710",47.782222748,-104.248252869],
-["S2021MT065704",46.578369141,-108.423072815],
-["S2021MT083709",47.782287598,-104.247886658],
-["S2021MT087706",46.656833649,-107.223831177],
-["S2021MT095705",45.556369781,-109.611511230],
-["S2021MT097707",46.001415253,-109.841529846],
-["S2021MT111708",46.128250122,-108.755279541],
-["S2021ND001001",46.132221222,-102.721900940],
-["S2021ND011001",46.199584961,-103.473052979],
-["S2021ND021001",46.066940308,-98.102775574],
-["S2021ND023001",48.735069275,-103.881126404],
-["S2021ND023002",48.963779449,-103.805831909],
-["S2021ND037001",46.442859650,-101.373725891],
-["S2021ND041001",46.379730225,-102.322013855],
-["S2021ND043001",47.173030853,-99.797996521],
-["S2021ND043002",46.717998505,-99.460899353],
-["S2021ND057001",47.301807404,-101.679420471],
-["S2021ND087001",46.488521576,-103.316307068],
-["S2021ND093016",47.221248627,-98.679847717],
-["S2021ND105001",48.735069275,-103.881126404],
-["S2021ND105002",48.133117676,-103.738533020],
-["S2021SD027001",43.052600861,-96.904098511],
-["S2021SD047500",43.473701477,-103.971702576],
-["S2021SD093001",44.564300537,-102.674499512],
-["S2021SD103001",44.000789642,-103.000831604],
-["S2021SD105001",45.515964508,-102.465797424]
 
-];
-
-
-var map = L.map('map').setView([47.9629806,-106.0336278]
-
-, 4);mapLink ='<a href="http://openstreetmap.org">OpenStreetMap</a>';L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; ' + mapLink + ' Contributors',maxZoom: 18,}).addTo(map);for (var i = 0; i , Pedon.length; i++) {marker = new L.marker([Pedon[i][1],Pedon[i][2]]).bindPopup(Pedon[i][0]).addTo(map);};</script>
 </body>	
 </body>
 </html>
