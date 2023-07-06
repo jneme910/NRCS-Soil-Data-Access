@@ -161,8 +161,8 @@ div {
 <li><b>Soil_Classification: </b>The date when the most recent change to the taxonomic classification of a particular soil series was made.</li>
 
 <li><b>	hzn_desgn:	</b>	The concatenation of three kinds of symbols (four data elements) used in various combinations to designate layers within the soil. (SSM)	</li>
-<li><b>	hzn_top:	</b>	The top (upper) depth of the layer.	</li>
-<li><b>	hzn_bot:	</b>	The bottom (lower) depth of the layer.	</li>
+<li><b>	hzn_top:	</b>	The top (upper) depth of the layer in Centimeters</li>
+<li><b>	hzn_bot:	</b>	The bottom (lower) depth of the layer in Centimeters.</li>
 <li><b>	sand_total:	</b>	Mineral particles 0.05mm to 2.0mm in equivalent diameter as a weight percentage of the less than 2 mm fraction.	</li>
 <li><b>	silt_total:	</b>	Total silt is the soil separate with 0.002 to 0.05 mm particle size. It is reported as a gravimetric percent of the less than 2 mm fraction.	</li>
 <li><b>	clay_total:	</b>	Total clay is the soil separate with less than 0.002 mm particle diameter. Clay size carbonate is included. Total clay is reported as a gravimetric percent of the less than2 mm fraction.	</li>
@@ -229,7 +229,7 @@ div {
 					+ "	,[User_pedon_ID] "
 
 					+ "	,[Soil_Classification] "
-					+ ", hzn_desgn, CAST (hzn_top AS real) AS hzn_top ,CAST (hzn_bot AS real) AS hzn_bot,  CAST ( sand_total AS REAL)  AS sand_total   , CAST (silt_total AS  real) AS silt_total, CAST (clay_total AS real) clay_total "
+					+ ", hzn_desgn, CAST (hzn_top AS real) AS [hzn_top] ,CAST (hzn_bot AS real) AS hzn_bot,  CAST ( sand_total AS REAL)  AS sand_total   , CAST (silt_total AS  real) AS silt_total, CAST (clay_total AS real) clay_total "
 					+ " , CAST (water_retention_third_bar AS REAL) AS  [33 kPa water] , CAST (water_retention_15_bar AS REAL) AS [1500 kPa water]  , bulk_density_third_bar AS [BD 33 kPa] "
 					+ " ,	bulk_density_oven_dry AS [BD Oven Dry] "
                     + "	 , REPLACE (CONCAT ('<a target=zz_blankzz href=zz' , [Primary_Lab_Report], 'zz>Click Here</a>'), 'zz', '''') AS [Primary_Lab Report] "
