@@ -229,7 +229,7 @@ div {
 					+ "	,[User_pedon_ID] "
 
 					+ "	,[Soil_Classification] "
-					+ ", hzn_desgn, CAST (hzn_top AS real) AS [hzn_top] ,CAST (hzn_bot AS real) AS hzn_bot,  CAST ( sand_total AS REAL)  AS sand_total   , CAST (silt_total AS  real) AS silt_total, CAST (clay_total AS real) clay_total "
+					+ ", hzn_desgn, CAST (hzn_top AS real) AS [hzn_top (cm)] ,CAST (hzn_bot AS real) AS [hzn_bot (cm)],  CAST ( sand_total AS REAL)  AS sand_total   , CAST (silt_total AS  real) AS silt_total, CAST (clay_total AS real) clay_total "
 					+ " , CAST (water_retention_third_bar AS REAL) AS  [33 kPa water] , CAST (water_retention_15_bar AS REAL) AS [1500 kPa water]  , bulk_density_third_bar AS [BD 33 kPa] "
 					+ " ,	bulk_density_oven_dry AS [BD Oven Dry] "
                     + "	 , REPLACE (CONCAT ('<a target=zz_blankzz href=zz' , [Primary_Lab_Report], 'zz>Click Here</a>'), 'zz', '''') AS [Primary_Lab Report] "
@@ -247,7 +247,7 @@ div {
 					+ "	INNER JOIN  (SELECT pedon_key  , labsampnum, layer_key, hzn_desgn, hzn_top ,hzn_bot FROM lab_layer "
 					+ "	WHERE project_key IN (6357,6374,6375,6376,6395) ) AS s ON s.pedon_key = lab_combine_nasis_ncss.pedon_key"
 					+ "	INNER JOIN lab_physical_properties AS p ON p.labsampnum=s.labsampnum "
-	+ " ORDER BY User_pedon_ID ASC, hzn_top ASC ,hzn_bot ASC "
+	+ " ORDER BY User_pedon_ID ASC, [hzn_top (cm)] ASC ,[hzn_bot (cm)]ASC "
 			
 
 ;
