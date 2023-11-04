@@ -1,0 +1,487 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <link rel="stylesheet" href="https://jneme910.github.io/NRCS-Soil-Data-Access/style-sheet/nrcs-style.min.css" media="all"> 
+ <!--  <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style.min.css" media="all">-->
+  <link rel="stylesheet" href="https://koala-bandits.github.io/nrcs-style/css/nrcs-style-docs.min.css" media="all">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+    <title>Hydric Soils Extent by MLRA</title>
+<!-- Start Map -->
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<!-- End Map -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!--subtable -->
+    <style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-ul38{text-align:left;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-rz9m{text-align:center;vertical-align:top;position:sticky;position:-webkit-sticky;top:-1px;will-change:transform}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+.tg-sort-header::-moz-selection{background:0 0}.tg-sort-header::selection{background:0 0}.tg-sort-header{cursor:pointer}.tg-sort-header:after{content:'';
+float:right;margin-top:7px;border-width:0 5px 5px;border-style:solid;border-color:#404040 transparent;visibility:hidden}.tg-sort-header:hover:after{visibility:visible}.tg-sort-asc:after,.tg-sort-asc:hover:after,
+.tg-sort-desc:after{visibility:visible;opacity:.4}.tg-sort-desc:after{border-bottom:none;border-width:5px 5px 0}@media screen and (max-width: 767px) {.tg {width: auto !important;}.tg col {width: auto !important;}
+.tg-wrap {overflow-x: auto;-webkit-overflow-scrolling: touch;margin: auto 0px;}}</style>
+<!--subtable .chart-container {
+    width: 2500px;
+    height:2600px
+}-- >
+    
+    <!-- -->
+   
+<style type="text/css">
+div {
+    box-sizing: border-box;
+    padding: 10px;
+}
+   ul.space_list li { margin-bottom: .2em; }
+        .scrolltable {
+            overflow-x: scroll;
+            height: 100%;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+        .scrolltable > .header {
+        }
+        .scrolltable > .body {
+            /*noinspection CssInvalidPropertyValue*/
+            width: -webkit-fit-content;
+            overflow-y: scroll;
+            flex: 1;
+            -webkit-flex: 1;
+        }
+        th, td {
+            min-width: 25px;
+            border-width: 1px;
+            padding: 2px;
+        }
+        /* an outside constraint to react against */
+        #constrainer {
+            width: 400px;
+            height: 200px;
+        }
+        #constrainer2 {
+            width: 400px;
+            overflow-x: scroll;
+        }
+        #constrainer2 table {
+            overflow-y: scroll;
+        }
+        #constrainer2 tbody {
+            overflow-x: scroll;
+            display: block;
+            height: 200px;
+        }
+        #constrainer2 thead {
+            display: table-row;
+        }
+        /* only styling below here */
+        #constrainer, #constrainer2 {
+            border: 1px solid lightgrey;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid gray;
+        }
+        th {
+            background-color: lightgrey;
+            border-width: 1px;
+        }
+        td {
+            border-width: 1px;
+        }
+        tr:first-child td {
+            border-top-width: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+<section class="docs__section docs__intro">
+      <h1 class="docs__bd docs__title">Web Soil Survey Metrics Summary Report<span class="docs__title__version" title="version"> </span></h1>
+      <div class="docs__nav-shell" id="global-nav">
+        <nav class="docs__nav">
+          <ul class="docs__primary-nav" id="primary-navigation" aria-label="Primary Navigation" data-title="nrcs-style">
+		  </section>
+	<div>
+<b>
+ <!--        <font color='red'>
+<h3>Web Soil Survey Metrics Report by a State</h3>
+
+        </font> -->
+    </b>
+    <p>
+   The Soil Data Access Web Services Query select list is used to pick a MLRA enabling creation of a "Hydric Soils Extent by MLRA" based upon those selections. 
+ 	 
+    <a href='#reportref'> For more information about the table, </a>
+    </p> </p>
+    <a name='top'>
+    <!-- The following "div" tag will be updated with the retrieved data
+        After the first selection the "(select a state)" will disappear -->
+    <select id="selectId1" onchange="ChangeSelectedState(event)">
+        <option value='' style="display: none" id="remove">(select a state)</option>
+    </select>
+    <div id="selectedStateId"><p>(no state selected)</p></div>
+
+    <div id="id1"></div>
+        <br></br>
+			<p> Click on MLRA field to deselect or select field in the chart below </p>
+        <div id="main" style="width: 1500px;height:600px;"></div>
+		
+		</br>
+    <b>
+        <font color='red'>
+            <a name='reportref'>Report Metadata:</a>
+        </font>
+    </b>
+    <php>
+        <a href='#top'>Back to top</a>
+    </php>
+        <ul  class=space_list> <!-- class=space_list -->
+<li ><b> Method: Component Percent was multiplied by the map unit Acres. Hydric Soil Flag was set to 'Yes'		
+<li ><b>Component Percent: </b>The percentage of the component of the mapunit.</li>
+<li ><b>Component Name: </b> Name assigned to a component based on its range of properties.   </li>
+<li><b>Hydric Rating: </b>A yes/no field that indicates whether or not a map unit component is classified as a "hydric soil".  If rated as hydric, the specific criteria met are listed in the Component Hydric Criteria table./li>
+<li><b> Map Unit Acres</b> The number of acres of a particular map unit within the geographic area to which the legend applies.  The number listed here may differ from that measured using GIS software due to different measuring techniques and rounding practices, or due to the fact that the value has been adjusted so that the sum total of all map units in the legend equals that listed for soil survey area.</li>
+<li><b> MLRA</b>An NRCS business unit responsible for oversight of soil survey production activities of a particular soil survey area.</li>
+<li><b>Area Overlap Acres</b>The area overlap of two geographic regions, in acres.</li>
+
+        </ul>
+		
+    <b>
+        <font color='red'>
+            <a name='reportref'>Issues or Enhancements to work on:</a>
+			        <ul  class=space_list> <!-- class=space_list -->
+<
+<li > Add NCSS Icon to Chart</li>
+
+        </ul>
+        </font>
+    </b>
+	</div>
+
+    <script>
+        var tableData = []; 
+        var url =  "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+        var stateId = "";
+        // Wait for everything to be loaded before starting the first SDA request
+        $(document).ready(function(){
+            // Start by retrieving a state list
+            var data = {
+                query:
+		"SELECT areasymbol, areasymbol AS stateid, areaname AS MLRA_Name FROM laoverlap WHERE laoverlap.areatypename ='MLRA' GROUP BY areasymbol ,  areaname ORDER BY areasymbol ASC;",
+				//"SELECT CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS [state], CASE WHEN [STATE]= 'xnational' THEN 'National' ELSE [STATE] END AS stateid   FROM [wss_metric_query_results] GROUP BY [state] ORDER BY CASE WHEN  [state] = 'xnational' THEN 'aaaaaa' ELSE [state] END ASC  ;",
+                //query: "Select statename, stateid from state  WHERE stateid IN ('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MS', 'MT', 'MX', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'WA', 'WI', 'WV', 'WY')order by statename;",
+                format: "json"
+            }
+            $.post(url, data, function( callbackData ) {
+                console.log(callbackData, 'callbackData')
+                    loadSelect("selectId1", callbackData.Table, 1, 0, "select a MLRA");
+                }, 
+                "json");
+        });
+        function loadSelect(id, table, valueColumn, labelColumn, hintOption) {
+            // Add options to the specified select list. The content of the table[valueColumn]
+            // defines the value of the selection, the table[labelColumn] is used for the 
+            // displayed option's text.
+            var iRow = 0;
+            $("#" + id)[0].innerHTML = "<option value='' style='display: none' id='remove'>(" + hintOption + ")</option>";
+            while (iRow < table.length) {
+                var row = table[iRow];
+                var optionHtml = "<option value='" + row[valueColumn] + "'>" + row[labelColumn] + "</option>";
+                $("#" + id).append(optionHtml);
+                iRow++;
+            }
+        }
+        function ChangeSelectedState(event) {
+            // Update the selected state text area and then fetch and display report 1 results
+            var stateId = event.target.value;
+            var notification = $("#selectedStateId");
+            notification[0].innerHTML = "<p>selected stateId = " + stateId + "</p>";
+            var query = 
+	"CREATE TABLE #comp "
+  + "   (  MLRA  VARCHAR(40) , "
++ " 	MLRA_Name VARCHAR(254) , "
++ " 	muacres DECIMAL , "
+  + "   MU_pct INT, "
+ + "    mukey INT , "
+ + "   comppct_r INT,  "
+ + "   compname  VARCHAR(254) ,  "
+ + "   cokey INT); "
+
++ " INSERT INTO #comp (MLRA, MLRA_Name, muacres, MU_pct,  mukey,  comppct_r, compname, cokey) "
++ " SELECT  lao.areasymbol AS MLRA, lao.areaname AS MLRA_Name, "
+ + " muacres,  "
++ " SUM (comppct_r) over(partition by m.mukey) as MU_pct, m.mukey,  comppct_r, compname, c.cokey "
+
++ " FROM legend AS l "
++ " INNER JOIN laoverlap AS lao ON l.lkey = lao.lkey  AND lao.areasymbol = '"  + stateId + "'"
++ " AND l.areasymbol <> 'US' "
++ " INNER JOIN muaoverlap AS mua ON mua.lareaovkey = lao.lareaovkey AND lao.areatypename='mlra'  "
++ " INNER JOIN mapunit AS m ON m.lkey=l.lkey  "
++ " INNER JOIN component AS c ON c.mukey=m.mukey AND hydricrating = 'Yes' "
+
++ " WHERE CASE WHEN muacres IS NULL THEN 1  "
++ " WHEN comppct_r IS NULL THEN 1 ELSE 2 END = 2; "
+
+
++ " CREATE TABLE #comp2 "
+ + "    ( MLRA  VARCHAR(40) ,  "
++ " 	MLRA_Name VARCHAR(254) ,  "	
++ " 	muacres REAL , "
+   + "  MU_pct REAL, "
+ + "    mukey INT , "
+  + "  comppct_r REAL,  "
+  + "  compname  VARCHAR(254) ,  "
+  + "  cokey INT, "
+ + "   component_acres  REAL, "
+ + "   pct REAL); "
++ " INSERT INTO #comp2 (MLRA, MLRA_Name, muacres, MU_pct,  mukey,  comppct_r, compname, cokey, pct   ) "
++ " Select  MLRA, MLRA_Name, muacres, MU_pct, mukey , comppct_r,   compname, cokey,  CAST (comppct_r AS decimal)/CAST (MU_pct AS decimal) AS pct  "
++ " From #comp "
++ " WHERE CASE WHEN comppct_r IS NULL THEN 1 "
++ " WHEN comppct_r = 0 THEN 1 "
++ " WHEN MU_pct  IS NULL THEN 1 "
++ " WHEN MU_pct  = 0 THEN 1 ELSE 2 END = 2 "
+
++ " CREATE TABLE #comp3 "
+ + "    ( MLRA  VARCHAR(40) ,  "
++ " 	MLRA_Name VARCHAR(254) ,  "
++ " 	muacres REAL , "
+  + "   MU_pct REAL, "
+ + "    mukey INT , "
+ + "   comppct_r REAL,  "
+ + "   compname  VARCHAR(254) ,  "
+  + "  cokey INT, "
+ + "   pct REAL, "
++ "    component_acres  REAL); "
+
++ " INSERT INTO #comp3 (MLRA, MLRA_Name, muacres, MU_pct,  mukey,  comppct_r, compname, cokey, pct , component_acres  ) "
++ " Select DISTINCT MLRA, MLRA_Name,  muacres, MU_pct, mukey , comppct_r,  compname, cokey,  pct, ROUND (muacres*pct, 2) AS component_acres "
++ " From #comp2 "
++ " ORDER BY component_acres DESC, compname "
+
++ " CREATE TABLE #last2 "
++ "     (  MLRA  VARCHAR(40) ,  "
++ " 	MLRA_Name VARCHAR(254) ,  "
+ + "   compname  VARCHAR(254) ,  "
+ + "   component_acres  REAL); "
+
++ " INSERT INTO #last2 (MLRA, MLRA_Name, compname, component_acres  ) "
++ " SELECT DISTINCT MLRA, MLRA_Name, compname, ROUND( SUM(component_acres) over(partition by compname),2) as SUM_component_acres "
++ " FROM #comp3  "
+
++ " SELECT  compname AS [Component_Name], FORMAT (ROUND (component_acres,0) , '#,###,##0') AS [Component_Acres] "
++ " FROM #last2  "
++ " ORDER BY component_acres DESC, compname		 "
+	
+			
+			
+;
+            var data = {
+                query: query,
+                format: "json+columnname"
+            }
+            //+ " AND LEFT (ROUND ([sandmed_r]/[sandtotal_r],2),4) >= .40 ) "
+            $.post(url, data, function( callbackData ) {
+                console.log(callbackData, 'callbackData2')
+                let i = 0
+                // callbackData.forEach((item,i) => {
+                //     tableData.push({
+                //         name: item
+                //     })
+                // });
+                let index2 = 0;
+				tableData = [];
+                for (let i = 0; i < callbackData.Table.length; i++) {
+                        tableData.push({
+                        name: callbackData.Table[0][i],
+                        values: []
+                    })
+                    for (let i2 = 0; i2 < callbackData.Table.length; i2++) {
+                        index2 = i2;
+                        console.log(tableData, 88)
+                        tableData[i].values.push(
+                        callbackData.Table[i2][i]
+                    )
+                    }
+                    tableData[i].values.shift()
+                }
+                console.log(tableData, 'tableData')
+                createChart()
+                // the success callback function: when executed add content to table
+                    $('#id1')[0].innerHTML = "";
+                    var tableHtml = '<table border="1">';
+                    // for each row...
+                                    var iRow = 0;
+                while (iRow < callbackData.Table.length) {
+                                var row = callbackData.Table[iRow];
+                                tableHtml += "<tr>";
+                                // for each column in each row...
+                                var iCol = 0;
+                                while (iCol < row.length) {
+                                                if (iRow == 0) {
+                                                                tableHtml += "<th>" + row[iCol] + "</th>";
+                                                } else {
+                                                                tableHtml += "<td>" + row[iCol] + "</td>";
+                                                }
+                                                iCol++;
+                                };
+                                tableHtml += "</tr>";                                  
+                                iRow++;
+                };
+                    tableHtml += '</table>'
+                    $('#id1').append(tableHtml);
+                }, 
+                // Specify that we want the request to be sent in JSON format
+                "json");            
+        }
+        function createChart(){
+        var myChart = echarts.init(document.getElementById('main'), 'dark'); 
+        let legend = []
+        tableData.forEach(element => {
+            legend.push(element.name)
+        });
+        // let chartData = []
+        // tableData.forEach(element => {
+        //     legend.push(element.name)
+        // });
+        let xAxis = tableData[0].values; 
+	
+        let series = []
+        tableData.forEach(element => {
+            let data = [...element.values]
+            data.forEach((item, i) =>{
+                try {
+                    data[i] = parseFloat(item.replace(/,/g, ''))
+                } catch (error) {
+                }
+            })
+            series.push(
+            {
+                name: element.name,
+                type: 'bar',
+                data: data
+            }
+            )
+        });	
+		series.shift();
+        console.log(series, xAxis, legend, 'series, xAxis, chartData, legend')
+        var option = {
+		
+        title: {
+            text: ''
+        },
+        //tooltip: {}, //pounded out
+		  toolbox: {
+		  orient:'verticle',
+		  
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+
+        }
+		
+    },
+	
+		
+        // legend: {
+        //     // data: [legend]
+        //     data: ['Year']
+        // },
+     tooltip: {
+    trigger: 'item'
+
+  },
+  legend: {data: legend},
+	//	legend: {
+	//	 orient: 'horizontal',
+   //right: 500,
+  //  top: 550,
+  //  bottom: 20,
+	//	data: legend},
+
+	grid: {
+  left: 80,
+  top: 80,
+  right: '10%',
+  bottom: '20%'
+},	
+
+
+    type: 'image',
+    style: {
+        image: 'https://www.nrcs.usda.gov/NRCS_WIDTheme/themes/html/NRCS_WIDTheme/images/USDA-Logo.jpg',
+        x: 100,
+        y: 200,
+        width: 230,
+        height: 400
+    }	,
+        xAxis: {
+            // data: ['Shirts', 'Cardigans', 'Chiffons', 'Pants', 'Heels', 'Socks'],
+            data: xAxis,
+            name: 'Component_Acres',
+        },
+        yAxis: {
+            name: ''
+        },
+        series: series
+        };
+        // Display the chart using the configuration items and data just specified.
+        myChart.setOption(option);
+	
+		
+		
+        }
+        // CHart Script
+        $(document).ready(function(){
+        // Initialize the echarts instance based on the prepared dom
+        var chartDom = document.getElementById('main');
+		var myChart = echarts.init(chartDom, 'dark');
+        // Specify the configuration items and data for the chart
+        var option = {
+        title: {
+            text: 'Hydric Soils Acres by MLRA'
+        },
+        tooltip: {},
+		
+        legend: {
+            data: ['']
+        },
+        xAxis: {
+            data: ['', '', '', '', '', ''],
+            name: '',
+        },
+        yAxis: {
+            name: ''
+        },
+        series: [
+            {
+            name: '',
+            type: 'bar',
+            data: [, , , , , ]
+            }
+        ]
+        };
+		
+		
+        // Display the chart using the configuration items and data just specified.
+       //  myChart.setOption(option);
+	
+        });
+    </script>
+</body>
+</html>

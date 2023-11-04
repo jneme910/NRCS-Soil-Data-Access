@@ -1,4 +1,4 @@
- USE sdmONLINE
+ /*USE sdmONLINE
  
  DROP TABLE IF EXISTS #AoiTablePoint2
  DROP TABLE IF EXISTS #AoiMUIn
@@ -18,7 +18,7 @@
  DECLARE @aoiGeom Geometry;
  DECLARE @aoiGeomFixed Geometry;
 
-
+*/
  
 ~DeclareGeometry(@aoiGeom)~
 ~DeclareGeometry(@aoiGeomFixed)~
