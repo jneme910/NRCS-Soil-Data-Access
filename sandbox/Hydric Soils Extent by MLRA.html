@@ -120,7 +120,7 @@ div {
         </font> -->
     </b>
     <p>
-   The Soil Data Access Web Services Query select list is used to pick a MLRA enabling creation of a "Hydric Soils Extent by MLRA" based upon those selections. 
+   The Soil Data Access Web Services Query select list is used to pick a MLRA enabling creation of a "Hydric Soils Extent by MLRA" based upon those selections. The report grabs the top 10 soils by MLRA based on acres. By selecting a MLRA the reports created 
  	 
     <a href='#reportref'> For more information about the table, </a>
     </p> </p>
@@ -151,9 +151,9 @@ div {
 <li ><b>Component Percent: </b>The percentage of the component of the mapunit.</li>
 <li ><b>Component Name: </b> Name assigned to a component based on its range of properties.   </li>
 <li><b>Hydric Rating: </b>A yes/no field that indicates whether or not a map unit component is classified as a "hydric soil".  If rated as hydric, the specific criteria met are listed in the Component Hydric Criteria table./li>
-<li><b> Map Unit Acres</b> The number of acres of a particular map unit within the geographic area to which the legend applies.  The number listed here may differ from that measured using GIS software due to different measuring techniques and rounding practices, or due to the fact that the value has been adjusted so that the sum total of all map units in the legend equals that listed for soil survey area.</li>
-<li><b> MLRA</b>An NRCS business unit responsible for oversight of soil survey production activities of a particular soil survey area.</li>
-<li><b>Area Overlap Acres</b>The area overlap of two geographic regions, in acres.</li>
+<li><b> Map Unit Acres: </b> The number of acres of a particular map unit within the geographic area to which the legend applies.  The number listed here may differ from that measured using GIS software due to different measuring techniques and rounding practices, or due to the fact that the value has been adjusted so that the sum total of all map units in the legend equals that listed for soil survey area.</li>
+<li><b> MLRA:</b>An NRCS business unit responsible for oversight of soil survey production activities of a particular soil survey area.</li>
+<li><b>Area Overlap Acres:</b>The area overlap of two geographic regions, in acres.</li>
 
         </ul>
 		
@@ -463,7 +463,7 @@ div {
         series: [
             {
             name: '',
-            type: 'bar',
+            type: 'stacked',
             data: [, , , , , ]
             }
         ]
