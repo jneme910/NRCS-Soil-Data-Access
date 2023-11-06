@@ -157,16 +157,7 @@ div {
 
         </ul>
 		
-    <b>
-        <font color='red'>
-            <a name='reportref'>Issues or Enhancements to work on:</a>
-			        <ul  class=space_list> <!-- class=space_list -->
-<
-<li > Add NCSS Icon to Chart</li>
 
-        </ul>
-        </font>
-    </b>
 	</div>
 
     <script>
@@ -280,7 +271,7 @@ div {
 + " SELECT DISTINCT MLRA, MLRA_Name, compname, ROUND( SUM(component_acres) over(partition by compname),2) as SUM_component_acres "
 + " FROM #comp3  "
 
-+ " SELECT  compname AS [Component_Name], ROUND (component_acres,0)  AS [Component_Acres] "
++ " SELECT  TOP 10 compname AS [Component_Name], ROUND (component_acres,0)  AS [Component_Acres] "
 + " FROM #last2  "
 + " ORDER BY component_acres DESC, compname		 "
 	
