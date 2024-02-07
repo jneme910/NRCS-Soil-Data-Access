@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>ex1 - simple table</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	<p>Soil Data Access (SDA) example #1</P
+	<p>
+	The first two rows from the "states" table are retrieved from SDA and 
+	displayed in a table. No error handling is used.
+	</p>
+	
+	<!-- The following "div" tag will be updated with the retrieved data -->
+	<div id="id1"></div>
+	
+	<p>Notes:</p>
+	<ul>
+	<li>The SDA "post.rest" service accepts a multi-statement query, this is called the "query batch".</li>
+	<li>The response is in the form of an object with members "Table",
+	"Table1", "Table2", "Table3", etc. Each of these is an array.
+	</li>
+	<li>The first "select" statement in the "query batch" results in "Table". The second in 
+	"Table1", the third in "Table2" and so forth as required.
+	</li>
+	<li>
+	Within each Table(#) member is an array of rows, within each row an array of column values.
+	</li>
+	<li>
+	When using "format=json" just data are returned. Changing this to "format=json+columnname" returns
+	the column name as the first row in the table. Changing it to "format=json+columnname+metadata"
+	returns the column name as the first row and column metadata as the second, the data commences
+	with the third row.
+	</li>
+	</ul>
+	<script>
+		// Wait for everything to be loaded before starting the SDA request
+		$(document).ready(function(){
+			var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+			var data = {
+				// This query has only a single "select" command, its results will be in "Table"
+				query: "SELECT DISTINCT mu.mukey, muname, compname, comppct_r, "
++" CASE WHEN ecoclassid IS NULL THEN '' ELSE REPLACE (CONCAT ('<a target=',   QUOTENAME ('_blank', ''' ')    , ' ',    ' href=', '~https://edit.jornada.nmsu.edu/catalogs/esd/',SUBSTRING (ecoclassid, 2, 4 ), '/' , ecoclassid  ,  '~>Click Here</a>') , '~', '''') END AS [Hyperlink to Ecological Site Description]"
+				
++ "FROM mapunit AS mu"
++"			INNER JOIN component c ON c.mukey = mu.mukey AND compkind = 'series'"
++"			LEFT OUTER JOIN coecoclass on c.cokey = coecoclass.cokey and coecoclass.ecoclassref like 'Ecological Site Description Database'"
++ "WHERE mu.mukey IN ( "
++ "SELECT * from SDA_Get_Mukey_from_intersection_with_WktWgs84('point(-121.77100 37.368402)')) ORDER BY comppct_r DESC",
+				// We'll request the column names which will be returned as the first row
+				format: "json+columnname"
+			}
+			
+			// "Post" the request to SDA and when the data are returned invoke the
+			// "success" function (see https://api.jquery.com/jquery.post/)
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+		});
+	</script>
+</body>
+</html>
