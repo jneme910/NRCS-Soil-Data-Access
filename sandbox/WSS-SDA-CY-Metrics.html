@@ -1,0 +1,200 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>ex1 - simple table</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	<p>Soil Data Access (SDA) example #1</P
+	<p>
+	The first two rows from the "states" table are retrieved from SDA and 
+	displayed in a table. No error handling is used.
+	</p>
+	
+	<!-- The following "div" tag will be updated with the retrieved data -->
+	<div id="id1"></div>
+	
+	<p>Notes:</p>
+	<ul>
+	<li>The SDA "post.rest" service accepts a multi-statement query, this is called the "query batch".</li>
+	<li>The response is in the form of an object with members "Table",
+	"Table1", "Table2", "Table3", etc. Each of these is an array.
+	</li>
+	<li>The first "select" statement in the "query batch" results in "Table". The second in 
+	"Table1", the third in "Table2" and so forth as required.
+	</li>
+	<li>
+	Within each Table(#) member is an array of rows, within each row an array of column values.
+	</li>
+	<li>
+	When using "format=json" just data are returned. Changing this to "format=json+columnname" returns
+	the column name as the first row in the table. Changing it to "format=json+columnname+metadata"
+	returns the column name as the first row and column metadata as the second, the data commences
+	with the third row.
+	</li>
+	</ul>
+	<script>
+		// Wait for everything to be loaded before starting the SDA request
+		$(document).ready(function(){
+			var url =  "HTTPS://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest";
+			var data = {
+				// This query has only a single "select" command, its results will be in "Table"
+				//query: "select top 2 * from state",
+				
+				query: 	" SELECT DISTINCT "
+   + "  [query_name] "
+   + "   ,[query_frequency] "
+  + "    ,[query_month] "
+  + "   ,[query_year] "
+  + "    ,[STATE] "
+   + "     ,[query_title] "
+
+    
+  + "       ,CASE "
+  + "        WHEN [query_month] = 1 THEN 'Jan' "
+  + "        WHEN [query_month] = 2 THEN 'Feb' "
+   + "       WHEN [query_month] = 3 THEN 'Mar' "
+   + "       WHEN [query_month] = 4 THEN 'Apr' "
+  + "        WHEN [query_month] = 5 THEN 'May' "
+ + "         WHEN [query_month] = 6 THEN 'Jun' "
+    + "      WHEN [query_month] = 7 THEN 'Jul' "
+  + "        WHEN [query_month] = 8 THEN 'Aug' "
+  + "        WHEN [query_month] = 9 THEN 'Sep' "
+   + "       WHEN [query_month] = 10 THEN 'Oct' "
+  + "        WHEN [query_month] = 11 THEN 'Nov' "
+   + "       WHEN [query_month] = 12 THEN 'Dec' "
+   + "       ELSE 'OTHER' "
+   + "    END AS [month_abrv] "
+  + "        ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name "
+
++ ", CONCAT ([query_month], [query_year]) AS sdam_yr "
++ " , SUM([COUNT]) over(partition by [query_month], [query_year]) as sum_count "
+ + " INTO #sda3 "
+ + " FROM [wss_metric_query_results]   WHERE  "
++ "   [query_frequency] = 'M' "
++ "  AND [STATE] LIKE '%NAT%' "
+ + " AND CASE WHEN [query_name] LIKE  'SDA_Usage' THEN 1  "
+ 
+ + " ELSE 2 END = 1 "
+ 
+  + " SELECT [id] "
++ "      ,[query_id] "
++ "      ,[query_name] "
+ + "     ,[query_frequency] "
+	  
++ "	        ,[query_month] "
+ + "        ,CASE "
+ + "         WHEN [query_month] = 1 THEN 'Jan' "
++ "         WHEN [query_month] = 2 THEN 'Feb' "
+ + "         WHEN [query_month] = 3 THEN 'Mar' "
+ + "         WHEN [query_month] = 4 THEN 'Apr' "
+ + "         WHEN [query_month] = 5 THEN 'May' "
++ "          WHEN [query_month] = 6 THEN 'Jun' "
++ "          WHEN [query_month] = 7 THEN 'Jul' "
++ "          WHEN [query_month] = 8 THEN 'Aug' "
++ "          WHEN [query_month] = 9 THEN 'Sep' "
++ "          WHEN [query_month] = 10 THEN 'Oct' "
++ "          WHEN [query_month] = 11 THEN 'Nov' "
+ + "         WHEN [query_month] = 12 THEN 'Dec' "
++ "          ELSE 'OTHER' "
+ + "      END AS [month_abrv] "
+ + "         ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name "
+  + "    ,[query_year] "
+ + "     ,[STATE] "
+ + "     ,[seqnum] "
+  + "    ,[query_title] "
+ + "     ,[query_header] "
++ "	  , CONCAT ([query_month], [query_year]) AS wssm_yr "
+ + "     ,[COUNT] "
++ ", CONCAT ([query_month], [query_year]) AS m_yr "
+
++ "  INTO #wss3 "
++ "  FROM [wss_metric_query_results]  WHERE  "
++ "[query_frequency] = 'M' "
++ "  AND [STATE] LIKE '%NAT%' "
++ "  AND CASE "
++ "  WHEN [query_name] LIKE 'wss_ActivityCounts' AND [query_header]= 'AOI' THEN 1  "
++ "  ELSE 2 END = 1 "
+
++ "  SELECT [id] "
++ "      ,[query_id] "
+ + "     ,[query_name] "
++ "      ,[query_frequency] "
+	  
++ "	        ,[query_month] "
++ "         ,CASE "
++ "          WHEN [query_month] = 1 THEN 'Jan'  "
++ "          WHEN [query_month] = 2 THEN 'Feb' "
++ "          WHEN [query_month] = 3 THEN 'Mar' "
+ + "         WHEN [query_month] = 4 THEN 'Apr' "
++ "          WHEN [query_month] = 5 THEN 'May' "
+ + "         WHEN [query_month] = 6 THEN 'Jun' "
++ "          WHEN [query_month] = 7 THEN 'Jul' "
+ + "         WHEN [query_month] = 8 THEN 'Aug' "
++ "          WHEN [query_month] = 9 THEN 'Sep' "
+ + "         WHEN [query_month] = 10 THEN 'Oct' "
+ + "         WHEN [query_month] = 11 THEN 'Nov' "
++ "          WHEN [query_month] = 12 THEN 'Dec' "
++ "          ELSE 'OTHER' "
+ + "      END AS [month_abrv] "
+ + "         ,DATENAME (MONTH, DATEADD(MONTH, MONTH(query_month) - 1, '1900-01-01')) AS month_name "
+ + "     ,[query_year] "
+ + "     ,[STATE] "
++ "      ,[seqnum] "
+ + "     ,[query_title] "
+ + "     ,[query_header] "
++ "	  , CONCAT ([query_month], [query_year]) AS wssm_yr "
++ "      ,[COUNT] "
++ " , CONCAT ([query_month], [query_year]) AS m_yr "
+	 
++ "  INTO #wss3_session_start "
++ "  FROM [wss_metric_query_results]  WHERE  "
++ "[query_frequency] = 'M' "
+ + " AND [STATE] LIKE '%NAT%' "
++ "  AND CASE "
++ "  WHEN [query_name] LIKE 'wss_ActivityCounts' AND [query_header]= 'SESSION_START' THEN 1  "
++ "  ELSE 2 END = 1 "
+
+
++ " SELECT DISTINCT #wss3.[query_year] AS Year,  "
+//+ " FORMAT(SUM (#wss3_session_start.[COUNT]) over(partition by #wss3_session_start.[query_year]), '#,#') as [Web Soil Survey Session Start], "
++ " FORMAT(SUM (#wss3.[COUNT]) over(partition by #wss3.[query_year]), '#,#') as [Web Soil Survey AOI], "
+
++ " FORMAT(SUM (sum_count) over(partition by #wss3.[query_year]), '#,#') as [Soil Data Access] "
++ " FROM #wss3 "
++ " INNER JOIN #sda3 ON #sda3.sdam_yr =#wss3.wssm_yr "
++ " INNER JOIN #wss3_session_start ON #wss3_session_start.wssm_yr =#wss3.wssm_yr "
++ " GROUP BY  #wss3.[query_year], #wss3.[COUNT], #wss3_session_start.[query_year], #wss3_session_start.[COUNT], sum_count " ,
+
+				// We'll request the column names which will be returned as the first row
+				format: "json+columnname"
+			}
+			
+			// "Post" the request to SDA and when the data are returned invoke the
+			// "success" function (see https://api.jquery.com/jquery.post/)
+			$.post(url, data, function( callbackData ) {
+				// the success callback function: when executed add content to table
+					var tableHtml = '<table border="1">';
+					// for each row...
+					var iRow = 0;
+					while (iRow < callbackData.Table.length) {
+						var row = callbackData.Table[iRow];
+						tableHtml += "<tr>";
+						// for each column in each row...
+						var iCol = 0;
+						while (iCol < row.length) {
+							tableHtml += "<td>" + row[iCol] + "</td>";
+							iCol++;
+						};
+						tableHtml += "</tr>";				
+						iRow++;
+					};
+					tableHtml += '</table>'
+					$('#id1').append(tableHtml);
+				}, 
+				// Specify that we want the request to be sent in JSON format
+				"json");			
+		});
+	</script>
+</body>
+</html>
