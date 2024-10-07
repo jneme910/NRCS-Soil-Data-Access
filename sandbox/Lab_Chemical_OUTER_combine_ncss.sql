@@ -50,9 +50,18 @@ SELECT
   --    ,[caco3_lt_2_mm]
   --    ,[caco3_lt_2_mm_method]
   --    ,[estimated_organic_carbon]
-     ,CASE WHEN [estimated_organic_carbon] IS NOT NULL THEN LEFT (ROUND ([estimated_organic_carbon]* 1.724, 2),4)
-       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NOT NULL THEN LEFT (ROUND (([total_carbon_ncs]- ([caco3_lt_2_mm]*0.12))* 1.724, 2),4)
-       WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NULL THEN LEFT (ROUND ([total_carbon_ncs]* 1.724,2),4) END AS [estimated_organic_matter]
+,CASE WHEN [estimated_organic_carbon] IS NOT NULL THEN estimated_organic_carbon
+		WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NOT NULL THEN ([total_carbon_ncs]- ([caco3_lt_2_mm]*0.12))
+		WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NULL AND [total_carbon_ncs] IS NOT NULL THEN [total_carbon_ncs] 
+		WHEN [organic_carbon_walkley_black] IS NOT NULL THEN 0.25 +  [organic_carbon_walkley_black] * 0.86
+		END AS [calc_estimated_organic_carbon]
+		
+		,CASE WHEN [estimated_organic_carbon] IS NOT NULL THEN 'estimated_organic_carbon'
+		WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NOT NULL THEN '([total_carbon_ncs]- ([caco3_lt_2_mm]*0.12))'
+		WHEN [estimated_organic_carbon] IS NULL AND [caco3_lt_2_mm] IS NULL AND [total_carbon_ncs] IS NOT NULL THEN '[total_carbon_ncs]' 
+		WHEN [organic_carbon_walkley_black] IS NOT NULL THEN '0.25 +  [organic_carbon_walkley_black] * 0.86'
+		END AS [calc_estimated_organic_carbon_field]
+		
 , (SELECT TOP 1 [texture_lab]
 FROM [lab_physical_properties] AS lpp WHERE lpp.labsampnum=l.labsampnum AND [texture_lab] IS NOT NULL) AS [lab_texture]
 

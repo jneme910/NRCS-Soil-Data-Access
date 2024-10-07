@@ -44,7 +44,7 @@ DECLARE @majcomp VARCHAR(20) ;
 --~DeclareINT(@area_type)~ 
 --~DeclareChar(@area,20)~
 -- End soil data access
-SELECT @area= 'WI'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
+SELECT @area= 'NE'; --Enter State Abbreviation or Soil Survey Area i.e. WI or WI025
 SELECT @majcomp = 'yes'; -- Enter 'yes' for all components or 'no' for major components
 
 
