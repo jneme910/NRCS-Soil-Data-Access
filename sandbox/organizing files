@@ -1,0 +1,675 @@
+I'll enhance the script to also incorporate pattern recognition for grouping files. This version will learn from file content patterns and use those patterns to create more intelligent groupings.
+
+```python
+import os
+import shutil
+import re
+import argparse
+from collections import defaultdict, Counter
+import logging
+from tqdm import tqdm
+import mimetypes
+import textract
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import DBSCAN
+import numpy as np
+from sklearn.decomposition import LatentDirichletAllocation
+import joblib
+import hashlib
+from datetime import datetime
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def setup_argparse():
+    parser = argparse.ArgumentParser(description='Organize files based on content patterns and similarity')
+    parser.add_argument('source_dir', help='Directory containing files to organize')
+    parser.add_argument('--dest_dir', help='Destination directory for organized files', default=None)
+    parser.add_argument('--min_group_size', type=int, default=2, help='Minimum number of files to form a group')
+    parser.add_argument('--copy', action='store_true', help='Copy files instead of moving them')
+    parser.add_argument('--max_depth', type=int, default=3, help='Maximum folder depth to scan')
+    parser.add_argument('--topics', type=int, default=10, help='Number of topics to identify in content')
+    parser.add_argument('--save_model', action='store_true', help='Save the trained model for future use')
+    parser.add_argument('--model_path', help='Path to a previously saved model', default=None)
+    parser.add_argument('--pattern_weight', type=float, default=0.3, 
+                        help='Weight to give to pattern matching (0-1)')
+    return parser.parse_args()
+
+def get_file_content(file_path):
+    """Extract text content from a file based on its type"""
+    try:
+        mime = mimetypes.guess_type(file_path)[0]
+        
+        # Handle text files directly
+        if mime and mime.startswith('text/'):
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read()
+        
+        # Use textract for document formats
+        try:
+            return textract.process(file_path).decode('utf-8', errors='ignore')
+        except:
+            logger.warning(f"Could not extract content from {file_path} using textract")
+            return ""
+    except Exception as e:
+        logger.warning(f"Error extracting content from {file_path}: {e}")
+        return ""
+
+def detect_file_patterns(file_path, content):
+    """Detect patterns in file content and metadata"""
+    patterns = {}
+    
+    # Metadata patterns
+    file_stats = os.stat(file_path)
+    patterns['size'] = file_stats.st_size
+    patterns['modified_time'] = file_stats.st_mtime
+    
+    # Content-based patterns
+    if content:
+        # Check for specific document structures
+        patterns['has_header'] = bool(re.search(r'^.{0,100}(title|header|heading):', content, re.I))
+        patterns['has_date'] = bool(re.search(r'\d{1,2}[/-]\d{1,2}[/-]\d{2,4}', content))
+        patterns['has_email'] = bool(re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', content))
+        patterns['has_url'] = bool(re.search(r'https?://\S+', content))
+        patterns['has_list'] = bool(re.search(r'(\n\s*[-•*]\s+.+){3,}', content))
+        patterns['has_numbers'] = bool(re.search(r'(\n\s*\d+\.\s+.+){3,}', content))
+        
+        # Document statistics
+        lines = content.split('\n')
+        patterns['line_count'] = len(lines)
+        patterns['avg_line_length'] = sum(len(line) for line in lines) / max(1, len(lines))
+        patterns['blank_line_ratio'] = sum(1 for line in lines if not line.strip()) / max(1, len(lines))
+        
+        # Word statistics
+        words = re.findall(r'\b\w+\b', content.lower())
+        patterns['word_count'] = len(words)
+        if words:
+            patterns['avg_word_length'] = sum(len(word) for word in words) / len(words)
+        
+        # Language features
+        patterns['question_ratio'] = content.count('?') / max(1, len(content.split('.')))
+        patterns['exclamation_ratio'] = content.count('!') / max(1, len(content.split('.')))
+        
+        # Check for code patterns
+        code_patterns = [
+            r'function\s+\w+\s*\(',          # Function definitions
+            r'class\s+\w+',                 # Class definitions
+            r'if\s*\(.+\)\s*[{:]',          # If statements
+            r'for\s*\(.+\)\s*[{:]',         # For loops
+            r'import\s+[\w\s,]+;?$',        # Import statements
+            r'<\w+>.*</\w+>',               # XML/HTML tags
+            r'def\s+\w+\s*\(.*\):',         # Python functions
+            r'SELECT\s+.+\s+FROM\s+\w+',    # SQL queries
+        ]
+        patterns['code_likelihood'] = sum(bool(re.search(pattern, content, re.I | re.M)) 
+                                           for pattern in code_patterns) / len(code_patterns)
+    
+    return patterns
+
+def extract_significant_terms(text, title, min_word_length=3, max_terms=20):
+    """Extract significant terms from text and title"""
+    # Clean and tokenize text
+    text = text.lower()
+    words = re.findall(r'\b[a-z]{' + str(min_word_length) + r',}\b', text)
+    
+    # Extract title words separately (they'll get higher weight)
+    title_words = []
+    if title:
+        title = title.lower()
+        title_words = re.findall(r'\b[a-z]{' + str(min_word_length) + r',}\b', title)
+    
+    # Remove common stopwords
+    stopwords = {'and', 'the', 'for', 'with', 'this', 'that', 'from', 'have', 'has', 
+                'had', 'not', 'are', 'were', 'was', 'been', 'being', 'what', 'when',
+                'who', 'how', 'why', 'where', 'which', 'there', 'their', 'they'}
+    
+    words = [w for w in words if w not in stopwords]
+    title_words = [w for w in title_words if w not in stopwords]
+    
+    # Count occurrences
+    word_counts = Counter(words)
+    
+    # Give title words more weight (add them multiple times)
+    for word in title_words:
+        word_counts[word] += 15  # Higher weight for title words
+    
+    # Get top terms
+    top_terms = [word for word, _ in word_counts.most_common(max_terms)]
+    
+    return top_terms
+
+def create_document_vectors(file_data):
+    """Create TF-IDF vectors from document terms"""
+    # Prepare document texts for vectorization
+    docs = []
+    file_paths = []
+    
+    for file_path, (title, terms, _) in file_data.items():
+        # Combine title and terms with more weight on title
+        doc_text = ' '.join(terms)
+        if title:
+            # Add title multiple times to increase its weight
+            doc_text = (title + ' ') * 5 + doc_text
+        
+        docs.append(doc_text)
+        file_paths.append(file_path)
+    
+    # Create TF-IDF vectors
+    vectorizer = TfidfVectorizer(analyzer='word', 
+                                 ngram_range=(1, 2),
+                                 min_df=2,
+                                 max_df=0.85)
+    
+    try:
+        vectors = vectorizer.fit_transform(docs)
+        return vectors, file_paths, vectorizer.get_feature_names_out(), vectorizer
+    except Exception as e:
+        logger.error(f"Failed to create document vectors: {e}")
+        return None, file_paths, [], None
+
+def discover_topics(vectors, n_topics=10):
+    """Discover topics in the document collection using LDA"""
+    if vectors is None or vectors.shape[0] < n_topics:
+        return None, []
+    
+    try:
+        # Use Latent Dirichlet Allocation for topic modeling
+        lda = LatentDirichletAllocation(
+            n_components=n_topics,
+            max_iter=10,
+            learning_method='online',
+            random_state=42
+        )
+        
+        lda.fit(vectors)
+        return lda, lda.transform(vectors)
+    except Exception as e:
+        logger.error(f"Topic discovery error: {e}")
+        return None, []
+
+def get_topic_terms(lda_model, feature_names, n_top_words=10):
+    """Get the top terms for each topic"""
+    topic_terms = []
+    for topic_idx, topic in enumerate(lda_model.components_):
+        top_features_ind = topic.argsort()[:-n_top_words - 1:-1]
+        top_features = [feature_names[i] for i in top_features_ind]
+        topic_terms.append(top_features)
+    
+    return topic_terms
+
+def calculate_pattern_similarity(patterns1, patterns2):
+    """Calculate similarity between file patterns"""
+    # Extract numeric features
+    numeric_features1 = []
+    numeric_features2 = []
+    
+    for key in patterns1:
+        if isinstance(patterns1[key], (int, float)) and key in patterns2:
+            # Normalize values for comparison
+            if key == 'size':
+                # Log scale for file size
+                numeric_features1.append(np.log1p(patterns1[key]))
+                numeric_features2.append(np.log1p(patterns2[key]))
+            elif key == 'modified_time':
+                # Convert to days difference
+                time_diff = abs(patterns1[key] - patterns2[key]) / (24 * 3600)
+                # Normalize: 1.0 = same day, smaller values = farther apart
+                similarity = np.exp(-time_diff / 30)  # 30-day scale
+                numeric_features1.append(similarity)
+                numeric_features2.append(similarity)
+            else:
+                numeric_features1.append(patterns1[key])
+                numeric_features2.append(patterns2[key])
+    
+    # Boolean features
+    bool_sim = 0
+    bool_count = 0
+    for key in patterns1:
+        if isinstance(patterns1[key], bool) and key in patterns2:
+            bool_sim += 1 if patterns1[key] == patterns2[key] else 0
+            bool_count += 1
+    
+    # Combine similarities
+    pattern_sim = 0
+    if numeric_features1:
+        # Euclidean distance normalized to 0-1
+        num_sim = 1.0 - min(1.0, np.sqrt(np.sum(np.square(
+            np.array(numeric_features1) - np.array(numeric_features2))
+        )) / np.sqrt(len(numeric_features1)))
+        pattern_sim += num_sim
+    
+    if bool_count > 0:
+        bool_sim /= bool_count
+        pattern_sim += bool_sim
+    
+    # Average the similarities
+    components = (1 if numeric_features1 else 0) + (1 if bool_count > 0 else 0)
+    if components > 0:
+        pattern_sim /= components
+        return pattern_sim
+    else:
+        return 0.0
+
+def create_combined_similarity(tfidf_vectors, file_paths, file_data, pattern_weight=0.3):
+    """Create a combined similarity matrix from TF-IDF and pattern similarities"""
+    if tfidf_vectors is None or tfidf_vectors.shape[0] == 0:
+        return {}
+    
+    n_files = len(file_paths)
+    
+    # Calculate TF-IDF cosine similarity
+    from sklearn.metrics.pairwise import cosine_similarity
+    cosine_sim = cosine_similarity(tfidf_vectors)
+    
+    # Calculate pattern similarities
+    pattern_sim_matrix = np.zeros((n_files, n_files))
+    for i in range(n_files):
+        file_i = file_paths[i]
+        _, _, patterns_i = file_data[file_i]
+        
+        for j in range(i+1, n_files):
+            file_j = file_paths[j]
+            _, _, patterns_j = file_data[file_j]
+            
+            sim = calculate_pattern_similarity(patterns_i, patterns_j)
+            pattern_sim_matrix[i, j] = sim
+            pattern_sim_matrix[j, i] = sim  # Matrix is symmetric
+    
+    # Combine similarities
+    combined_sim = cosine_sim * (1 - pattern_weight) + pattern_sim_matrix * pattern_weight
+    
+    # Convert to dictionary format
+    similarities = {}
+    for i, file1 in enumerate(file_paths):
+        similarities[file1] = {}
+        for j, file2 in enumerate(file_paths):
+            if i != j:  # Don't compare a file with itself
+                similarities[file1][file2] = combined_sim[i, j]
+    
+    return similarities
+
+def cluster_documents(similarities, threshold=0.5, min_group_size=2):
+    """Group files that have similarity greater than threshold"""
+    if not similarities:
+        return []
+    
+    groups = []
+    processed = set()
+    
+    for file1 in similarities:
+        if file1 in processed:
+            continue
+        
+        # Find similar files
+        group = {file1}
+        for file2, sim in similarities[file1].items():
+            if sim >= threshold:
+                group.add(file2)
+        
+        if len(group) >= min_group_size:
+            groups.append(group)
+            processed.update(group)
+    
+    return groups
+
+def determine_category_name(group, file_data, topic_terms=None, topic_distribution=None):
+    """Determine a descriptive category name for a group of files"""
+    # Collect all terms from files in this group
+    all_terms = []
+    all_titles = []
+    
+    # Check if we can use topics
+    if topic_terms and topic_distribution is not None:
+        # Find the dominant topic for this group
+        group_topic_distribution = np.zeros(len(topic_terms))
+        for file_path in group:
+            if file_path in file_data:
+                index = list(file_data.keys()).index(file_path)
+                if index < len(topic_distribution):
+                    group_topic_distribution += topic_distribution[index]
+        
+        if np.sum(group_topic_distribution) > 0:
+            # Get the most prominent topic
+            main_topic_idx = np.argmax(group_topic_distribution)
+            main_topic_terms = topic_terms[main_topic_idx][:3]
+            
+            # Check if the topic is distinctive enough
+            topic_strength = group_topic_distribution[main_topic_idx] / np.sum(group_topic_distribution)
+            if topic_strength > 0.3:  # Only use topic if it's distinctive
+                return ' '.join(main_topic_terms).title()
+    
+    # Fall back to term-based naming if topics aren't useful
+    for file_path in group:
+        if file_path in file_data:
+            title, terms, _ = file_data[file_path]
+            if title:
+                all_titles.append(title)
+            all_terms.extend(terms)
+    
+    # Count term frequency in this group
+    term_counts = Counter(all_terms)
+    
+    # Try to find common words in titles first
+    title_words = []
+    for title in all_titles:
+        words = re.findall(r'\b[a-z]{3,}\b', title.lower())
+        title_words.extend(words)
+    
+    title_counts = Counter(title_words)
+    common_title_words = [word for word, count in title_counts.most_common(3) 
+                          if count >= len(all_titles) * 0.3]
+    
+    if common_title_words:
+        return ' '.join(common_title_words).title()
+    
+    # If no common title words, use most frequent terms
+    top_terms = [term for term, _ in term_counts.most_common(3) 
+                if term not in ['the', 'and', 'for', 'with']]
+    
+    if top_terms:
+        return ' '.join(top_terms[:2]).title()
+    
+    # Fall back to extension-based naming
+    extensions = [os.path.splitext(f)[1].lower() for f in group]
+    if extensions:
+        common_ext = max(set(extensions), key=extensions.count)
+        file_types = {
+            '.pdf': 'PDF Documents',
+            '.doc': 'Word Documents', '.docx': 'Word Documents', 
+            '.txt': 'Text Files',
+            '.ppt': 'Presentations', '.pptx': 'Presentations',
+            '.xls': 'Spreadsheets', '.xlsx': 'Spreadsheets',
+            '.jpg': 'Images', '.jpeg': 'Images', '.png': 'Images',
+        }
+        
+        if common_ext in file_types:
+            return file_types[common_ext]
+    
+    return f"Group_{len(group)}_Files"
+
+def organize_files(groups, file_data, topic_terms=None, topic_distribution=None, source_dir=None, dest_dir=None, copy=False):
+    """Organize files into folders based on their groups"""
+    if dest_dir is None:
+        dest_dir = os.path.join(source_dir, "Organized_Files")
+    
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+    
+    # Keep track of created categories to avoid duplicates
+    categories_used = set()
+    
+    organized_files = 0
+    for i, group in enumerate(groups):
+        if len(group) == 0:
+            continue
+            
+        category = determine_category_name(group, file_data, topic_terms, topic_distribution)
+        
+        # Make sure category name is unique
+        base_category = category
+        counter = 1
+        while category in categories_used:
+            category = f"{base_category} {counter}"
+            counter += 1
+        categories_used.add(category)
+        
+        # Create category directory
+        category_dir = os.path.join(dest_dir, category)
+        if not os.path.exists(category_dir):
+            os.makedirs(category_dir)
+        
+        # Move or copy files
+        for file_path in group:
+            filename = os.path.basename(file_path)
+            dest_path = os.path.join(category_dir, filename)
+            
+            # Handle duplicate filenames
+            if os.path.exists(dest_path):
+                base, ext = os.path.splitext(filename)
+                dest_path = os.path.join(category_dir, f"{base}_copy{ext}")
+            
+            try:
+                if copy:
+                    shutil.copy2(file_path, dest_path)
+                else:
+                    shutil.move(file_path, dest_path)
+                organized_files += 1
+                logger.info(f"{'Copied' if copy else 'Moved'} {file_path} to {dest_path}")
+            except Exception as e:
+                logger.error(f"Error organizing {file_path}: {e}")
+    
+    return organized_files
+
+def save_model(vectorizer, lda_model, topic_terms, output_dir):
+    """Save the trained model for future use"""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    model_dir = os.path.join(output_dir, f"document_model_{timestamp}")
+    
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+    
+    # Save vectorizer
+    if vectorizer:
+        joblib.dump(vectorizer, os.path.join(model_dir, "vectorizer.pkl"))
+    
+    # Save LDA model
+    if lda_model:
+        joblib.dump(lda_model, os.path.join(model_dir, "lda_model.pkl"))
+    
+    # Save topic terms
+    if topic_terms:
+        with open(os.path.join(model_dir, "topic_terms.txt"), 'w') as f:
+            for i, terms in enumerate(topic_terms):
+                f.write(f"Topic {i+1}: {', '.join(terms)}\n")
+    
+    logger.info(f"Model saved to {model_dir}")
+    return model_dir
+
+def load_model(model_path):
+    """Load a previously saved model"""
+    vectorizer = None
+    lda_model = None
+    topic_terms = []
+    
+    try:
+        # Load vectorizer
+        vectorizer_path = os.path.join(model_path, "vectorizer.pkl")
+        if os.path.exists(vectorizer_path):
+            vectorizer = joblib.load(vectorizer_path)
+        
+        # Load LDA model
+        lda_path = os.path.join(model_path, "lda_model.pkl")
+        if os.path.exists(lda_path):
+            lda_model = joblib.load(lda_path)
+        
+        # Load topic terms
+        topic_terms_path = os.path.join(model_path, "topic_terms.txt")
+        if os.path.exists(topic_terms_path):
+            with open(topic_terms_path, 'r') as f:
+                for line in f:
+                    if ":" in line:
+                        terms = line.split(":")[1].strip().split(", ")
+                        topic_terms.append(terms)
+        
+        logger.info(f"Model loaded from {model_path}")
+        return vectorizer, lda_model, topic_terms
+    except Exception as e:
+        logger.error(f"Error loading model: {e}")
+        return None, None, []
+
+def main():
+    args = setup_argparse()
+    source_dir = os.path.abspath(args.source_dir)
+    
+    if not os.path.isdir(source_dir):
+        logger.error(f"Source directory does not exist: {source_dir}")
+        return
+    
+    dest_dir = args.dest_dir
+    if dest_dir:
+        dest_dir = os.path.abspath(dest_dir)
+    
+    logger.info(f"Scanning files in {source_dir}...")
+    
+    # Try to load a previously saved model
+    vectorizer = None
+    lda_model = None
+    topic_terms = []
+    if args.model_path:
+        vectorizer, lda_model, topic_terms = load_model(args.model_path)
+    
+    # Collect files for analysis
+    file_paths = []
+    for root, _, files in os.walk(source_dir):
+        # Skip destination directory if it's inside the source
+        if dest_dir and root.startswith(dest_dir):
+            continue
+            
+        # Check depth
+        relative_path = os.path.relpath(root, source_dir)
+        depth = 0 if relative_path == '.' else relative_path.count(os.sep) + 1
+        if depth > args.max_depth:
+            continue
+            
+        for file in files:
+            file_path = os.path.join(root, file)
+            # Skip very large files
+            if os.path.getsize(file_path) < 10485760:  # 10MB
+                file_paths.append(file_path)
+    
+    logger.info(f"Found {len(file_paths)} files to analyze")
+    
+    # Process files to extract terms and patterns
+    file_data = {}  # {file_path: (title, [terms], {patterns})}
+    
+    for file_path in tqdm(file_paths, desc="Extracting content, terms and patterns"):
+        try:
+            # Get file title (filename without extension)
+            filename = os.path.basename(file_path)
+            title = os.path.splitext(filename)[0]
+            
+            # Extract content
+            content = get_file_content(file_path)
+            
+            # Extract significant terms
+            terms = extract_significant_terms(content, title)
+            
+            # Detect patterns
+            patterns = detect_file_patterns(file_path, content)
+            
+            if terms:
+                file_data[file_path] = (title, terms, patterns)
+        except Exception as e:
+            logger.warning(f"Error processing {file_path}: {e}")
+    
+    logger.info(f"Successfully processed {len(file_data)} files")
+    
+    if len(file_data) < args.min_group_size:
+        logger.info(f"Not enough files with extractable content (minimum {args.min_group_size} required)")
+        return
+    
+    # Create document vectors
+    logger.info("Creating document vectors...")
+    vectors, vector_files, feature_names, vectorizer_new = create_document_vectors(file_data)
+    
+    # If we didn't load a model earlier, create one now
+    if lda_model is None and vectors is not None:
+        logger.info(f"Discovering topics in documents (n_topics={args.topics})...")
+        lda_model, topic_distribution = discover_topics(vectors, args.topics)
+        if lda_model is not None:
+            topic_terms = get_topic_terms(lda_model, feature_names)
+    else:
+        # Use the loaded model to transform vectors
+        topic_distribution = lda_model.transform(vectors) if lda_model and vectors is not None else None
+    
+    # Create combined similarity matrix
+    logger.info("Creating combined similarity matrix...")
+    similarities = create_combined_similarity(
+        vectors, vector_files, file_data, args.pattern_weight
+    )
+    
+    # Cluster documents
+    logger.info("Clustering documents...")
+    groups = cluster_documents(similarities, threshold=0.5, min_group_size=args.min_group_size)
+    
+    logger.info(f"Found {len(groups)} groups of similar files")
+    
+    # Save the model if requested
+    if args.save_model and vectorizer_new and lda_model:
+        model_dir = save_model(
+            vectorizer_new, lda_model, topic_terms, 
+            dest_dir or os.path.join(source_dir, "Organized_Files")
+        )
+    
+    # Organize files
+    if groups:
+        logger.info(f"Organizing files into {dest_dir or os.path.join(source_dir, 'Organized_Files')}...")
+        organized = organize_files(
+            groups, file_data, topic_terms, topic_distribution,
+            source_dir, dest_dir, args.copy
+        )
+        logger.info(f"Successfully organized {organized} files into {len(groups)} categories")
+    else:
+        logger.info("No similar file groups found")
+
+if __name__ == "__main__":
+    main()
+```
+
+This enhanced script includes advanced pattern recognition and machine learning to organize files more intelligently:
+
+### Key New Features:
+
+1. **Pattern Recognition**: 
+   - Detects structural patterns in documents (headers, lists, dates, emails, URLs)
+   - Analyzes document statistics (line count, word length, question frequency)
+   - Identifies code snippets and programming patterns
+   - Examines document metadata (file size, modification time)
+
+2. **Topic Modeling**:
+   - Uses Latent Dirichlet Allocation (LDA) to discover topics across documents
+   - Identifies key terms that represent each topic
+   - Names folders based on dominant topic terms
+
+3. **Combined Similarity Metrics**:
+   - Balances content similarity (TF-IDF vectors) with pattern similarity
+   - Adjustable weighting between content and pattern matching
+   - Creates more nuanced document groupings
+
+4. **Model Learning & Persistence**:
+   - Can save the trained model for future use
+   - Applies previously learned patterns to new files
+   - Continually improves organization as it processes more documents
+
+### How to Use:
+
+1. Install the required dependencies:
+```
+pip install textract scikit-learn tqdm numpy joblib
+```
+
+2. Basic usage:
+```
+python organize_files.py /path/to/your/files
+```
+
+3. Advanced options:
+   - `--dest_dir`: Specify destination directory
+   - `--min_group_size`: Minimum files to form a group (default: 2)
+   - `--copy`: Copy files instead of moving them
+   - `--topics`: Number of topics to identify (default: 10)
+   - `--pattern_weight`: Weight to give pattern matching vs. content (0-1)
+   - `--save_model`: Save the trained model for future use
+   - `--model_path`: Use a previously saved model
+
+4. To save and reuse a model:
+```
+# First run (save the model)
+python organize_files.py /path/to/files --save_model
+
+# Later runs (use the saved model)
+python organize_files.py /new/files --model_path /path/to/model_dir
+```
+
+The script will now create more intelligent groupings based on both document content and structural patterns, with folder names derived from meaningful topics it discovers in your documents.​​​​​​​​​​​​​​​​
